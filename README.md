@@ -47,81 +47,13 @@ ROSBRIDGE_URL=ws://localhost:9090
 - `POST /api/robot/stop` - Emergency stop
 - `GET /api/robot/status` - Get robot status
 
-### Navigation
-- `POST /api/navigation/setGoal` - Set navigation goal
-- `GET /api/navigation/currentPose` - Get current robot position
-- `GET /api/navigation/map` - Get current map data
-
-### Sensor Data
-- `GET /api/sensors/laser` - Get laser scan data
-- `GET /api/sensors/camera` - Get camera feed
-
-## Usage
-
-```bash
-# Development mode
-npm run dev
-
-# Production mode
-npm start
-```
-
-## ROS Topics
-The server subscribes to and publishes on the following ROS topics:
-- `/cmd_vel` - Robot velocity commands
-- `/amcl_pose` - Robot pose estimation
-- `/map` - Map data
-- `/scan` - Laser scan data
-
-## Error Handling
-- All API endpoints include proper error handling
-- WebSocket connection failures are automatically handled with reconnection attempts
-- Invalid requests return appropriate HTTP status codes and error messages
-
-## Security
-- API authentication using JWT tokens
-- Rate limiting to prevent abuse
-- Input validation for all endpoints
-
-## Contributing
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-This project is licensed under the MIT License.
-
-## Contact
-For any queries or support, please contact the development team.// filepath: /home/omark/SANAD_Server/server/.env
-PORT=3000
-ROSBRIDGE_URL=ws://localhost:9090
-```
-
-## Features
-- WebSocket connection to ROSBridge
-- RESTful API endpoints for:
-  - Robot control commands
-  - Sensor data retrieval
-  - Navigation controls
-  - Status monitoring
-  - User authentication
-
-## API Endpoints
-
-### Robot Control
-- `POST /api/chair/move` - Control robot movement
-- `POST /api/chair/stop` - Emergency stop
-- `GET /api/chair/status` - Get robot status
-
 ### Navigation - not now
 - `POST /api/navigation/setGoal` - Set navigation goal
 - `GET /api/navigation/currentPose` - Get current robot position
 - `GET /api/navigation/map` - Get current map data
 
 ### Sensor Data
-- `GET /api/sensors/ultrasonic` - Get laser scan data
+- `GET /api/sensors/ultrasonic` - Get ultrasonic data
 
 ## Usage
 
@@ -134,15 +66,14 @@ npm start
 ```
 
 ## ROS Topics
-The server subscribes to and publishes on the following ROS topics:
-Still not decided
+
 
 ## Error Handling
 - All API endpoints include proper error handling
-- WebSocket connection failures are automatically handled with reconnection attempts
-- Invalid requests return appropriate HTTP status codes and error messages
+- WebSocket connection failures should be automatically handled with reconnection attempts
+- Invalid requests should return appropriate HTTP status codes and error messages
 
-## Security
+## Security - not now
 - API authentication using JWT tokens
 - Rate limiting to prevent abuse
 - Input validation for all endpoints
@@ -153,8 +84,8 @@ Still not decided
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
-## FILES Structure
 
+## File Structure
 - **lib/** - Core business logic, ROS bridge integration, and database models
 - **api/v1/** - REST API endpoints and controllers for the first version
 - **middlewares/** - Express.js middleware functions for auth, validation, etc.
@@ -164,7 +95,6 @@ Still not decided
 
 
 ## License
-This project is licensed under the MIT License.
 
 ## Contact
 For any queries or support, please contact the development team.
