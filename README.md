@@ -6,7 +6,8 @@ This server acts as a middleware between ROS (Robot Operating System) and other 
 ## Prerequisites
 - Node.js (v16 or higher)
 - npm (Node Package Manager)
-- ROS Noetic
+- roslibjs
+- ROS2
 - rosbridge_suite
 - A running ROSBridge WebSocket server
 
