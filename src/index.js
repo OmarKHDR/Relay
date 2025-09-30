@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 import logger from './utils/logger.js';
 import express from 'express';
-import apiRouter from './api/v1/routes.js'
-import morgan from 'morgan'
+import apiRouter from './api/v1/routes.js';
+import morgan from 'morgan';
 
 // connections info
 const serverHostname= process.env.SERVER_HOSTNAME;
@@ -26,5 +26,5 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1', apiRouter);
 
 app.listen(serverPort, serverHostname, () => {
-	logger.info(`server is running on ${host}:${port}`);
+	logger.info(`server is running on ${serverHostname}:${serverPort}`);
 });
