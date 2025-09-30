@@ -1,0 +1,36 @@
+{
+  "name": "sanad-server",
+  "version": "1.0.0",
+  "description": "a server to connect the rosbridge websocket to the outer system components",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanadChair/server.git"
+  },
+  "keywords": [
+    "sanad",
+    "server",
+    "rosbridge",
+    "roslibjs"
+  ],
+  "author": "OmarKHDR",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sanadChair/server/issues"
+  },
+  "homepage": "https://github.com/sanadChair/server#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1",
+    "roslib": "^1.4.1",
+    "winston": "^3.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
