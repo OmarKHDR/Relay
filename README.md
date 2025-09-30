@@ -24,12 +24,8 @@ npm install
 ```
 
 ## Configuration
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory like the one in .env.example
 
-````text
-PORT=3000
-ROSBRIDGE_URL=ws://localhost:9090
-```
 
 ## Features
 - WebSocket connection to ROSBridge
@@ -65,8 +61,6 @@ npm run dev
 npm start
 ```
 
-## ROS Topics
-
 
 ## Error Handling
 - All API endpoints include proper error handling
@@ -90,11 +84,10 @@ npm start
 - **api/v1/** - REST API endpoints and controllers for the first version
 - **middlewares/** - Express.js middleware functions for auth, validation, etc.
 - **utils/** - Helper functions and utility modules used across the application like loggers and other things
+## Notes
+- use utilities logger instead of console.log for better logging
 
-## use utilities logger instead of console.log for better logging
 
-
-## License
 
 ## Contact
 For any queries or support, please contact the development team.
