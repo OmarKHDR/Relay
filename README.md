@@ -39,18 +39,139 @@ Create a `.env` file in the root directory like the one in .env.example
 
 ## API Endpoints
 
-### Robot Control
-- `POST /api/robot/move` - Control robot movement
-- `POST /api/robot/stop` - Emergency stop
-- `GET /api/robot/status` - Get robot status
+### motor control
+- `POST /api/motor/:id` - control motor speed and angle
+- `GET /api/motor/` - get all motors speed and angles
+- `GET /api/motor/:id` - get a specific motor speed and angle
 
-### Navigation - not now
-- `POST /api/navigation/setGoal` - Set navigation goal
-- `GET /api/navigation/currentPose` - Get current robot position
-- `GET /api/navigation/map` - Get current map data
+### Req/Res Structure
+```javascript
+//request: POST /api/motor/:id
+//request body:
+{
+  angle: Number; //for now restricted to 0, 90, 180, 270
+  speed: Number; // const for now to simplify system
+}
 
+//response:
+{
+  "status": "success",
+  "data": {},
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+
+//request: GET /api/motor/
+
+//response:
+{
+  "status": "success",
+  "data": {
+    "id1": {
+      "name": "left motor",
+      "speed": Number,
+      "angle": Number
+    },
+    "id2": {
+      "name": "right motor",
+      "speed": Number,
+      "angle": Number
+    }
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//request: GET /api/motor/:id
+
+//response:
+{
+  "status": "success",
+  "data": {
+    "id1": {
+      "name": "left motor",
+      "speed": Number,
+      "angle": Number
+    }
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
 ### Sensor Data
-- `GET /api/sensors/ultrasonic` - Get ultrasonic data
+- `GET /api/sensors/ultrasonic/` - Get all ultrasonics data
+- `GET /api/sensors/ultrasonic/:id` - Get ultrasonic data
+
+### Req/Res Structure
+```javascript
+//request: GET /api/sensors/ultrasonic/
+//response:
+{
+  "status": "success",
+  "data": {
+    "id1": {
+      "name": "left motor",
+      "distance": Number,
+      ...
+    },
+    "id2": {
+      "name": "right motor"
+      "distance": Number,
+    },
+    ...
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//request: GET /api/sensors/ultrasonic/:id
+//response:
+{
+  "status": "success",
+  "data": {
+    "id": {
+      "name": "left motor",
+      "distance": Number,
+      ...
+    },
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
+
+## General Response Structure
+```javascript
+//for success
+{
+  "status": "success",
+  "data": {
+    ...
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//for failures (errors, authorization, authentication, other)
+{
+  "status": "fail",
+  "error": {
+    "code": "AUTH_INVALID_TOKEN",
+    "type": "AuthenticationError",
+    "message": "The provided token is invalid or expired"
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
 
 ## Usage
 
@@ -73,46 +194,18 @@ npm start
 - Rate limiting to prevent abuse
 - Input validation for all endpoints
 
-## Contributing
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
 ## File Structure
 - **lib/** - Core business logic, ROS bridge integration, and database models
 - **api/v1/** - REST API endpoints and controllers for the first version
 - **middlewares/** - Express.js middleware functions for auth, validation, etc.
 - **utils/** - Helper functions and utility modules used across the application like loggers and other things
 
-
-## Response Structure
-```javascript
-//for success
-{
-  "status": "success",
-  "data": {
-  },
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-
-//for failures (errors, authorization, authentication, other)
-{
-  "status": "fail",
-  "error": {
-    "code": "AUTH_INVALID_TOKEN",
-    "type": "AuthenticationError",
-    "message": "The provided token is invalid or expired"
-  },
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-```
-
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 
 ## Notes
