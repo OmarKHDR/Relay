@@ -1,11 +1,6 @@
 import winston from 'winston';
+import timestamper from './timestamp.js';
 
-
-const timezoned = () => {
-  return new Date().toLocaleString( 'en-US', {
-    	timeZone: process.env.TZ
-	});
-};
 
 
 const logger = winston.createLogger({
@@ -15,22 +10,23 @@ const logger = winston.createLogger({
 			level: 'debug',
 			format: winston.format.combine(
 				winston.format.colorize(),
-				winston.format.printf(({ level, message }) => `[${level}] ${message}`)
+				winston.format.timestamp({format: timestamper}),
+				winston.format.printf(({ timestamp, level, message }) => `${timestamp} - [${level}] ${message}`)
 			)
 		}),
 		new winston.transports.File({
 			level: 'error',
 			filename: 'error.log',
 			format: winston.format.combine(
-				winston.format.timestamp({ format: timezoned }),
-				winston.format.printf(({ timestamp, level, message }) => `${timestamp}: [${level}] ${message}`)
+				winston.format.timestamp({ format: timestamper }),
+				winston.format.printf(({ timestamp, level, message }) => `${timestamp} - [${level}] ${message}`)
 			)
 		}),
 		new winston.transports.File({
 			filename: 'combined.log',
 			format: winston.format.combine(
-				winston.format.timestamp({ format: timezoned }),
-				winston.format.printf(({ timestamp, level, message }) => `${timestamp}: [${level}] ${message}`)
+				winston.format.timestamp({ format: timestamper }),
+				winston.format.printf(({ timestamp, level, message }) => `${timestamp} - [${level}] ${message}`)
 			)
 		})
 	]

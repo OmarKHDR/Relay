@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import logger from './utils/logger.js';
+import timestamper from './utils/timestamp.js';
 import express from 'express';
 import apiRouter from './api/v1/routes.js';
 import morgan from 'morgan';
@@ -8,7 +9,6 @@ import morgan from 'morgan';
 // connections info
 const serverHostname= process.env.SERVER_HOSTNAME;
 const serverPort= process.env.SERVER_PORT;
-
 
 
 const app = express();

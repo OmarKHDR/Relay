@@ -85,6 +85,36 @@ npm start
 - **api/v1/** - REST API endpoints and controllers for the first version
 - **middlewares/** - Express.js middleware functions for auth, validation, etc.
 - **utils/** - Helper functions and utility modules used across the application like loggers and other things
+
+
+## Response Structure
+```javascript
+//for success
+{
+  "status": "success",
+  "data": {
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//for failures (errors, authorization, authentication, other)
+{
+  "status": "fail",
+  "error": {
+    "code": "AUTH_INVALID_TOKEN",
+    "type": "AuthenticationError",
+    "message": "The provided token is invalid or expired"
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
+
+
+
 ## Notes
 - use utilities logger instead of console.log for better logging
 
