@@ -1,5 +1,5 @@
 import winston from 'winston';
-import timestamper from './timestamp.js';
+import timestamper from '#utils/timestamp.js';
 
 
 

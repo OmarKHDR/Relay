@@ -4,6 +4,13 @@
   "type": "module",
   "description": "a server to connect the rosbridge websocket to the outer system components",
   "main": "src/index.js",
+  "imports": {
+    "#utils/*": "./src/utils/*",
+    "#lib/*": "./src/lib/*",
+    "#middlewares/*": "./src/middlewares/*",
+    "#controllers/*": "./src/api/v1/controllers/*",
+    "#routes": "./src/api/v1/routes.js"
+  },
   "scripts": {
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

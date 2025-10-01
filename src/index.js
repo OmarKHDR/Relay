@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import logger from './utils/logger.js';
-import timestamper from './utils/timestamp.js';
+import logger from '#utils/logger.js';
+import timestamper from '#utils/timestamp.js';
+import apiRouter from '#routes';
 import express from 'express';
-import apiRouter from './api/v1/routes.js';
 import morgan from 'morgan';
 
 // connections info
