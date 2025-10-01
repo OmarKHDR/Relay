@@ -50,3 +50,9 @@ pids/
 
 # Yarn Integrity file
 .yarn-integrity
+
+
+#logging
+
+combined.log
+error.log
