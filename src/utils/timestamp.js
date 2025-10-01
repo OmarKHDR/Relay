@@ -1,5 +1,5 @@
 const timestamper = () => {
-  return new Date().toLocaleString( 'en-GB', {
+  return new Date().toLocaleString( process.env.LOCALE, {
 		timeZone: process.env.TZ
 	});
 };
