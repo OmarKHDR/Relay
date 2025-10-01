@@ -18,7 +18,7 @@ This server acts as a middleware between ROS (Robot Operating System) and other 
 git clone <repository-url>
 
 # Navigate to server directory
-cd SANAD_Server/server
+cd server
 
 # Install dependencies
 npm install
