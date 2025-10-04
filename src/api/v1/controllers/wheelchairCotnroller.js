@@ -25,7 +25,11 @@ function setWheelchairDirection(req, res) {
     return res.status(200).json({
         status: 'success',
         data: [
-			{ direction }
+			{
+				id: 1,
+				name: "testing wheelchair",
+				direction
+			}
 		],
         meta: { timestamp: timestamper() },
     });
@@ -53,7 +57,7 @@ export function getWheelchairDirection(req, res) {
     logger.info(`[wheelchairController] Returning current direction: ${direction}`);
     return res.status(200).json({
         status: 'success',
-        data: [{ id: 1, direction }],
+        data: [{ id: 1, name: "testing wheelchair" ,direction }],
         meta: { timestamp: timestamper() },
     });
 }

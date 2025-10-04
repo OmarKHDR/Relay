@@ -3,8 +3,8 @@ import { getWheelchairDirection, setWheelchairDirection } from "#controllers/whe
 
 const wheelchairRouter = Router();
 
-wheelchairRouter.post('/move/', setWheelchairDirection)
-wheelchairRouter.get('/move/', getWheelchairDirection)
+wheelchairRouter.post('/direction/', setWheelchairDirection)
+wheelchairRouter.get('/direction/', getWheelchairDirection)
 
 
 export default wheelchairRouter;

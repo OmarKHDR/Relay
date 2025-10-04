@@ -40,7 +40,13 @@ export function setServoAngle(req, res) {
 
 	return res.status(200).json({
 		status: 'success',
-		data: [{ angle }],
+		data: [
+			{
+				id: 1,
+				name: "primary servomotor",
+				angle,
+			}
+		],
 		meta: { timestamp: timestamper() },
 	});
 }

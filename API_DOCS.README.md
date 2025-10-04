@@ -1,9 +1,8 @@
 # API Endpoints
 
 ## servo-motor control
-- `POST /api/servo-servo-motor/:id` - control servo-motor angle
+- `POST /api/servo-motor/` - control servo-motor angle
 - `GET /api/servo-motor/` - get all servo-motors  angles
-- `GET /api/servo-motor/:id` - get a specific servo-motor angle
 
 ```javascript
 //request: POST /api/servo-motor/
@@ -16,7 +15,11 @@
 {
   "status": "success",
   "data": [
-    {angle: Number}
+    {
+      id,
+      name,
+      angle: Number
+    }
   ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -25,7 +28,6 @@
 
 
 //request: GET /api/servo-motor/
-
 //response:
 {
   "status": "success",
@@ -49,9 +51,11 @@
 ```
 
 ## wheelchair movements
-- `POST /api/wheelchair/move/` - moves the wheelchair with a specific driection and speed
+- `POST /api/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
+- `GET /api/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
+
 ```javascript
-//request: POST /api/wheelchair/move
+//request: POST /api/wheelchair/direction/
 
 //request body
 {
@@ -62,13 +66,19 @@
 //response:
 {
   "status": "success",
-  "data": [],
+  "data": [
+    {
+      id: 1,
+      name: "testing wheelchair",
+      direction: "forward"
+    }
+  ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
   }
 }
 
-//request: GET /api/wheelchair/
+//request: GET /api/wheelchair/direction/
 
 //response:
 {
@@ -76,13 +86,8 @@
   "data": [
     {
       "id": "id1",
-      "alias": "main-wheelchair",
       "name": "mywheelchair",
-      "angle": Number,
-      "speed" : {
-        "left-motor": Number,
-        "right-motor": Number,
-      },
+      "direction": "forward",
   ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -94,7 +99,6 @@
 
 ## Sensor Data
 - `GET /api/sensors/ultrasonic/` - Get all ultrasonics data
-- `GET /api/sensors/ultrasonic/:id` - Get ultrasonic data
 
 ```javascript
 //request: GET /api/sensors/ultrasonic/
@@ -104,13 +108,11 @@
   "data": [
     {
       "id": "id1",
-      "alias": "front",
       "name": "front ultrasonic",
       "distance": Number
     },
     {
       "id": "id2",
-      "alias": "rear",
       "name": "rear ultrasonic",
       "distance": Number
     }
