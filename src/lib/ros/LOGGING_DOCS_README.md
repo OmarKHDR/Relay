@@ -41,9 +41,3 @@ Show consistent logging for ROS connection and topic handlers.
 * Include relevant data (topic, payload) in message
 
 ```
-
----
-
-This keeps it short, **just shows the logging structure**, and can be referred to quickly by anyone adding new ROS topics.  
-
-I can also make an **even shorter visual cheat-sheet style** version if you want something you can paste in the repo root. Do you want me to do that?

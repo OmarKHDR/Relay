@@ -6,7 +6,7 @@
 - `GET /api/servo-motor/:id` - get a specific servo-motor angle
 
 ```javascript
-//request: POST /api/servo-motor/:id
+//request: POST /api/servo-motor/
 //request body:
 {
   angle: Number;
@@ -15,7 +15,9 @@
 //response:
 {
   "status": "success",
-  "data": [],
+  "data": [
+    {angle: Number}
+  ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
   }
@@ -30,13 +32,11 @@
   "data": [
     {
       "id": "id1",
-      "alias": "left",
       "name": "left servo-motor",
       "angle": Number
     },
     {
       "id": "id2",
-      "alias": "right",
       "name": "right servo-motor",
       "angle": Number
     }
@@ -46,34 +46,17 @@
   }
 }
 
-//request: GET /api/servo-motor/:id
-
-//response:
-{
-  "status": "success",
-  "data": [
-    {
-      "id": "id1",
-      "alias": "left",
-      "name": "left servo-motor",
-      "angle": Number
-    }
-  ],
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
 ```
 
 ## wheelchair movements
-- `POST /api/wheelchair/move/` - moves the wheelchair with a specific angle and speed
+- `POST /api/wheelchair/move/` - moves the wheelchair with a specific driection and speed
 ```javascript
 //request: POST /api/wheelchair/move
 
 //request body
 {
-  angle: Number; //for now restricted to 0, 90, 180, 270
-  speed: Number;
+  direction: string; //for now restricted to ['stop', 'forward', 'backward', 'left', 'right']
+  speed: Number; //discard for now
 }
 
 //response:
@@ -129,23 +112,6 @@
       "id": "id2",
       "alias": "rear",
       "name": "rear ultrasonic",
-      "distance": Number
-    }
-  ],
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-
-//request: GET /api/sensors/ultrasonic/:id
-//response:
-{
-  "status": "success",
-  "data": [
-    {
-      "id": "id1",
-      "alias": "front",
-      "name": "front ultrasonic",
       "distance": Number
     }
   ],

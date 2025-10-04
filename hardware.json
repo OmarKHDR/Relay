@@ -1,0 +1,15 @@
+{
+	"servo-motors": {
+		"primary": {
+			"id": 1,
+			"name": "primary testing servo",
+			"angle": 0
+		}
+	}, 
+	"wheelchair": {
+		"id": 1,
+		"name": "my wheelchair",
+		"angle": 0,
+		"speed": 0
+	}
+}
