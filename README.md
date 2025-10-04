@@ -36,7 +36,17 @@ Create a `.env` file in the root directory like the one in .env.example
   - Navigation controls
   - Status monitoring
   - User authentication
-
+---
+## Core feature Vs Modularity allowance
+instead of just having tightly coupled system endpoints we need to use more abstract approach, but still core system modules need to be implemented first for more convinient usage,
+### Core System modules:
+- ultrasonic for distnaces
+- motors for wheelchair movements
+- servo motor (for testing till now)
+### Abstract system modules
+- system don't need to know which module is sending the distance so instead of sending to `ultrasonic` topic we would publish to `distance/direction`
+- instead of controlling the whole wheelchair movements, we can control only one motor for extending more moving parts in the system so it will be `motor/:id`
+- and so on...
 ## General Response Structure
 ```javascript
 //for success

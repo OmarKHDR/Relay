@@ -1,4 +1,3 @@
-// ros-connection.js
 import ROSLIB from 'roslib';
 import logger from '#utils/logger.js';
 
@@ -22,28 +21,28 @@ class RosConnection {
     }
 
     _connect() {
-        logger.info(`Connecting to rosbridge at ${this.url}...`);
         this.ros = new ROSLIB.Ros({ url: this.url });
 
         this.ros.on('connection', () => {
             this.connected = true;
-            logger.info('Connected to rosbridge');
+			logger.info(`[ROS-CONNECTION] Connected to rosbridge at ${this.url}`);
         });
 
         this.ros.on('error', err => {
             this.connected = false;
-            logger.error(`ROS error: ${err}`);
+            logger.error(`[ROS-CONNECTION] ROS error: ${err}`);
         });
 
         this.ros.on('close', () => {
             if (this.connected) {
-                logger.warn('Connection to rosbridge closed');
+                logger.warn('[ROS-CONNECTION] Connection to rosbridge closed');
             } else {
-                logger.warn('Failed to connect to rosbridge');
+                logger.warn('[ROS-CONNECTION] Failed to connect to rosbridge');
             }
             this.connected = false;
 
             // Retry after delay
+			logger.info('[ROS-CONNECTION] Retrying in 2s')
             setTimeout(() => this._connect(), 2000);
         });
     }
