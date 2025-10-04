@@ -3,8 +3,8 @@ import { getServoAngle, setServoAngle } from "#controllers/servoController.js";
 const servoRouter = Router();
 
 
-servoRouter.post('/primary', setServoAngle)
-servoRouter.get('/primary', getServoAngle)
+servoRouter.post('/', setServoAngle)
+servoRouter.get('/', getServoAngle)
 
 
 

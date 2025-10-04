@@ -1,11 +1,11 @@
 # API Endpoints
 
 ## servo-motor control
-- `POST /api/servo-motor/` - control servo-motor angle
-- `GET /api/servo-motor/` - get all servo-motors  angles
+- `POST /api/v1/servo-motor/` - control servo-motor angle
+- `GET /api/v1/servo-motor/` - get all servo-motors  angles
 
 ```javascript
-//request: POST /api/servo-motor/
+//request: POST /api/v1/servo-motor/
 //request body:
 {
   angle: Number;
@@ -27,7 +27,7 @@
 }
 
 
-//request: GET /api/servo-motor/
+//request: GET /api/v1/servo-motor/
 //response:
 {
   "status": "success",
@@ -51,11 +51,11 @@
 ```
 
 ## wheelchair movements
-- `POST /api/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
-- `GET /api/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
+- `POST /api/v1/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
+- `GET /api/v1/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
 
 ```javascript
-//request: POST /api/wheelchair/direction/
+//request: POST /api/v1/wheelchair/direction/
 
 //request body
 {
@@ -78,7 +78,7 @@
   }
 }
 
-//request: GET /api/wheelchair/direction/
+//request: GET /api/v1/wheelchair/direction/
 
 //response:
 {
@@ -98,10 +98,10 @@
 
 
 ## Sensor Data
-- `GET /api/sensors/ultrasonic/` - Get all ultrasonics data
+- `GET /api/v1/sensors/ultrasonic/` - Get all ultrasonics data
 
 ```javascript
-//request: GET /api/sensors/ultrasonic/
+//request: GET /api/v1/sensors/ultrasonic/
 //response:
 {
   "status": "success",
