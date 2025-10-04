@@ -122,3 +122,21 @@
   }
 }
 ```
+
+
+## ALL ERRORS 
+- all error responses has same format
+
+```javascript
+{
+  "status": "fail",
+  "error": {
+    "code": "AUTH_INVALID_TOKEN",
+    "type": "AuthenticationError",
+    "message": "The provided token is invalid or expired"
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
