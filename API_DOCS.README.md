@@ -1,16 +1,15 @@
 # API Endpoints
 
-## motor control
-- `POST /api/motor/:id` - control motor speed and angle
-- `GET /api/motor/` - get all motors speed and angles
-- `GET /api/motor/:id` - get a specific motor speed and angle
+## servo-motor control
+- `POST /api/servo-servo-motor/:id` - control servo-motor angle
+- `GET /api/servo-motor/` - get all servo-motors  angles
+- `GET /api/servo-motor/:id` - get a specific servo-motor angle
 
 ```javascript
-//request: POST /api/motor/:id
+//request: POST /api/servo-motor/:id
 //request body:
 {
-  angle: Number; //for now restricted to 0, 90, 180, 270
-  speed: Number; // const for now to simplify system
+  angle: Number;
 }
 
 //response:
@@ -23,7 +22,7 @@
 }
 
 
-//request: GET /api/motor/
+//request: GET /api/servo-motor/
 
 //response:
 {
@@ -32,15 +31,13 @@
     {
       "id": "id1",
       "alias": "left",
-      "name": "left motor",
-      "speed": Number,
+      "name": "left servo-motor",
       "angle": Number
     },
     {
       "id": "id2",
       "alias": "right",
-      "name": "right motor",
-      "speed": Number,
+      "name": "right servo-motor",
       "angle": Number
     }
   ],
@@ -49,7 +46,7 @@
   }
 }
 
-//request: GET /api/motor/:id
+//request: GET /api/servo-motor/:id
 
 //response:
 {
@@ -58,8 +55,7 @@
     {
       "id": "id1",
       "alias": "left",
-      "name": "left motor",
-      "speed": Number,
+      "name": "left servo-motor",
       "angle": Number
     }
   ],
@@ -68,6 +64,50 @@
   }
 }
 ```
+
+## wheelchair movements
+- `POST /api/wheelchair/move/` - moves the wheelchair with a specific angle and speed
+```javascript
+//request: POST /api/wheelchair/move
+
+//request body
+{
+  angle: Number; //for now restricted to 0, 90, 180, 270
+  speed: Number;
+}
+
+//response:
+{
+  "status": "success",
+  "data": [],
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//request: GET /api/wheelchair/
+
+//response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "id1",
+      "alias": "main-wheelchair",
+      "name": "mywheelchair",
+      "angle": Number,
+      "speed" : {
+        "left-motor": Number,
+        "right-motor": Number,
+      },
+  ],
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
+
+
 
 ## Sensor Data
 - `GET /api/sensors/ultrasonic/` - Get all ultrasonics data
