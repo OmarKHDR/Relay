@@ -1,6 +1,6 @@
 import UltrasonicSensorHandler from '#lib/ros/topics/ultrasonic-topic.js';
 import logger from '#utils/logger.js';
-import timestamper from '#utils/timestamper.js';
+import timestamper from '#utils/timestamp.js';
 
 export function getDistance(req, res) {
     logger.info(`[ultrasonicController] Received request for ultrasonic sensor`);

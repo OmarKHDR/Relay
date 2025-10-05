@@ -1,17 +1,20 @@
 import Router from 'express'
-import servoRouter from './servo-routes';
-import ultrasonicRouter from './ultrasonic-router';
-import wheelchairRouter from './wheelchair-router';
+import { getServoAngle, setServoAngle } from "#controllers/servoController.js";
+import { getWheelchairDirection, setWheelchairDirection } from "#controllers/wheelchairCotnroller.js";
+import { getDistance } from "#controllers/ultrasonicController.js";
+
 
 const apiRouter = Router();
 
 // servo routes
-apiRouter.use('/servo-motor/', servoRouter);
+apiRouter.post('/servo-motor/', setServoAngle);
+apiRouter.get('/servo-motor/', getServoAngle);
 
 // wheelchair
-apiRouter.use('/wheelchair/', wheelchairRouter);
+apiRouter.post('/wheelchair/direction/', setWheelchairDirection);
+apiRouter.get('/wheelchair/direction/', getWheelchairDirection);
 
 // ultrasonic
-apiRouter.use('/sensors/ultrasonic/', ultrasonicRouter);
+apiRouter.get('/sensors/ultrasonic/', getDistance);
 
 export default apiRouter;

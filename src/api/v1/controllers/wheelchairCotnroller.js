@@ -2,7 +2,7 @@ import wheelChairHandler from '#lib/ros/topics/wheelchair-topic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
-function setWheelchairDirection(req, res) {
+export function setWheelchairDirection(req, res) {
     const { direction } = req.body || {};
     logger.info(`[wheelchairController] Received direction: ${direction}`);
 

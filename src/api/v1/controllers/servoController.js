@@ -1,6 +1,6 @@
 import servoMotorHandler from '#lib/ros/topics/servo-motor-topic.js';
 import logger from '#utils/logger.js';
-import timestamper from '#utils/timestamper.js';
+import timestamper from '#utils/timestamp.js';
 
 export function setServoAngle(req, res) {
 	const { angle } = req.body || {};

@@ -29,16 +29,25 @@ class UltrasonicSensor {
     }
 
     subscribe() {
-        if (!this.ros.isConnected) {
-            logger.warn('[UltrasonicSensor] ROS not connected — subscription not started');
-            return;
-        }
+        const startSubscription = () => {
+            this.topic.subscribe(msg => {
+                this.distance = msg.data;
+                logger.info(`[UltrasonicSensor] Received distance value: ${msg.data}`);
+            });
+            logger.info('[UltrasonicSensor] Subscribed to /ultrasonic');
+        };
 
-        this.topic.subscribe(msg => {
-            this.distance = msg.data;
-            logger.info(`[UltrasonicSensor] Received distance value: ${msg.data}`);
-        });
+        if (this.ros.isConnected) {
+            startSubscription();
+        } else {
+            logger.warn('[UltrasonicSensor] ROS not connected — waiting for connection to subscribe');
+            this.ros.on('connection', () => {
+                logger.info('[UltrasonicSensor] ROS connected — subscribing now');
+                startSubscription();
+            });
+        }
     }
+
 
     getDistance() {
         if (this.distance !== undefined) {
