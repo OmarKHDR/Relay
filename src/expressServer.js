@@ -10,9 +10,7 @@ class ExpressServer {
             return ExpressServer.instance;
         }
 
-        this.server = express();
-
-        // Mark instance early to avoid accidental re-init
+        this.app = express();
         ExpressServer.instance = this;
 
         this.initializeCoreMiddleware();
@@ -21,13 +19,13 @@ class ExpressServer {
     }
 
     initializeCoreMiddleware() {
-        this.server.use(cors());
-        this.server.use(express.json());
-        this.server.use(express.urlencoded({ extended: true }));
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
     }
 
     attachLogger() {
-        this.server.use(
+        this.app.use(
             morgan(':method :url :status :response-time ms', {
                 stream: {
                     write: message => logger.info(message.trim()),
@@ -37,14 +35,13 @@ class ExpressServer {
     }
 
     mountRoutes() {
-        this.server.use('/api/v1', apiRouter);
+        this.app.use('/api/v1', apiRouter);
     }
 
-    getServer() {
-        return this.server;
+    getApp() {
+        return this.app;
     }
 }
 
-const serverCreator = new ExpressServer();
-const app = serverCreator.getServer();
-export default app;
+const expressServer = new ExpressServer();
+export default expressServer.getApp();

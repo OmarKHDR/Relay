@@ -3,56 +3,53 @@ import ROSLIB from 'roslib';
 import logger from '#utils/logger.js';
 
 class WheelChair {
-	constructor() {
-		if (WheelChair.instance) return WheelChair.instance;
+    constructor() {
+        if (WheelChair.instance) return WheelChair.instance;
+		logger.info('[WheelChair] initializing wheelchair topic');
+        this.ros = rosHandler.getRos();
+        this.topic = this.createTopic();
+        this.MAX_LINEAR = 1.0;
+        this.MAX_ANGULAR = 2.0;
+        this.linearInput = 0;
+        this.angularInput = 0;
+        WheelChair.instance = this;
+    }
 
-		logger.info('[WheelChair] Initializing WheelChair topic handler');
-		this.ros = rosHandler.getRos();
-		this.topic = this.createTopic();
-		this.direction = undefined;
+    createTopic() {
+		logger.info('[WheelChair] creating wheelchair topic for controlling speed and angle');
+        return new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/cmd_vel',
+            messageType: 'geometry_msgs/Twist',
+        });
+    }
 
-		WheelChair.instance = this;
-	}
+    setVelocity(linearInput, angularInput) {
+		logger.info(`[WheelChair] setting velocity with ratio linear speed ${linearInput} and angular speed ${angularInput}`)
+        this.linearInput = Math.max(-1, Math.min(1, linearInput));
+        this.angularInput = Math.max(-1, Math.min(1, angularInput));
+        this.publishCurrent();
+    }
 
-	createTopic() {
-		const topic = new ROSLIB.Topic({
-			ros: this.ros,
-			name: '/cmd_vel',
-			messageType: 'std_msgs/UInt8', // expected on ROS side
-		});
-		logger.info('[WheelChair] Topic created: /cmd_vel (std_msgs/UInt8)');
-		return topic;
-	}
-
-	move(direction) {
-		const allowed = ['stop', 'forward', 'backward', 'left', 'right'];
-		if (!allowed.includes(direction)) {
-			logger.error(`[WheelChair] Invalid direction: ${direction}`);
-			return;
-		}
-
-		const code = allowed.indexOf(direction); // 0–4
-		this.direction = direction;
-
-		const msg = new ROSLIB.Message({ data: code });
-
-		if (this.ros.isConnected) {
-			this.topic.publish(msg);
-			logger.info(`[WheelChair] Published direction: ${direction} (code ${code})`);
-		} else {
-			logger.warn('[WheelChair] ROS not connected, message skipped');
+	getVelocity() {
+		return {
+			linear: this.linearInput,
+			angular: this.angularInput
 		}
 	}
 
-	getDirection() {
-		if (this.direction !== undefined) {
-			logger.info(`[WheelChair] Returning direction value: ${this.direction}`);
-			return this.direction;
-		} else {
-			logger.warn('[WheelChair] Direction value is undefined');
-			return undefined;
+    publishCurrent() {
+        const msg = new ROSLIB.Message({
+            linear: { x: this.linearInput * this.MAX_LINEAR },
+            angular: { z: this.angularInput * this.MAX_ANGULAR },
+        });
+        if (this.ros.isConnected) {
+			logger.info(`[WheelChair] publishing velocity with linear speed ${this.linearInput * this.MAX_LINEAR} and angular speed ${this.angularInput * this.MAX_ANGULAR}`)
+            this.topic.publish(msg);
+        } else {
+			logger.warn(`[WheelChair] ros is not connected ignored publishing this message`)
 		}
-	}
+    }
 }
 
 const wheelChairHandler = new WheelChair();

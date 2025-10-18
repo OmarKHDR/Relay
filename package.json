@@ -9,7 +9,9 @@
     "#lib/*": "./src/lib/*",
     "#middlewares/*": "./src/middlewares/*",
     "#controllers/*": "./src/api/v1/controllers/*",
-    "#routes": "./src/api/v1/routes.js"
+    "#wsControllers/*": "./src/api/v1/wsControllers/*",
+    "#routes": "./src/api/v1/routes.js",
+    "#src/*": "./src/*"
   },
   "scripts": {
     "dev": "nodemon src/index.js",

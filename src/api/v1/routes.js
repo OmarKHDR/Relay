@@ -1,6 +1,6 @@
 import Router from 'express'
 import { getServoAngle, setServoAngle } from "#controllers/servoController.js";
-import { getWheelchairDirection, setWheelchairDirection } from "#controllers/wheelchairCotnroller.js";
+import { getVelocity, updateVelocity } from "#controllers/wheelchairCotnroller.js";
 import { getDistance } from "#controllers/ultrasonicController.js";
 
 
@@ -11,8 +11,8 @@ apiRouter.post('/servo-motor/', setServoAngle);
 apiRouter.get('/servo-motor/', getServoAngle);
 
 // wheelchair
-apiRouter.post('/wheelchair/direction/', setWheelchairDirection);
-apiRouter.get('/wheelchair/direction/', getWheelchairDirection);
+apiRouter.post('/wheelchair/velocity/', updateVelocity);
+apiRouter.get('/wheelchair/velocity/', getVelocity);
 
 // ultrasonic
 apiRouter.get('/sensors/ultrasonic/', getDistance);

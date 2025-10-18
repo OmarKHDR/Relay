@@ -51,16 +51,16 @@
 ```
 
 ## wheelchair movements
-- `POST /api/v1/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
-- `GET /api/v1/wheelchair/direction/` - moves the wheelchair with a specific driection and speed
+- `POST /api/v1/wheelchair/velocity/` - moves the wheelchair with a specific linear and angular velocity
+- `GET /api/v1/wheelchair/velocity/` - gets current wheelchair linear and angular velocity
 
 ```javascript
-//request: POST /api/v1/wheelchair/direction/
+//request: POST /api/v1/wheelchair/velocity/
 
 //request body
 {
-  direction: string; //for now restricted to ['stop', 'forward', 'backward', 'left', 'right']
-  speed: Number; //discard for now
+  linear: Number; //a multiplier in interval of [-1, 1]
+  angular: Number; //a multiplier in interval of [-1, 1]
 }
 
 //response:
@@ -78,7 +78,7 @@
   }
 }
 
-//request: GET /api/v1/wheelchair/direction/
+//request: GET /api/v1/wheelchair/velocity/
 
 //response:
 {
@@ -87,7 +87,10 @@
     {
       "id": "id1",
       "name": "mywheelchair",
-      "direction": "forward",
+      "velocity" : {
+        "linear": Number,
+        "angular": Number
+      }
   ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -97,7 +100,7 @@
 
 
 
-## Sensor Data
+## Sensor Data 
 - `GET /api/v1/sensors/ultrasonic/` - Get all ultrasonics data
 
 ```javascript

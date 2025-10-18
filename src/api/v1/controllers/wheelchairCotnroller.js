@@ -2,62 +2,46 @@ import wheelChairHandler from '#lib/ros/topics/wheelchair-topic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
-export function setWheelchairDirection(req, res) {
-    const { direction } = req.body || {};
-    logger.info(`[wheelchairController] Received direction: ${direction}`);
-
-	const allowed = ['stop', 'forward', 'backward', 'left', 'right'];
-    if (!allowed.includes(direction)) {
-		logger.error(`[wheelchairController] direction not allowed: ${direction}`);
+export function updateVelocity(req, res) {
+    const { linear, angular } = req.body || {};
+    logger.info(`[wheelchairController] Received inputs: linear=${linear}, angular=${angular}`);
+    if (
+        typeof linear !== 'number' ||
+        typeof angular !== 'number' ||
+        linear < -1 ||
+        linear > 1 ||
+        angular < -1 ||
+        angular > 1
+    ) {
         return res.status(400).json({
             status: 'fail',
             error: {
-                code: 'INVALID_DIRECTION',
-				type: 'ValueError',
-                message: `Invalid direction '${direction}', must be one of ${allowed.join(', ')}`,
+                code: 'INVALID_INPUT',
+                type: 'ValueError',
+                message: 'Linear and angular values must be numbers between -1 and 1.',
             },
             meta: { timestamp: timestamper() },
         });
     }
 
-    wheelChairHandler.move(direction);
-
+    wheelChairHandler.setVelocity(linear, angular);
     return res.status(200).json({
         status: 'success',
-        data: [
-			{
-				id: 1,
-				name: "testing wheelchair",
-				direction
-			}
-		],
+        data: [{ id: 1, name: 'wheelchair', linear, angular }],
         meta: { timestamp: timestamper() },
     });
 }
 
+export function getVelocity(req, res) {
+    logger.info('[wheelchairController] Received request for wheelchair velocity');
+    const velocity = {
+        linear: wheelChairHandler.linearInput,
+        angular: wheelChairHandler.angularInput,
+    };
 
-export function getWheelchairDirection(req, res) {
-    logger.info('[wheelchairController] Received request for wheelchair direction');
-
-    const direction = wheelChairHandler.getDirection();
-
-    if (typeof direction !== 'string') {
-        logger.warn('[wheelchairController] Direction value undefined or unavailable');
-        return res.status(503).json({
-            status: 'fail',
-            error: {
-                code: 'NO_DATA',
-                type: 'UnavailableError',
-                message: 'Wheelchair direction not available at the moment.',
-            },
-            meta: { timestamp: timestamper() },
-        });
-    }
-
-    logger.info(`[wheelchairController] Returning current direction: ${direction}`);
     return res.status(200).json({
         status: 'success',
-        data: [{ id: 1, name: "testing wheelchair" ,direction }],
+        data: [{ id: 1, name: 'wheelchair', velocity }],
         meta: { timestamp: timestamper() },
     });
 }
