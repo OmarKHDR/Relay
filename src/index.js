@@ -1,32 +1,16 @@
+import http from 'http';
 import dotenv from 'dotenv';
+import app from './expressServer.js';
+import WebsocketServer from './websocketServer.js';
+
 dotenv.config();
-import logger from '#utils/logger.js';
-import timestamper from '#utils/timestamp.js';
-import apiRouter from '#routes';
-import express from 'express';
-import morgan from 'morgan';
-import cors from 'cors';
 
-// connections info
-const serverHostname = process.env.SERVER_HOSTNAME;
-const serverPort = process.env.SERVER_PORT;
+const server = http.createServer(app);
+const io = new WebsocketServer(server).getIO();
 
-const app = express();
+const PORT = process.env.SERVER_PORT;
+const HOST = process.env.SERVER_HOSTNAME;
 
-//create a logger for logging the requests
-app.use(
-    morgan(':method :url :status :response-time ms', {
-        stream: {
-            write: message => logger.info(message.trim()),
-        },
-    })
-);
-
-app.use(express.json());
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use('/api/v1', apiRouter);
-
-app.listen(serverPort, serverHostname, () => {
-    logger.info(`server is running on ${serverHostname}:${serverPort}`);
+server.listen(PORT, HOST, () => {
+    console.log(`HTTP & WS running on http://${HOST}:${PORT}`);
 });

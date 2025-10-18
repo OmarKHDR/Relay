@@ -37,6 +37,7 @@
     "express": "^5.1.0",
     "morgan": "^1.10.1",
     "roslib": "^1.4.1",
+    "socket.io": "^4.8.1",
     "winston": "^3.18.1"
   },
   "devDependencies": {
