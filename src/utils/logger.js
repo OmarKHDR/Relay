@@ -7,7 +7,7 @@ const logger = winston.createLogger({
 	level: 'debug',
 	transports: [
 		new winston.transports.Console({
-			level: 'debug',
+			level: (process.env.NODE_ENV == 'testing') ? 'silent' : 'debug',
 			format: winston.format.combine(
 				winston.format.colorize(),
 				winston.format.timestamp({format: timestamper}),

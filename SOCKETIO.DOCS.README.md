@@ -41,7 +41,7 @@ data = {
 	}
 }
 */
-socket.on('wheelchair:error', (error) => {})
+socket.on('wheelchair:velocity:error', (error) => {})
 /*
 error = {
 	type: "",
