@@ -1,4 +1,3 @@
-// controllers/wsWheelchairController.js
 import wheelChairHandler from '#lib/ros/topics/wheelchair-topic.js';
 import logger from '#utils/logger.js';
 
@@ -6,13 +5,12 @@ class WsWheelchairController {
     constructor(wsServer) {
         this.wsServer = wsServer;
     }
-
-    // Called for each new socket connection
+    // injecting the events on every socket connection made
     onConnection(socket) {
-        logger.info(`[WheelchairController] Socket connected: ${socket.id}`);
+        logger.info(`[wsWheelchairController] Socket connected: ${socket.id}`);
 
-        // Handle velocity updates from client
-        socket.on('velocity', data => this.handleVelocity(data, socket));
+        // Handle velocity updates from client side
+        socket.on('wheelchair:velocity', data => this.handleVelocity(data, socket));
 
         // Send initial connection acknowledgment with current velocity
         socket.emit('connected', {
@@ -21,22 +19,22 @@ class WsWheelchairController {
         });
     }
 
-    // Cleanup when socket disconnects
+    // Cleanup when socket disconnects {only some logs as no socket id was cached}
     onDisconnect(socket) {
-        logger.info(`[WheelchairController] Socket disconnected: ${socket.id}`);
+        logger.info(`[wsWheelchairController] Socket disconnected: ${socket.id}`);
     }
 
+    // helper method for setting velocity and validation
     handleVelocity(data, socket) {
         const { linear, angular } = data;
         
-        logger.info(`[WheelchairController] Velocity update: linear=${linear}, angular=${angular}`);
+        logger.info(`[wsWheelchairController] Velocity update: linear=${linear}, angular=${angular}`);
         
         // Validation
         if (!this.validateVelocity(linear, angular)) {
-            socket.emit('error', {
+            socket.emit('wheelchair:velocity:error', {
                 type: 'VALIDATION_ERROR',
                 message: 'Linear and angular must be numbers between -1 and 1',
-                received: { linear, angular }
             });
             return;
         }
@@ -49,13 +47,15 @@ class WsWheelchairController {
             this.broadcastVelocity({
                 linear,
                 angular,
-                timestamp: Date.now(),
-                source: socket.id
+                meta: {
+                    timestamp: Date.now(),
+                    source: socket.id
+                }
             });
 
         } catch (error) {
-            logger.error(`[WheelchairController] Error setting velocity:`, error);
-            socket.emit('error', {
+            logger.error(`[wsWheelchairController] Error setting velocity:`, error);
+            socket.emit('wheelchair:velocity:error', {
                 type: 'INTERNAL_ERROR',
                 message: 'Failed to update velocity'
             });
@@ -77,30 +77,8 @@ class WsWheelchairController {
 
     // Broadcast velocity to all connected clients
     broadcastVelocity(velocityData) {
-        this.wsServer.broadcast('velocity', velocityData);
-        logger.debug(`[WheelchairController] Broadcasted velocity to all clients`);
-    }
-
-    // Public method to broadcast velocity updates from external sources (e.g., ROS callbacks)
-    publishVelocity(velocity) {
-        if (!this.validateVelocity(velocity.linear, velocity.angular)) {
-            logger.error(`[WheelchairController] Invalid velocity for publishing:`, velocity);
-            return;
-        }
-
-        this.broadcastVelocity({
-            ...velocity,
-            timestamp: Date.now(),
-            source: 'system'
-        });
-    }
-
-    // Get controller statistics
-    getStats() {
-        return {
-            controller: 'wheelchair',
-            connectedClients: this.wsServer.getConnectionCount()
-        };
+        this.wsServer.broadcast('wheelchair:velocity', velocityData);
+        logger.debug(`[wsWheelchairController] Broadcasted velocity to all clients`);
     }
 }
 
