@@ -1,5 +1,58 @@
 # API Endpoints
 
+
+## wheelchair movements
+- `POST /api/v1/wheelchair/velocity/` - moves the wheelchair with a specific linear and angular velocity
+- `GET /api/v1/wheelchair/velocity/` - gets current wheelchair linear and angular velocity
+
+```javascript
+//request: POST /api/v1/wheelchair/velocity/
+
+//request body
+{
+  linear: Number; //a multiplier in interval of [-1, 1]
+  angular: Number; //a multiplier in interval of [-1, 1]
+}
+
+//response:
+{
+  "status": "success",
+  "data": [
+    {
+      id: 1,
+      name: "testing wheelchair",
+      direction: "forward"
+    }
+  ],
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+//request: GET /api/v1/wheelchair/velocity/
+
+//response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "id1",
+      "name": "mywheelchair",
+      "velocity" : {
+        "linear": Number,
+        "angular": Number
+      }
+  ],
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
+
+
+
+
+
 ## servo-motor control
 - `POST /api/v1/servo-motor/` - control servo-motor angle
 - `GET /api/v1/servo-motor/` - get all servo-motors  angles
@@ -50,53 +103,6 @@
 
 ```
 
-## wheelchair movements
-- `POST /api/v1/wheelchair/velocity/` - moves the wheelchair with a specific linear and angular velocity
-- `GET /api/v1/wheelchair/velocity/` - gets current wheelchair linear and angular velocity
-
-```javascript
-//request: POST /api/v1/wheelchair/velocity/
-
-//request body
-{
-  linear: Number; //a multiplier in interval of [-1, 1]
-  angular: Number; //a multiplier in interval of [-1, 1]
-}
-
-//response:
-{
-  "status": "success",
-  "data": [
-    {
-      id: 1,
-      name: "testing wheelchair",
-      direction: "forward"
-    }
-  ],
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-
-//request: GET /api/v1/wheelchair/velocity/
-
-//response:
-{
-  "status": "success",
-  "data": [
-    {
-      "id": "id1",
-      "name": "mywheelchair",
-      "velocity" : {
-        "linear": Number,
-        "angular": Number
-      }
-  ],
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-```
 
 
 
