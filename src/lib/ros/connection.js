@@ -21,7 +21,7 @@ class RosConnection {
     }
 
     _connect() {
-        this.ros = new ROSLIB.Ros({ url: this.url });
+        this.ros = new ROSLIB.Ros({ url: this.url , encoding: 'bson'});
 
         this.ros.on('connection', () => {
             this.connected = true;
