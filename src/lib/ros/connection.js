@@ -30,7 +30,7 @@ class RosConnection {
 
         this.ros.on('error', err => {
             this.connected = false;
-            logger.error(`[ROS-CONNECTION] ROS error: ${err}`);
+            logger.error(`[ROS-CONNECTION] ROS error: ${err.message}`);
         });
 
         this.ros.on('close', () => {

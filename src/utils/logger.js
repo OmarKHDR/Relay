@@ -4,10 +4,10 @@ import timestamper from '#utils/timestamp.js';
 
 
 const logger = winston.createLogger({
-	level: 'debug',
+	level: (process.env.NODE_ENV == 'testing') ? 'silent' : 'debug',
 	transports: [
 		new winston.transports.Console({
-			level: (process.env.NODE_ENV == 'testing') ? 'silent' : 'debug',
+			level: 'debug',
 			format: winston.format.combine(
 				winston.format.colorize(),
 				winston.format.timestamp({format: timestamper}),

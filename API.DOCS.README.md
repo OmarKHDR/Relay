@@ -18,11 +18,12 @@
 {
   "status": "success",
   "data": [
-    {
-      id: 1,
-      name: "testing wheelchair",
-      direction: "forward"
-    }
+      "id": "id1",
+      "name": "mywheelchair",
+      "velocity" : {
+        "linear": Number,
+        "angular": Number
+      }
   ],
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"

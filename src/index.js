@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import websocketServer from '#src/websocketServer.js';
 import logger from '#utils/logger.js';
 import httpServer from '#src/wsInit.js';
+import websocketServer from '#src/websocketServer.js';
 
 dotenv.config();
 
