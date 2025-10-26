@@ -47,12 +47,13 @@ instead of just having tightly coupled system endpoints we need to use more abst
 - system don't need to know which module is sending the distance so instead of sending to `ultrasonic` topic we would publish to `distance/direction`
 - instead of controlling the whole wheelchair movements, we can control only one motor for extending more moving parts in the system so it will be `motor/:id`
 - and so on...
+
 ## General Response Structure
 ```javascript
 //for success
 {
   "status": "success",
-  "data": [], // Now always an array
+  "data": [], // always an array
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
   }
@@ -78,6 +79,9 @@ instead of just having tightly coupled system endpoints we need to use more abst
 # Development mode
 npm run dev
 
+#testing
+npm run test
+
 # Production mode
 npm start
 ```
@@ -94,10 +98,16 @@ npm start
 - Input validation for all endpoints
 
 ## File Structure
-- **lib/** - Core business logic, ROS bridge integration, and database models
-- **api/v1/** - REST API endpoints and controllers for the first version
-- **middlewares/** - Express.js middleware functions for auth, validation, etc.
-- **utils/** - Helper functions and utility modules used across the application like loggers and other things
+- **/src/lib/** - Core business logic, ROS bridge integration, and database models
+- **/src/api/v1/** - REST API endpoints and controllers for the first version
+- **/src/middlewares/** - Express.js middleware functions for auth, validation, etc.
+- **/src/utils/** - Helper functions and utility modules used across the application like loggers and other things
+- **/src/websocketServer.js** - a file where we create a websocket initializer that uses singleton pattern and the initialization injects the callback and events on connection
+- **/src/expressServer.js** - a file where we create the express server and use the router to be separated from the websocket and the entrypoint file so we can import it in the unit test separately
+- **/src/wsInit.js** - initializing the websocket by adding the controllers that will register events later on connection, and it integrates the websocket controllers and the websocket class wrapper and the http wrapper of express server
+- **/src/index.js** - the entry point where the server can listen on the port
+- **/test/** - all websockets and api unit tests
+
 
 ## Contributing
 1. Fork the repository
