@@ -2,7 +2,7 @@ import Router from 'express'
 import { getServoAngle, setServoAngle } from "#controllers/servoController.js";
 import { getVelocity, updateVelocity } from "#controllers/wheelchairCotnroller.js";
 import { getDistance } from "#controllers/ultrasonicController.js";
-
+import { getMap } from '#controllers/mapController.js';
 
 const apiRouter = Router();
 
@@ -16,5 +16,10 @@ apiRouter.get('/wheelchair/velocity/', getVelocity);
 
 // ultrasonic
 apiRouter.get('/sensors/ultrasonic/', getDistance);
+
+
+//map routes
+apiRouter.get('/map/', getMap)
+
 
 export default apiRouter;

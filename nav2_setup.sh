@@ -1,8 +1,6 @@
 # Clone this ready-made repo
-cd ~
 git clone https://github.com/Onicc/navigation2_ignition_gazebo_turtlebot3.git
 
-echo "navigation2_ignition_gazebo_turtlebot3/" >> .gitignore
 cd navigation2_ignition_gazebo_turtlebot3
 
 # Install dependencies
