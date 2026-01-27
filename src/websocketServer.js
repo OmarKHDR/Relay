@@ -66,7 +66,7 @@ class WebsocketServer {
         if (!controller.onConnection || typeof controller.onConnection !== 'function' 
             || !controller.onDisconnect || typeof controller.onDisconnect !== 'function'
         ) {
-            throw new Error('Controller must implement onConnection(socket) method');
+            throw new Error('Controller must implement onConnection(socket), onDisconnect(socket) method');
         }
 
         this.controllers.push(controller);
