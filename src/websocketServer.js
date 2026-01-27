@@ -63,7 +63,9 @@ class WebsocketServer {
 
     // Register a controller that will handle events
     registerController(controller) {
-        if (!controller.onConnection || typeof controller.onConnection !== 'function') {
+        if (!controller.onConnection || typeof controller.onConnection !== 'function' 
+            || !controller.onDisconnect || typeof controller.onDisconnect !== 'function'
+        ) {
             throw new Error('Controller must implement onConnection(socket) method');
         }
 
