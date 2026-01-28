@@ -8,7 +8,8 @@
     "#utils/*": "./src/utils/*",
     "#lib/*": "./src/lib/*",
     "#src/*": "./src/*",
-    "#modules/*": "./src/api/v1/*"
+    "#modules/*": "./src/api/v1/*",
+    "#servers/*": "./src/servers/*"
   },
   "scripts": {
     "dev": "nodemon src/index.js",
