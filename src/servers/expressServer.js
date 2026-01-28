@@ -1,8 +1,8 @@
 import logger from '#utils/logger.js';
-import apiRouter from '#routes';
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import { ApiRegistry } from '#servers/apiRegistry.js';
 
 class ExpressServer {
     constructor() {
@@ -34,8 +34,10 @@ class ExpressServer {
         );
     }
 
-    mountRoutes() {
-        this.app.use('/api/v1', apiRouter);
+    mountRoutes(prefix = '/api/v1') {
+        ApiRegistry.forEach(route => {
+            this.app.use(prefix, route);
+        });
     }
 
     getApp() {

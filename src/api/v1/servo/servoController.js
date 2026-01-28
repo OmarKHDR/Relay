@@ -1,4 +1,4 @@
-import servoMotorHandler from '#lib/ros/topics/servo-motor-topic.js';
+import servoMotorHandler from '#src/api/v1/servo/servoMotorTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 

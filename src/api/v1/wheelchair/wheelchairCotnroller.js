@@ -1,4 +1,4 @@
-import wheelChairHandler from '#lib/ros/topics/wheelchair-topic.js';
+import wheelChairHandler from '#modules/wheelchair/wheelchairTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 

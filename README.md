@@ -43,6 +43,8 @@ instead of just having tightly coupled system endpoints we need to use more abst
 - ultrasonic for distnaces
 - motors for wheelchair movements
 - servo motor (for testing till now)
+
+
 ### Abstract system modules
 - system don't need to know which module is sending the distance so instead of sending to `ultrasonic` topic we would publish to `distance/direction`
 - instead of controlling the whole wheelchair movements, we can control only one motor for extending more moving parts in the system so it will be `motor/:id`
@@ -98,8 +100,8 @@ npm start
 - Input validation for all endpoints
 
 ## File Structure
-- **/src/lib/** - Core business logic, ROS bridge integration, and database models
-- **/src/api/v1/** - REST API endpoints and controllers for the first version
+- **/src/lib/** - Core business logic, ROS bridge connection
+- **/src/api/v1/** - All modules, each module is separated in a feature based instead of past layered arch
 - **/src/middlewares/** - Express.js middleware functions for auth, validation, etc.
 - **/src/utils/** - Helper functions and utility modules used across the application like loggers and other things
 - **/src/websocketServer.js** - a file where we create a websocket initializer that uses singleton pattern and the initialization injects the callback and events on connection
@@ -112,9 +114,10 @@ npm start
 ## Contributing
 1. Fork the repository
 2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Follow guide in DEVELOPER_GUIDE directory
+4. Commit your changes
+5. Push to the branch
+6. Create a Pull Request
 
 
 ## Notes

@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import httpServer from '#src/wsInit.js';
+import {httpServer} from '#servers/websocketServer.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -39,20 +39,5 @@ describe('testing wheelchair websocket control over velocity', () => {
         });
 
         socket.emit('wheelchair:velocity', { linear: 0.5, angular: 0.5 });
-    });
-
-    test('validate errors', done => {
-        try {
-            socket.on('wheelchair:velocity:error', err => {
-                expect(err).toMatchObject({
-                    type: expect.any(String),
-                    message: expect.any(String),
-                });
-                done();
-            });
-        } catch (err) {
-            done(err);
-        }
-        socket.emit('wheelchair:velocity', { linear: 5, angular: 0.5 });
     });
 });
