@@ -1,21 +1,22 @@
-# API Endpoints (Navigation / Visualization)
+# Navigation / Visualization API
 
-These endpoints are **read-only visualization + goal command**.
-They are designed so the frontend can render a 2D map with wheelchair pose, path, and goal **without knowing ROS**.
+These endpoints allow the frontend to render a 2D map with the wheelchair pose and navigation goal **without needing ROS knowledge**.  
+They include **static world data** (map) and **dynamic navigation state** (pose and goal).
 
 ---
 
 ## Map (static world data)
 
-* `GET /api/v1/navigation/map/` – get the current navigation map
+**GET** `/api/v1/navigation/map/` – get the current navigation map
 
-> The map is assumed **static** during normal operation.
-> Frontend should fetch **once**, cache it, and only refetch if `version` changes.
+> The map is **assumed static** during normal operation.  
+> Frontend should fetch **once**, cache it, and only refetch if the map changes.
 
 ```javascript
-// request: GET /api/v1/navigation/map/
+// request
+GET /api/v1/navigation/map/
 
-// response:
+// response
 {
   "status": "success",
   "data": {
@@ -26,16 +27,15 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
     "origin": {
       "x": Number,                  // map origin x in meters
       "y": Number,                  // map origin y in meters
-      "yaw": Number,
-      }                 // radians (usually 0)
-      "map": Number[],               // row-major occupancy grid
-      /*
-        cell values:
-          -1  = unknown
-          0  = free
-          100 = occupied
-      */
+      "yaw": Number                 // radians, usually 0
     },
+    "map": Number[],                // row-major occupancy grid
+    /*
+      cell values:
+        -1  = unknown
+        0   = free
+        100 = occupied
+    */
   },
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -45,77 +45,31 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 
 ### Frontend notes
 
-* Coordinate conversion:
-
-  ```
-  world_x = origin.x + cell_x * resolution
-  world_y = origin.y + cell_y * resolution
-  ```
-* All other navigation data (pose, path, goal) is expressed **in this same map frame**.
-* Render once, reuse forever unless `version` changes.
+- **Coordinate conversion**: `world_x = origin.x + cell_x * resolution` and `world_y = origin.y + cell_y * resolution`
+- All navigation data (pose, goal) is expressed in the map frame.
+- Render once, reuse until map changes.
 
 ---
 
-## Wheelchair Pose (live ws at [[./NAV.SOCKETIO.DOCS.README.md]])
+## Wheelchair Pose (live)
 
-* `GET /api/v1/navigation/pose/` – get current wheelchair pose
-
-> every response is a complete path, can use pulling to get data, or ws for live changes in path
-> path changes when goal changes or when the path is recalculated
-```javascript
-// request: GET /api/v1/navigation/pose/
-
-// response:
-{
-  "status": "success",
-  "data": {
-    "frame": "map",           // same frame as map
-    "points": [
-      {
-        "x": Number,            // meters
-        "y": Number,            // meters
-        "z": Number             // meters (usually 0)
-        "yaw": Number           // radians, CCW, 0 = +X axis
-      },
-      ... // all the points for the nav goal
-    ]
-  },
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-```
-
-### Frontend notes
-
-* Use `(x, y)` directly on the map.
-* `yaw` is enough for 2D rendering (no quaternions needed).
-* Draw wheelchair icon centered at `(x, y)` rotated by `yaw`.
-
----
-
-## Planned Path (optional visualization)
-
-* `GET /api/v1/navigation/path/` – get current planned path
-
-> Path may change during navigation.
-> If no navigation is active, `points` may be empty.
+**GET** `/api/v1/navigation/pose/` – get current wheelchair pose
 
 ```javascript
-// request: GET /api/v1/navigation/path/
+// request
+GET /api/v1/navigation/pose/
 
-// response:
+// response
 {
   "status": "success",
   "data": {
     "frame": "map",
-    "points": [
-      {
-        "x": Number,          // meters
-        "y": Number,          // meters
-        "yaw": Number         // radians (optional for rendering)
-      }
-    ]
+    "pose": {
+      "x": Number,            // meters
+      "y": Number,            // meters
+      "z": Number,            // meters (usually 0)
+      "yaw": Number           // radians, CCW, 0 = +X axis
+    }
   },
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -125,9 +79,9 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 
 ### Frontend notes
 
-* Draw a polyline through `(x, y)` points.
-* Ignore `yaw` unless you want arrowheads or orientation hints.
-* Path is **informational**, not authoritative control.
+- Use (x, y) directly on the map.
+- yaw is enough for 2D rendering (no quaternions needed).
+- Draw wheelchair icon centered at (x, y) rotated by yaw.
 
 ---
 
@@ -135,21 +89,17 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 
 ### Set goal
 
-* `POST /api/v1/navigation/goal/` – send navigation target
+**POST** `/api/v1/navigation/goal/` – send navigation target
 
 ```javascript
-// request: POST /api/v1/navigation/goal/
-// request body:
+// request body
 {
-  "frame": "map",
-  "position": {
-    "x": Number,              // meters
-    "y": Number               // meters
-    "yaw": Number             // radians
-  },
+  "x": Number,        // meters
+  "y": Number,        // meters
+  "yaw": Number       // radians
 }
 
-// response:
+// response
 {
   "status": "success",
   "data": {
@@ -161,24 +111,64 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 }
 ```
 
+- Returns 500 if ROS connection fails or Nav2 rejects the goal.
+
 ### Get current goal
 
-* `GET /api/v1/navigation/goal/`
+**GET** `/api/v1/navigation/goal/` – retrieve current goal
 
 ```javascript
-// request: GET /api/v1/navigation/goal/
-
-// response:
+// response when goal exists
 {
   "status": "success",
   "data": {
-    "frame": "map",
-    "position": {
+    "goal": {
       "x": Number,
-      "y": Number
+      "y": Number,
       "yaw": Number
     },
-    "active": Boolean         // false if no goal set
+    "status": "ACTIVE"         // IDLE | PENDING | ACTIVE | CANCELING | SUCCEEDED | FAILED | CANCELED
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+// response when no goal
+{
+  "status": "fail",
+  "error": {
+    "code": "NO_ACTIVE_GOAL",
+    "message": "There is no active navigation goal"
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+```
+
+### Stop navigation
+
+**DELETE** `/api/v1/navigation/goal/` – cancel active goal
+
+```javascript
+// response when canceled successfully
+{
+  "status": "success",
+  "data": {
+    "canceled": true
+  },
+  "meta": {
+    "timestamp": "2025-09-28T22:00:00Z"
+  }
+}
+
+// response when no active goal
+{
+  "status": "fail",
+  "error": {
+    "code": "NO_ACTIVE_GOAL",
+    "message": "There is no active goal to cancel"
   },
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -188,27 +178,5 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 
 ### Frontend notes
 
-* Goal is always expressed in **map frame**.
-* Frontend can:
-
-  * Place a marker on click
-  * Send `(x, y, yaw)`
-  * Optionally show planned path afterward
-
-## Stop navigation
-
-* `POST /api/v1/navigation/stop/`
-```javascript
-// request: GET /api/v1/navigation/stop/
-
-// response:
-{
-  "status": "success",
-  "data": {
-    "stopped": true
-  },
-  "meta": {
-    "timestamp": "2025-09-28T22:00:00Z"
-  }
-}
-```
+- All goals are expressed in map frame.
+- Frontend can place a marker, send (x, y, yaw), and optionally show the planned path afterward.
