@@ -66,16 +66,7 @@ class WebsocketServer {
         })
     }
 
-    //if anyone publish on an event the callback is triggered
-    registerPubCallback(socket) {
-        this.callbackRegistry.forEach(registry => {
-            registry.publish.forEach(pub => {
-                socket.on(pub.eventName, data => {
-                    pub.callback(data)
-                })
-            })
-        })
-    }
+
 
     registerSubCallback(socket) {
         this.callbackRegistry.forEach(registry => {

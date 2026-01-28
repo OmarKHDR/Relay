@@ -44,12 +44,12 @@ class WheelChair extends EventEmitter {
         this.linearInput = newLinearInput;
         this.angularInput = newAnngularInput;
 
+        
+        this.publishCurrent();
         this.emit('velocity:change', {
             linear: this.linearInput,
             angular: this.angularInput
         });
-
-        this.publishCurrent();
     }
 
     getVelocity() {

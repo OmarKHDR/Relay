@@ -1,5 +1,6 @@
 import wheelChairHandler from '#src/api/v1/wheelchair/wheelchairTopic.js';
 import logger from '#utils/logger.js';
+import timestamper from '#utils/timestamp.js';
 
 export const wheelchairCallback = {
     publish: [
@@ -24,7 +25,7 @@ function updateVelocity(data) {
     logger.info(`[wsWheelchairCallback] Velocity update: linear=${linear}, angular=${angular}`);
 
     // Validation
-    if (!this.validateVelocity(linear, angular)) {
+    if (!validateVelocity(linear, angular)) {
         logger.warn(
             `[wsWheelchairCallback] failed to update Velocity: non-valid speed linear=${linear}, angular=${angular}`
         );
@@ -35,7 +36,7 @@ function updateVelocity(data) {
         // Update the wheelchair velocity
         wheelChairHandler.setVelocity(linear, angular);
     } catch (error) {
-        logger.error(`[wsWheelchairController] Error setting velocity:`, error);
+        logger.error(`[wsWheelchairCallback] Error setting velocity:`, error);
     }
 }
 
@@ -53,8 +54,17 @@ function validateVelocity(linear, angular) {
 }
 
 function broadcastingVelocity(io, eventName) {
-    wheelChairHandler.on("velocity:change", (data) => {
-        io.broadcast(eventName, data)
-    })
+    const handler = (data) => {
+        io.emit(eventName, {
+            linear: data.linear, 
+            angular:data.angular, 
+            meta: {
+                timestamp: timestamper(),
+                source: "helloworld"
+            }
+        }); // use emit, not broadcast
+    };
+
+    wheelChairHandler.on("velocity:change", handler);
 }
 
