@@ -1,4 +1,4 @@
-import wheelChairHandler from '#lib/ros/topics/wheelchair-topic.js';
+import wheelChairHandler from '#src/api/v1/wheelchair/wheelchairTopic.js';
 import logger from '#utils/logger.js';
 
 class WsWheelchairController {
@@ -15,7 +15,7 @@ class WsWheelchairController {
         // Send initial connection acknowledgment with current velocity
         socket.emit('connected', {
             controller: 'wheelchair',
-            currentVelocity: wheelChairHandler.getVelocity()
+            currentVelocity: wheelChairHandler.getVelocity(),
         });
     }
 
@@ -27,9 +27,11 @@ class WsWheelchairController {
     // helper method for setting velocity and validation
     handleVelocity(data, socket) {
         const { linear, angular } = data;
-        
-        logger.info(`[wsWheelchairController] Velocity update: linear=${linear}, angular=${angular}`);
-        
+
+        logger.info(
+            `[wsWheelchairController] Velocity update: linear=${linear}, angular=${angular}`
+        );
+
         // Validation
         if (!this.validateVelocity(linear, angular)) {
             socket.emit('wheelchair:velocity:error', {
@@ -49,15 +51,14 @@ class WsWheelchairController {
                 angular,
                 meta: {
                     timestamp: Date.now(),
-                    source: socket.id
-                }
+                    source: socket.id,
+                },
             });
-
         } catch (error) {
             logger.error(`[wsWheelchairController] Error setting velocity:`, error);
             socket.emit('wheelchair:velocity:error', {
                 type: 'INTERNAL_ERROR',
-                message: 'Failed to update velocity'
+                message: 'Failed to update velocity',
             });
         }
     }

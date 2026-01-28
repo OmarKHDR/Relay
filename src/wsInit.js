@@ -1,7 +1,7 @@
 import http from 'http';
 import expressApp from '#src/expressServer.js';
 import websocketServer from '#src/websocketServer.js';
-import WsWheelchairController from '#wsControllers/wsWheelchairController.js';
+import WsWheelchairController from '#src/api/v1/wheelchair/wsWheelchairController.js';
 
 
 // Create HTTP server with Express app

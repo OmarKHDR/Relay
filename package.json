@@ -7,11 +7,8 @@
   "imports": {
     "#utils/*": "./src/utils/*",
     "#lib/*": "./src/lib/*",
-    "#middlewares/*": "./src/middlewares/*",
-    "#controllers/*": "./src/api/v1/controllers/*",
-    "#wsControllers/*": "./src/api/v1/wsControllers/*",
-    "#routes": "./src/api/v1/routes.js",
-    "#src/*": "./src/*"
+    "#src/*": "./src/*",
+    "#modules/*": "./src/api/v1/*"
   },
   "scripts": {
     "dev": "nodemon src/index.js",

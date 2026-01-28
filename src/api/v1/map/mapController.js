@@ -1,4 +1,4 @@
-import MapHandler from "#lib/ros/topics/map-topic.js";
+import MapHandler from "#modules/map/map-topic.js";
 import logger from "#utils/logger.js";
 import timestamper from "#utils/timestamp.js";
 
