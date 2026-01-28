@@ -1,4 +1,4 @@
-import wheelChairHandler from '#src/api/v1/wheelchair/wheelchairTopic.js';
+import wheelChairHandler from '#modules/wheelchair/wheelchairTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
@@ -54,17 +54,16 @@ function validateVelocity(linear, angular) {
 }
 
 function broadcastingVelocity(io, eventName) {
-    const handler = (data) => {
+    const handler = data => {
         io.emit(eventName, {
-            linear: data.linear, 
-            angular:data.angular, 
+            linear: data.linear,
+            angular: data.angular,
             meta: {
                 timestamp: timestamper(),
-                source: "helloworld"
-            }
+                source: 'helloworld',
+            },
         }); // use emit, not broadcast
     };
 
-    wheelChairHandler.on("velocity:change", handler);
+    wheelChairHandler.on('velocity:change', handler);
 }
-

@@ -25,7 +25,6 @@ describe('testing wheelchair websocket control over velocity', () => {
     test('listen to wheelchair velocity change', done => {
         socket.on('wheelchair:velocity', data => {
             try {
-                console.log(data)
                 expect(data).toMatchObject({
                     linear: expect.any(Number),
                     angular: expect.any(Number),

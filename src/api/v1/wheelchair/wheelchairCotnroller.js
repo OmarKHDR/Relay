@@ -1,4 +1,4 @@
-import wheelChairHandler from '#src/api/v1/wheelchair/wheelchairTopic.js';
+import wheelChairHandler from '#modules/wheelchair/wheelchairTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 

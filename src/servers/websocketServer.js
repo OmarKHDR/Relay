@@ -1,21 +1,21 @@
 import { Server } from 'socket.io';
 import logger from '#utils/logger.js';
 import { CallbackRegistry } from '#servers/callbackRegistry.js';
-import expressApp from '#servers/expressServer.js'
+import expressApp from '#servers/expressServer.js';
 import http from 'http';
 
 
 
 
 class WebsocketServer {
-    constructor() {
+    constructor(options = {}) {
         if (WebsocketServer.instance) {
             return WebsocketServer.instance;
         }
         this.io = null;
         this.httpServer = http.createServer(expressApp);
         this.callbackRegistry = CallbackRegistry;
-        this.initialize();
+        this.initialize(options);
         WebsocketServer.instance = this;
     }
 

@@ -31,18 +31,18 @@ class WheelChair extends EventEmitter {
             `[WheelChair] setting velocity with ratio linear speed ${linearInput} and angular speed ${angularInput}`
         );
         const newLinearInput = Math.max(-1, Math.min(1, linearInput));
-        const newAnngularInput = Math.max(-1, Math.min(1, angularInput));
-        const changed = this.linearInput !== newLinearInput || this.angularInput !== newAnngularInput;
+        const newAngularInput = Math.max(-1, Math.min(1, angularInput));
+        const changed = this.linearInput !== newLinearInput || this.angularInput !== newAngularInput;
         if (!changed) {
             logger.info(
-            `[WheelChair] velocity not changed, keeping it on: ${this.linearInput} and angular speed ${this.linearInput}`
+            `[WheelChair] velocity not changed, keeping it on: ${this.linearInput} and angular speed ${this.angularInput}`
         );
             return;
         }
 
 
         this.linearInput = newLinearInput;
-        this.angularInput = newAnngularInput;
+        this.angularInput = newAngularInput;
 
         
         this.publishCurrent();
