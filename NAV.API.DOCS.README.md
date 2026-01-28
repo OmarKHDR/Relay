@@ -19,23 +19,23 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 {
   "status": "success",
   "data": {
-    "frame": "map",                 // global reference frame
+    "frame": "map",
     "resolution": Number,           // meters per cell (e.g. 0.05)
     "width": Number,                // number of cells (x)
     "height": Number,               // number of cells (y)
     "origin": {
       "x": Number,                  // map origin x in meters
       "y": Number,                  // map origin y in meters
-      "yaw": Number                 // radians (usually 0)
+      "yaw": Number,
+      }                 // radians (usually 0)
+      "map": Number[],               // row-major occupancy grid
+      /*
+        cell values:
+          -1  = unknown
+          0  = free
+          100 = occupied
+      */
     },
-    "data": Number[],               // row-major occupancy grid
-    /*
-      cell values:
-        -1  = unknown
-         0  = free
-        100 = occupied
-    */
-    "version": String               // map identity / hash / name
   },
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -56,13 +56,12 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
 
 ---
 
-## Wheelchair Pose (live)
+## Wheelchair Pose (live ws at [[./NAV.SOCKETIO.DOCS.README.md]])
 
 * `GET /api/v1/navigation/pose/` – get current wheelchair pose
 
-> This is **live data**.
-> Will use another websocket event with same structure
-
+> every response is a complete path, can use pulling to get data, or ws for live changes in path
+> path changes when goal changes or when the path is recalculated
 ```javascript
 // request: GET /api/v1/navigation/pose/
 
@@ -71,14 +70,15 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
   "status": "success",
   "data": {
     "frame": "map",           // same frame as map
-    "position": {
-      "x": Number,            // meters
-      "y": Number,            // meters
-      "z": Number             // meters (usually 0)
-    },
-    "orientation": {
-      "yaw": Number           // radians, CCW, 0 = +X axis
-    }
+    "points": [
+      {
+        "x": Number,            // meters
+        "y": Number,            // meters
+        "z": Number             // meters (usually 0)
+        "yaw": Number           // radians, CCW, 0 = +X axis
+      },
+      ... // all the points for the nav goal
+    ]
   },
   "meta": {
     "timestamp": "2025-09-28T22:00:00Z"
@@ -145,10 +145,8 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
   "position": {
     "x": Number,              // meters
     "y": Number               // meters
-  },
-  "orientation": {
     "yaw": Number             // radians
-  }
+  },
 }
 
 // response:
@@ -178,8 +176,6 @@ They are designed so the frontend can render a 2D map with wheelchair pose, path
     "position": {
       "x": Number,
       "y": Number
-    },
-    "orientation": {
       "yaw": Number
     },
     "active": Boolean         // false if no goal set
