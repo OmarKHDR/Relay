@@ -1,5 +1,5 @@
 import Router from 'express'
-import { getVelocity, updateVelocity } from "#src/api/v1/wheelchair/wheelchairCotnroller.js";
+import { getVelocity, updateVelocity } from "#src/api/v1/wheelchair/wheelchairController.js";
 
 const wheelchairApi = Router();
 

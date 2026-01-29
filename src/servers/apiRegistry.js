@@ -3,7 +3,7 @@ import servoApi from '#modules/servo/routes.js';
 import ultrasonicApi from '#modules/ultrasonic/routes.js';
 import wheelchairApi from '#modules/wheelchair/routes.js';
 import poseApi from '#modules/pose/routes.js';
-import goalApi from '#src/api/v1/goal/routes.js';
+import goalApi from '#modules/goal/routes.js';
 
 export const ApiRegistry = [
 	mapApi, servoApi, ultrasonicApi, wheelchairApi, poseApi, goalApi

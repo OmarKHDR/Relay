@@ -1,6 +1,7 @@
 {
   "name": "sanad-server",
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "description": "a server to connect the rosbridge websocket to the outer system components",
   "main": "src/index.js",

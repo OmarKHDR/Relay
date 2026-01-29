@@ -1,6 +1,7 @@
 # SANAD Server
 
 ## Overview
+This repository contains the backend server developed as part of a larger graduation project. Other project components (ROS, frontend, hardware) are maintained separately.
 This server acts as a middleware between ROS (Robot Operating System) and other system components through RESTful APIs. It facilitates communication between the mobile application, web interface, and ROS-powered robot using rosbridge.
 
 ## Prerequisites
