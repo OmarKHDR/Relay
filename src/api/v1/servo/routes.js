@@ -1,4 +1,4 @@
-import Router from 'express'
+import {Router} from 'express'
 import { getServoAngle, setServoAngle } from "#modules/servo/servoController.js";
 
 const servoApi = Router();

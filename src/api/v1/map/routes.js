@@ -1,4 +1,4 @@
-import Router from 'express'
+import { Router } from 'express'
 import { getMap } from '#modules/map/mapController.js';
 
 const mapApi = Router();

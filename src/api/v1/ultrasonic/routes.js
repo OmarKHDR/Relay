@@ -1,4 +1,4 @@
-import Router from 'express'
+import {Router} from 'express'
 import { getDistance } from "#modules/ultrasonic/ultrasonicController.js";
 
 const ultrasonicApi = Router();

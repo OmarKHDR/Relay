@@ -88,11 +88,6 @@ class NavGoal {
     }
 
     cancelGoal() {
-        // 1. Check if we have a goal (optional, but good practice)
-        if (this.status === 'IDLE' || this.status === 'CANCELED') {
-            logger.warn('[NavGoal] No active goal to cancel');
-            return false;
-        }
 
         logger.info('[NavGoal] Force canceling goal via Service...');
         this.status = 'CANCELING';

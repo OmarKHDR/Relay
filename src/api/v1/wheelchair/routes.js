@@ -1,4 +1,4 @@
-import Router from 'express'
+import {Router} from 'express'
 import { getVelocity, updateVelocity } from "#src/api/v1/wheelchair/wheelchairController.js";
 
 const wheelchairApi = Router();
