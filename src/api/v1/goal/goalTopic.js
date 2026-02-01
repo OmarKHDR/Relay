@@ -88,14 +88,46 @@ class NavGoal {
     }
 
     cancelGoal() {
-        if (!this.goalHandle) {
+        // 1. Check if we have a goal (optional, but good practice)
+        if (this.status === 'IDLE' || this.status === 'CANCELED') {
             logger.warn('[NavGoal] No active goal to cancel');
             return false;
         }
 
-        logger.info('[NavGoal] Canceling current goal...');
+        logger.info('[NavGoal] Force canceling goal via Service...');
         this.status = 'CANCELING';
-        this.goalHandle.cancel();
+
+        // 2. Define the Cancellation Service explicitly
+        const cancelService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/navigate_to_pose/_action/cancel_goal', // The hidden service
+            serviceType: 'action_msgs/srv/CancelGoal'
+        });
+
+        // 3. Create the "Zero ID" request (Cancels everything)
+        const request = new ROSLIB.ServiceRequest({
+            goal_info: {
+                goal_id: {
+                    uuid: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // Zero UUID
+                },
+                stamp: {
+                    sec: 0,
+                    nanosec: 0
+                }
+            }
+        });
+
+        // 4. Send the request
+        cancelService.callService(request, (result) => {
+            logger.info('[NavGoal] Cancel service response:', result);
+            // Manually update state since we bypassed the action client
+            this.status = 'CANCELED';
+            this.goalHandle = null;
+            this.currentGoal = null;
+        }, (error) => {
+            logger.error('[NavGoal] Failed to call cancel service:', error);
+        });
+
         return true;
     }
 
