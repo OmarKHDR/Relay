@@ -2,7 +2,11 @@ import logger from '#utils/logger.js';
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUiExpress from 'swagger-ui-express';
+import { swaggerOptions } from '../../swagger.options.js';
 import { ApiRegistry } from '#servers/apiRegistry.js';
+
 
 class ExpressServer {
     constructor() {
@@ -16,6 +20,8 @@ class ExpressServer {
         this.initializeCoreMiddleware();
         this.attachLogger();
         this.mountRoutes();
+        this.setUpSwaggerDocs(swaggerOptions);
+        this.serveSwaggerDocs();
     }
 
     initializeCoreMiddleware() {
@@ -38,6 +44,16 @@ class ExpressServer {
         ApiRegistry.forEach(route => {
             this.app.use(prefix, route);
         });
+    }
+
+    setUpSwaggerDocs(options) {
+        this.swaggerDocs = swaggerJsdoc(options);
+    }
+
+    serveSwaggerDocs(prefix="/api/v1", endpoint="/docs") {
+        if(this.swaggerDocs)
+            this.app.use(prefix+endpoint, swaggerUiExpress.serve, swaggerUiExpress.setup(this.swaggerDocs));
+        else throw new Error('cant setup swagger')
     }
 
     getApp() {

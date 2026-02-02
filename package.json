@@ -1,7 +1,7 @@
 {
   "name": "sanad-server",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "ISC",
   "type": "module",
   "description": "a server to connect the rosbridge websocket to the outer system components",
   "main": "src/index.js",
@@ -27,7 +27,6 @@
     "roslibjs"
   ],
   "author": "OmarKHDR",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/sanadChair/server/issues"
   },
@@ -39,6 +38,8 @@
     "morgan": "^1.10.1",
     "roslib": "^1.4.1",
     "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "winston": "^3.18.1"
   },
   "devDependencies": {

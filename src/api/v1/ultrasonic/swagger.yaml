@@ -1,0 +1,16 @@
+paths:
+  /api/v1/sensors/ultrasonic/:
+    get:
+      summary: Get ultrasonic sensor data
+      description: Retrieves distance readings from all connected ultrasonic sensors.
+      responses:
+        '200':
+          description: Successful sensor reading
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - { "id": "id1", "name": "front ultrasonic", "distance": 120.5 }
+                  - { "id": "id2", "name": "rear ultrasonic", "distance": 45.0 }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }

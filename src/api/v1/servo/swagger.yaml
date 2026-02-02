@@ -1,0 +1,35 @@
+paths:
+  /api/v1/servo-motor/:
+    get:
+      summary: Get all servo angles
+      responses:
+        '200':
+          description: List of all servos and their current angles
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - { "id": "id1", "name": "left servo-motor", "angle": 90 }
+                  - { "id": "id2", "name": "right servo-motor", "angle": 45 }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+    post:
+      summary: Control servo angle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                angle:
+                  type: number
+      responses:
+        '200':
+          description: Angle updated
+          content:
+            application/json:
+              example:
+                status: "success"
+                data: [{ "id": "id1", "name": "servo", "angle": 90 }]
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }

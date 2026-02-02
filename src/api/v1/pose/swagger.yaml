@@ -1,0 +1,16 @@
+paths:
+  /api/v1/navigation/pose/:
+    get:
+      summary: Get wheelchair pose
+      description: Returns the live location (x, y, z) and orientation (yaw) in the map frame.
+      responses:
+        '200':
+          description: Current pose retrieved
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  frame: "map"
+                  pose: { x: 1.25, y: 3.44, z: 0, yaw: 1.57 }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }

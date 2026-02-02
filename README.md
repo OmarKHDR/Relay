@@ -27,6 +27,11 @@ npm install
 
 ## Configuration
 Create a `.env` file in the root directory like the one in .env.example
+install and run `rosbridge` it should be running for the server to work as expected
+
+## API documentations
+Running the server will open an api docs endpoint at
+`http://host:port/api/v1/docs`
 
 
 ## Features

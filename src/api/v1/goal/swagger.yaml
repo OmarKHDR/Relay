@@ -1,0 +1,60 @@
+paths:
+  /api/v1/navigation/goal/:
+    get:
+      summary: Get current goal
+      description: Retrieves the active navigation target and its status.
+      responses:
+        '200':
+          description: Goal retrieved
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  goal: { x: 5.0, y: 2.0, yaw: 0.0 }
+                  status: "ACTIVE"
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+        '404':
+          description: No active goal found
+          content:
+            application/json:
+              example:
+                status: "fail"
+                error: { code: "NO_ACTIVE_GOAL", message: "There is no active navigation goal" }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+    post:
+      summary: Set navigation goal
+      description: Sends a new target coordinate to the wheelchair.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [x, y, yaw]
+              properties:
+                x: { type: number }
+                y: { type: number }
+                yaw: { type: number }
+      responses:
+        '200':
+          description: Goal accepted
+          content:
+            application/json:
+              example:
+                status: "success"
+                data: { accepted: true }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+
+    delete:
+      summary: Stop navigation
+      description: Cancels the currently active navigation goal.
+      responses:
+        '200':
+          description: Goal canceled successfully
+          content:
+            application/json:
+              example:
+                status: "success"
+                data: { canceled: true }
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }

@@ -1,0 +1,43 @@
+paths:
+  /api/v1/wheelchair/velocity/:
+    get:
+      summary: Get current velocity
+      description: Returns the current linear and angular velocity of the wheelchair.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                status: "success"
+                data: [{ "id": "id1", "name": "mywheelchair", "velocity": { "linear": 0.5, "angular": 0.0 } }]
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+    post:
+      summary: Update velocity
+      description: Moves the wheelchair with specific linear and angular multipliers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                linear:
+                  type: number
+                  minimum: -1
+                  maximum: 1
+                  description: Multiplier for forward/backward movement.
+                angular:
+                  type: number
+                  minimum: -1
+                  maximum: 1
+                  description: Multiplier for turning.
+      responses:
+        '200':
+          description: Velocity updated successfully
+          content:
+            application/json:
+              example:
+                status: "success"
+                data: [{ "id": "id1", "name": "mywheelchair", "velocity": { "linear": 0.5, "angular": 0.2 } }]
+                meta: { "timestamp": "2025-09-28T22:00:00Z" }
