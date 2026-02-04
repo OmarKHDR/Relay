@@ -5,11 +5,11 @@ import {
     setGoal,
 } from '#modules/goal/goalController.js';
 
-const goalApi = Router();
+const goalRouter = Router();
 
 // goal routes
 goalApi.get('/goal', getGoal);
 goalApi.post('/goal', setGoal);
 goalApi.delete('/goal', cancelGoal);
 
-export default goalApi;
+export default goalRouter;

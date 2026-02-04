@@ -3,7 +3,7 @@ import WebsocketServer from '#servers/websocketServer.js';
 import logger from '#utils/logger.js';
 import { createServer } from 'http';
 import express from 'express';
-import { log } from 'console';
+
 
 export default class Server {
     constructor() {
