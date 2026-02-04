@@ -1,4 +1,4 @@
-import MapHandler from "#src/api/v1/map/mapTopic.js";
+import MapHandler from "#modules/map/ros/mapTopic.js";
 import logger from "#utils/logger.js";
 import timestamper from "#utils/timestamp.js";
 

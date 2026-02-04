@@ -1,13 +1,10 @@
-import {Router} from 'express'
-import { getServoAngle, setServoAngle } from "#modules/servo/servoController.js";
+import { Router } from 'express';
+import { getServoAngle, setServoAngle } from '#modules/servo/servoController.js';
 
-const servoApi = Router();
+const servoRouter = Router();
 
+servoRouter.post('/servo-motor/', setServoAngle);
 
-servoApi.post('/servo-motor/', setServoAngle);
+servoRouter.get('/servo-motor/', getServoAngle);
 
-
-servoApi.get('/servo-motor/', getServoAngle);
-
-
-export default servoApi;
+export default servoRouter;

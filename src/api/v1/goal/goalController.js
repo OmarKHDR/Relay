@@ -1,4 +1,4 @@
-import NavGoal from '#src/api/v1/goal/goalTopic.js';
+import NavGoal from '#src/api/v1/goal/ros/goalTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 

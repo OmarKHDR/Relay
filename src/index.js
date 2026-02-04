@@ -1,18 +1,36 @@
 import dotenv from 'dotenv';
 import logger from '#utils/logger.js';
-import websocketServer, {httpServer} from '#servers/websocketServer.js';
+import Server from '#servers/server.js';
+import { swaggerOptions } from '../swagger.options.js';
+import { RouterRegistry } from '#servers/routerRegistry.js';
+import { CallbackRegistry } from '#servers/callbackRegistry.js';
 
 dotenv.config();
 
 const PORT = process.env.SERVER_PORT || 3000;
 const HOST = process.env.SERVER_HOSTNAME || 'localhost';
 
+const server = new Server();
 
+server.configureExpress({
+    logging: logger,
+    docs: {
+        swaggerOptions,
+        prefix: '/api/v1',
+        endpoint: '/docs',
+    },
+});
 
+server.configureWS({
+    CORS: '*',
+});
 
-// Start the server
-httpServer.listen(PORT, HOST, () => {
-    logger.info(`HTTP & WS running on http://${HOST}:${PORT}`);
-    logger.info(`WebSocket controllers registered: ${websocketServer.callbackRegistry.length}`);
-    logger.info(`Active connections: ${websocketServer.getConnectionCount()}`);
+server.registerModules({
+    RouterRegistry,
+    CallbackRegistry,
+});
+
+server.start({
+    host: HOST,
+    port: PORT,
 });

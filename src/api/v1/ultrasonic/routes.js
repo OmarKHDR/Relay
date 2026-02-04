@@ -1,11 +1,9 @@
-import {Router} from 'express'
-import { getDistance } from "#modules/ultrasonic/ultrasonicController.js";
+import { Router } from 'express';
+import { getDistance } from '#modules/ultrasonic/ultrasonicController.js';
 
-const ultrasonicApi = Router();
-
+const ultrasonicRouter = Router();
 
 // ultrasonic
-ultrasonicApi.get('/sensors/ultrasonic/', getDistance);
+ultrasonicRouter.get('/sensors/ultrasonic/', getDistance);
 
-
-export default ultrasonicApi;
+export default ultrasonicRouter;
