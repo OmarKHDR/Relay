@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { getMap } from '#modules/map/mapController.js';
 
-const mapApi = Router();
+const mapRouter = Router();
 
 //map routes
-mapApi.get('/map/', getMap);
+mapRouter.get('/map/', getMap);
 
 export default mapRouter;

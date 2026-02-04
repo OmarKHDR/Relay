@@ -3,7 +3,6 @@ import morgan from 'morgan';
 import cors from 'cors';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUiExpress from 'swagger-ui-express';
-import { log } from 'console';
 
 
 export default class ExpressServer {
@@ -39,8 +38,8 @@ export default class ExpressServer {
         return this;
     }
 
-    mountRoutes(ApiRegistry, prefix = '/api/v1') {
-        ApiRegistry.forEach(route => {
+    mountRoutes(RouterRegistry, prefix = '/api/v1') {
+        RouterRegistry.forEach(route => {
             this.app.use(prefix, route);
         });
         return this;

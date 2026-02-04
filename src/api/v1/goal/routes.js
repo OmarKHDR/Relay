@@ -8,8 +8,8 @@ import {
 const goalRouter = Router();
 
 // goal routes
-goalApi.get('/goal', getGoal);
-goalApi.post('/goal', setGoal);
-goalApi.delete('/goal', cancelGoal);
+goalRouter.get('/goal', getGoal);
+goalRouter.post('/goal', setGoal);
+goalRouter.delete('/goal', cancelGoal);
 
 export default goalRouter;

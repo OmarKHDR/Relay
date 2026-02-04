@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { getPose } from '#modules/pose/poseController.js';
 
-const poseApi = Router();
+const poseRouter = Router();
 
 //pose routes
-poseApi.get('/pose/', getPose);
+poseRouter.get('/pose/', getPose);
 
 export default poseRouter;

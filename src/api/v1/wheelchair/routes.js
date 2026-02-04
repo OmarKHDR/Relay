@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { getVelocity, updateVelocity } from '#src/api/v1/wheelchair/wheelchairController.js';
 
-const wheelchairApi = Router();
+const wheelchairRouter = Router();
 
 // wheelchair
-wheelchairApi.post('/wheelchair/velocity/', updateVelocity);
-wheelchairApi.get('/wheelchair/velocity/', getVelocity);
+wheelchairRouter.post('/wheelchair/velocity/', updateVelocity);
+wheelchairRouter.get('/wheelchair/velocity/', getVelocity);
 
 export default wheelchairRouter;
