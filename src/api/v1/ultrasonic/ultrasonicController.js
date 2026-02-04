@@ -1,4 +1,4 @@
-import UltrasonicSensorHandler from '#src/api/v1/ultrasonic/ultrasonicTopic.js';
+import UltrasonicSensorHandler from '#modules/ultrasonic/ros/ultrasonicTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 

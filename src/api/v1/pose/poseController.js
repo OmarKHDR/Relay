@@ -1,4 +1,4 @@
-import PoseHandler from '#src/api/v1/pose/poseTopic.js';
+import PoseHandler from '#modules/pose/ros/poseTopic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
