@@ -1,5 +1,5 @@
 paths:
-  /api/v1/navigation/goal/:
+  /api/v1/goal/:
     get:
       summary: Get current goal
       description: Retrieves the active navigation target and its status.

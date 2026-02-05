@@ -22,12 +22,15 @@ server.configureExpress({
 });
 
 server.configureWS({
-    CORS: '*',
+    cors: '*',
 });
 
 server.registerModules({
-    RouterRegistry,
-    CallbackRegistry,
+    routes: {
+        RouterRegistry,
+        prefix: "/api/v1",
+    },
+    callback: CallbackRegistry,
 });
 
 server.start({
