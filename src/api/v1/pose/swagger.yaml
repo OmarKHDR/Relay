@@ -1,5 +1,5 @@
 paths:
-  /api/v1/navigation/pose/:
+  /api/v1/pose/:
     get:
       summary: Get wheelchair pose
       description: Returns the live location (x, y, z) and orientation (yaw) in the map frame.

@@ -20,7 +20,7 @@ export default class ExpressServer {
     }
 
     initializeCoreMiddleware(options) {
-        this.app.use(options.CORS || cors());
+        this.app.use(options.cors || cors());
         this.app.use(options.json || express.json());
         this.app.use(options.urlencoded || express.urlencoded({ extended: true }));
         return this;

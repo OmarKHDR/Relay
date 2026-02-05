@@ -1,5 +1,5 @@
 paths:
-  /api/v1/navigation/map/:
+  /api/v1/map/:
     get:
       summary: Get navigation map
       description: Returns the static occupancy grid map. Frontend should cache this.

@@ -24,7 +24,7 @@ export default class Server {
     configureExpress(options) {
         this.expressServer
             .initializeCoreMiddleware({
-                CORS: options.CORS,
+                cors: options.cors,
                 json: options.json,
                 urlencoded: options.urlencoded,
             })
@@ -41,8 +41,8 @@ export default class Server {
     }
 
     registerModules(modules) {
-        this.expressServer.mountRoutes(modules.RouterRegistry);
-        this.websocketServer.registerCallback(modules.CallbackRegistry);
+        this.expressServer.mountRoutes(modules.routes.RouterRegistry, modules.routes.prefix);
+        this.websocketServer.registerCallback(modules.callback.CallbackRegistry);
     }
 
     start(info) {
