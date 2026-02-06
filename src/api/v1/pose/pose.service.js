@@ -17,4 +17,5 @@ class PoseService {
     }
 }
 
-export default new PoseService();
+export default new 
+PoseService();

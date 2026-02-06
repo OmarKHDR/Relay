@@ -13,4 +13,4 @@ source install/setup.bash
 
 # Launch (Gazebo Fortress + Nav2 + RViz)
 export TURTLEBOT3_MODEL=waffle
-ros2 launch turtlebot3 simulation.launch.py
+ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True
