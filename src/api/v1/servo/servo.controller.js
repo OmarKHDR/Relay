@@ -1,12 +1,10 @@
-import servoMotorHandler from '#modules/servo/ros/servoMotorTopic.js';
+import ServoHandler from './ros/servo.ros.topic.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
 export function setServoAngle(req, res) {
 	const { angle } = req.body || {};
 	logger.info(`[servoController] Received request to set servo angle: ${angle}`);
-
-	// Validate type
 	if (typeof angle !== 'number') {
 		logger.warn(`[servoController] Invalid angle type: ${typeof angle}`);
 		return res.status(400).json({
@@ -36,7 +34,7 @@ export function setServoAngle(req, res) {
 
 	// Valid input → publish
 	logger.info(`[servoController] Publishing servo angle: ${angle}`);
-	servoMotorHandler.publishAngle(angle);
+	ServoHandler.publishAngle(angle);
 
 	return res.status(200).json({
 		status: 'success',
@@ -55,7 +53,7 @@ export function setServoAngle(req, res) {
 export function getServoAngle(req, res) {
 	logger.info('[servoController] Received request for current servo angle');
 
-	const angle = servoMotorHandler.getAngle();
+	const angle = ServoHandler.getAngle();
 
 	if (typeof angle !== 'number') {
 		logger.warn('[servoController] Servo angle unavailable');

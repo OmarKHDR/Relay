@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getServoAngle, setServoAngle } from '#modules/servo/servoController.js';
+import { getServoAngle, setServoAngle } from './servo.controller.js';
 
 const servoRouter = Router();
 

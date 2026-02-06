@@ -1,43 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Wheelchair Velocity API
+  description: API for manual teleoperation and monitoring of wheelchair velocity commands.
+  version: 1.0.0
+
 paths:
-  /api/v1/wheelchair/velocity/:
+  /api/v1/wheelchair/velocity:
     get:
-      summary: Get current velocity
-      description: Returns the current linear and angular velocity of the wheelchair.
+      summary: Get current velocity inputs
+      description: Retrieves the last commanded linear and angular velocity inputs for the wheelchair.
       responses:
         '200':
-          description: Successful response
+          description: Velocity data retrieved successfully.
           content:
             application/json:
-              example:
-                status: "success"
-                data: [{ "id": "id1", "name": "mywheelchair", "velocity": { "linear": 0.5, "angular": 0.0 } }]
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/VelocityResponse'
+
     post:
-      summary: Update velocity
-      description: Moves the wheelchair with specific linear and angular multipliers.
+      summary: Update wheelchair velocity
+      description: Publishes new linear and angular velocity commands to the wheelchair.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - linear
+                - angular
               properties:
                 linear:
                   type: number
                   minimum: -1
                   maximum: 1
-                  description: Multiplier for forward/backward movement.
+                  description: Forward/backward speed (normalized -1 to 1).
+                  example: 0.5
                 angular:
                   type: number
                   minimum: -1
                   maximum: 1
-                  description: Multiplier for turning.
+                  description: Turning speed (normalized -1 to 1).
+                  example: -0.2
       responses:
         '200':
-          description: Velocity updated successfully
+          description: Velocity command processed and returned in nested format.
           content:
             application/json:
-              example:
-                status: "success"
-                data: [{ "id": "id1", "name": "mywheelchair", "velocity": { "linear": 0.5, "angular": 0.2 } }]
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/VelocityResponse'
+        '400':
+          description: Invalid Input - Values must be numbers between -1 and 1.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # This unified schema now covers both GET and POST responses
+    VelocityResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "wheelchair"
+              velocity:
+                type: object
+                properties:
+                  linear:
+                    type: number
+                    example: 0.5
+                  angular:
+                    type: number
+                    example: -0.2
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: INVALID_INPUT
+            type:
+              type: string
+              example: ValueError
+            message:
+              type: string
+              example: Linear and angular values must be numbers between -1 and 1.
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    Meta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time

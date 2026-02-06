@@ -1,4 +1,4 @@
-import NavGoal from '#src/api/v1/goal/ros/goalTopic.js';
+import GoalService from './goal.service.js';
 import logger from '#utils/logger.js';
 import timestamper from '#utils/timestamp.js';
 
@@ -15,12 +15,13 @@ export async function setGoal(req, res) {
             meta: { timestamp: timestamper() },
         });
     }
-
     try {
-        NavGoal.sendGoal({ x, y, yaw });
+        // Service handles the logic and throws if robot is busy
+        GoalService.sendGoal({ x, y, yaw });
+        
         return res.status(200).json({
             status: 'success',
-            data: { x, y, yaw },
+            data: { x, y, yaw, status: 'PENDING' },
             meta: { timestamp: timestamper() },
         });
     } catch (error) {
@@ -39,12 +40,14 @@ export async function setGoal(req, res) {
 
 export async function getGoal(req, res) {
     try {
-        const { goal, status } = NavGoal.getCurrentGoal();
+        const { status, goal } = GoalService.getGoal();
+        const { feedback } = GoalService.getFeedback();
 
-        if (!goal) {
+        if (!status.isActive) {
             return res.status(404).json({
                 status: 'fail',
                 error: {
+                    status,
                     code: 'NO_ACTIVE_GOAL',
                     message: 'There is no active navigation goal',
                 },
@@ -57,6 +60,7 @@ export async function getGoal(req, res) {
             data: {
                 goal,
                 status,
+                feedback,
             },
             meta: { timestamp: timestamper() },
         });
@@ -76,7 +80,7 @@ export async function getGoal(req, res) {
 
 export async function cancelGoal(req, res) {
     try {
-        const canceled = NavGoal.cancelGoal();
+        const canceled = await GoalService.cancelGoal();
 
         if (!canceled) {
             return res.status(409).json({
@@ -93,6 +97,7 @@ export async function cancelGoal(req, res) {
             status: 'success',
             data: {
                 canceled: true,
+                message: 'Cancellation signal sent'
             },
             meta: { timestamp: timestamper() },
         });

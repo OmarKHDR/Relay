@@ -52,5 +52,5 @@ class ServoMotor {
 	}
 }
 
-const servoMotorHandler = new ServoMotor();
-export default servoMotorHandler;
+const ServoHandler = new ServoMotor();
+export default ServoHandler;

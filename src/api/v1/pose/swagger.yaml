@@ -1,16 +1,94 @@
+openapi: 3.0.3
+info:
+  title: Robot Pose API
+  description: API for retrieving the current localized position and orientation of the robot.
+  version: 1.0.0
+
 paths:
-  /api/v1/pose/:
+  /api/v1/pose:
     get:
-      summary: Get wheelchair pose
-      description: Returns the live location (x, y, z) and orientation (yaw) in the map frame.
+      summary: Get current robot pose
+      description: Returns the robot's current x, y coordinates and yaw orientation relative to a specific coordinate frame (usually "map").
       responses:
         '200':
-          description: Current pose retrieved
+          description: Pose data retrieved successfully.
           content:
             application/json:
-              example:
-                status: "success"
-                data:
-                  frame: "map"
-                  pose: { x: 1.25, y: 3.44, z: 0, yaw: 1.57 }
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/PoseResponse'
+        '503':
+          description: Service Unavailable - Pose data not yet received from the ROS transform tree or topic.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    PoseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            frame:
+              type: string
+              description: The coordinate frame ID (e.g., "map" or "odom").
+              example: "map"
+            x:
+              type: number
+              format: float
+              example: 1.254
+            y:
+              type: number
+              format: float
+              example: -0.542
+            yaw:
+              type: number
+              description: Orientation in radians.
+              example: 1.5708
+            stamp:
+              $ref: '#/components/schemas/RosTime'
+              description: The original ROS message timestamp.
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: NO_DATA
+            type:
+              type: string
+              example: UnavailableError
+            message:
+              type: string
+              example: robot pose not available yet
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    RosTime:
+      type: object
+      properties:
+        sec:
+          type: integer
+        nanosec:
+          type: integer
+
+    Meta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-02-06T02:35:00Z"

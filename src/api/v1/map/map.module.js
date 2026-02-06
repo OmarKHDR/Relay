@@ -1,4 +1,4 @@
-import mapRouter from '#modules/map/routes.js';
+import mapRouter from './routes.js';
 
 export const MapModule = {
     routers: [mapRouter],

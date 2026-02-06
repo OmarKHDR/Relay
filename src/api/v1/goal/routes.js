@@ -3,7 +3,7 @@ import {
     getGoal,
     cancelGoal,
     setGoal,
-} from '#modules/goal/goalController.js';
+} from './goal.controller.js';
 
 const goalRouter = Router();
 

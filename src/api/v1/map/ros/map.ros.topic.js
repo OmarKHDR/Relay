@@ -6,7 +6,7 @@ class Map {
 	constructor() {
 		if (Map.instance) return Map.instance;
 
-		logger.info('[Map] Initializing Map topic handler');
+		logger.info('[MAP ROS TOPIC] Initializing Map topic handler');
 		this.ros = rosHandler.getRos();
 		this.topic = this.createTopic();
 		this.map;

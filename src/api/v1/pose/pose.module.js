@@ -1,4 +1,4 @@
-import poseRouter from '#modules/pose/routes.js';
+import poseRouter from './routes.js';
 
 export const PoseModule = {
     routers: [poseRouter],

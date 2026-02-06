@@ -1,4 +1,4 @@
-import servoRouter from '#modules/servo/routes.js';
+import servoRouter from './routes.js';
 
 export const ServoModule = {
     routers: [servoRouter],

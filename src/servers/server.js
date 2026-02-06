@@ -42,7 +42,7 @@ export default class Server {
 
     registerModules(modules) {
         this.expressServer.mountRoutes(modules.routes.RouterRegistry, modules.routes.prefix);
-        this.websocketServer.registerCallback(modules.callback.CallbackRegistry);
+        this.websocketServer.registerCallback(modules.callback);
     }
 
     start(info) {

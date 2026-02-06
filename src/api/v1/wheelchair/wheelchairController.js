@@ -27,7 +27,16 @@ export function updateVelocity(req, res) {
     wheelChairHandler.setVelocity(linear, angular);
     return res.status(200).json({
         status: 'success',
-        data: [{ id: 1, name: 'wheelchair', linear, angular }],
+        data: [
+            {
+                id: 1,
+                name: 'wheelchair',
+                velocity: {
+                    linear,
+                    angular,
+                },
+            },
+        ],
         meta: { timestamp: timestamper() },
     });
 }

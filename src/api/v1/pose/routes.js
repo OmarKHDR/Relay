@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPose } from '#modules/pose/poseController.js';
+import { getPose } from './pose.controller.js';
 
 const poseRouter = Router();
 

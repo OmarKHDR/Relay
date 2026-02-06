@@ -1,60 +1,224 @@
+openapi: 3.0.3
+info:
+  title: Robot Navigation API
+  description: API for managing Nav2 goals via ROS 2 Action Servers.
+  version: 1.0.0
+
 paths:
-  /api/v1/goal/:
+  /api/v1/goal:
     get:
-      summary: Get current goal
-      description: Retrieves the active navigation target and its status.
+      summary: Get current navigation goal and status
+      description: Retrieves the active goal coordinates, the current ROS status, and real-time feedback.
       responses:
         '200':
-          description: Goal retrieved
+          description: Active goal found.
           content:
             application/json:
-              example:
-                status: "success"
-                data:
-                  goal: { x: 5.0, y: 2.0, yaw: 0.0 }
-                  status: "ACTIVE"
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
         '404':
-          description: No active goal found
+          description: No active goal.
           content:
             application/json:
-              example:
-                status: "fail"
-                error: { code: "NO_ACTIVE_GOAL", message: "There is no active navigation goal" }
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     post:
-      summary: Set navigation goal
-      description: Sends a new target coordinate to the wheelchair.
+      summary: Set a new navigation goal
+      description: Sends a new target pose (x, y, yaw) to the robot.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [x, y, yaw]
+              required:
+                - x
+                - y
+                - yaw
               properties:
-                x: { type: number }
-                y: { type: number }
-                yaw: { type: number }
+                x:
+                  type: number
+                  example: 1.5
+                y:
+                  type: number
+                  example: -2.0
+                yaw:
+                  type: number
+                  description: Rotation in radians.
+                  example: 0.785
       responses:
         '200':
-          description: Goal accepted
+          description: Goal sent successfully.
           content:
             application/json:
-              example:
-                status: "success"
-                data: { accepted: true }
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/GoalAcceptedResponse'
+        '400':
+          description: Invalid input (types are not numbers).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: ROS Action Server failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
-      summary: Stop navigation
-      description: Cancels the currently active navigation goal.
+      summary: Cancel the active goal
+      description: Issues a cancellation command to the Nav2 action server.
       responses:
         '200':
-          description: Goal canceled successfully
+          description: Cancellation signal sent.
           content:
             application/json:
-              example:
-                status: "success"
-                data: { canceled: true }
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      canceled:
+                        type: boolean
+                      message:
+                        type: string
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        '409':
+          description: Conflict - No active goal to cancel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # --- Response Wrappers ---
+    GoalResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            goal:
+              $ref: '#/components/schemas/GoalPose'
+            status:
+              $ref: '#/components/schemas/RosStatus'
+            feedback:
+              $ref: '#/components/schemas/NavFeedback'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    GoalAcceptedResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          allOf:
+            - $ref: '#/components/schemas/GoalPose'
+            - type: object
+              properties:
+                status:
+                  type: string
+                  example: PENDING
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            detail:
+              type: string
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    # --- Data Objects ---
+    GoalPose:
+      type: object
+      properties:
+        x:
+          type: number
+        y:
+          type: number
+        yaw:
+          type: number
+
+    RosStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          enum: [0, 1, 2, 3, 4, 5, 6]
+        status:
+          type: string
+          enum: [UNKNOWN, ACCEPTED, EXECUTING, CANCELING, SUCCEEDED, CANCELED, ABORTED]
+        isActive:
+          type: boolean
+
+    NavFeedback:
+      type: object
+      properties:
+        position:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        q:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+            w: { type: number }
+        navigation_time:
+          $ref: '#/components/schemas/RosTime'
+        estimated_time_remaining:
+          $ref: '#/components/schemas/RosTime'
+        number_of_recoveries:
+          type: integer
+        distance_remaining:
+          type: number
+
+    RosTime:
+      type: object
+      properties:
+        sec:
+          type: integer
+        nanosec:
+          type: integer
+
+    Meta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-05-20T10:00:00Z"

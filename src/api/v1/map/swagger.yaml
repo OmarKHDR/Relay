@@ -1,20 +1,103 @@
+openapi: 3.0.3
+info:
+  title: Robot Map API
+  description: API for retrieving occupancy grid map data from ROS.
+  version: 1.0.0
+
 paths:
-  /api/v1/map/:
+  /api/v1/map:
     get:
-      summary: Get navigation map
-      description: Returns the static occupancy grid map. Frontend should cache this.
+      summary: Get occupancy grid map
+      description: Returns the metadata and the 1D array of cell data representing the environment.
       responses:
         '200':
-          description: Map data retrieved successfully
+          description: Map data retrieved successfully.
           content:
             application/json:
-              example:
-                status: "success"
-                data:
-                  frame: "map"
-                  resolution: 0.05
-                  width: 1000
-                  height: 1000
-                  origin: { x: -10.0, y: -10.0, yaw: 0 }
-                  map: [0, 0, -1, 100, 0] # Example row-major array
-                meta: { "timestamp": "2025-09-28T22:00:00Z" }
+              schema:
+                $ref: '#/components/schemas/MapResponse'
+        '503':
+          description: Service Unavailable - Map data not yet received from ROS.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    MapResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            frame:
+              type: string
+              example: "map"
+            resolution:
+              type: number
+              format: float
+              description: The map resolution in meters/pixel.
+              example: 0.05
+            width:
+              type: integer
+              description: Number of cells in the x direction.
+              example: 1024
+            height:
+              type: integer
+              description: Number of cells in the y direction.
+              example: 1024
+            origin:
+              type: object
+              properties:
+                x:
+                  type: number
+                  example: -10.0
+                y:
+                  type: number
+                  example: -10.0
+                yaw:
+                  type: number
+                  description: Origin orientation in radians.
+                  example: 0.0
+            map:
+              type: array
+              items:
+                type: integer
+                minimum: -1
+                maximum: 100
+              description: "1D array of occupancy values (0-100, -1 for unknown)."
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: NO_DATA
+            type:
+              type: string
+              example: UnavailableError
+            message:
+              type: string
+              example: map occupancy grid data not available at the moment.
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    Meta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-02-06T02:32:46Z"

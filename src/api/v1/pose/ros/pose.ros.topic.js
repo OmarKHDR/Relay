@@ -31,7 +31,7 @@ class Pose extends EventEmitter {
                 x: p.position.x,
                 y: p.position.y,
                 yaw,
-								stamp: msg.header.stamp?.secs * 1000 || Date.now(),
+				stamp: msg.header.stamp?.secs * 1000 || Date.now(),
             };
 
             this.pose = newPose;

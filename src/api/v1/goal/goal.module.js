@@ -1,6 +1,7 @@
-import goalRouter from "#modules/goal/routes.js"
+import goalRouter from './routes.js';
+import './ros/goal.ros.topic.js';
 
 export const GoalModule = {
-	routers: [goalRouter],
-	WSCallback: []
-}
+    routers: [goalRouter],
+    WSCallback: [],
+};
