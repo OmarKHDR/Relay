@@ -58,3 +58,4 @@ combined.log
 error.log
 
 navigation2_ignition_gazebo_turtlebot3/
+nav2_ws/
