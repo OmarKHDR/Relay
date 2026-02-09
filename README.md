@@ -105,25 +105,59 @@ npm start
 - Rate limiting to prevent abuse
 - Input validation for all endpoints
 
-## File Structure
-- **/src/lib/** - Core business logic, ROS bridge connection
-- **/src/api/v1/** - All modules, each module is separated in a feature based instead of past layered arch
-- **/src/middlewares/** - Express.js middleware functions for auth, validation, etc.
-- **/src/utils/** - Helper functions and utility modules used across the application like loggers and other things
-- **/src/websocketServer.js** - a file where we create a websocket initializer that uses singleton pattern and the initialization injects the callback and events on connection
-- **/src/expressServer.js** - a file where we create the express server and use the router to be separated from the websocket and the entrypoint file so we can import it in the unit test separately
-- **/src/wsInit.js** - initializing the websocket by adding the controllers that will register events later on connection, and it integrates the websocket controllers and the websocket class wrapper and the http wrapper of express server
-- **/src/index.js** - the entry point where the server can listen on the port
-- **/test/** - all websockets and api unit tests
+## File Structure (High Level)
+- **/src/lib/** – Core infrastructure (e.g. ROS bridge connection, shared helpers)
+- **/src/api/v1/** – Versioned REST API, organized by **feature modules** (pose, map, goal, wheelchair, ultrasonic, servo, etc.).  
+  Each module typically contains:
+  - a controller (`*.controller.js`) for HTTP handlers
+  - an optional service (`*.service.js`) for business logic
+  - an optional `ros/` subfolder for ROS topics/actions/services
+  - a module definition (`*.module.js`) that plugs the feature into the app
+  - a `routes.js` file that defines Express routes
+  - a `swagger.yaml` file that documents the API
+- **/src/middlewares/** – Express middleware (auth, validation, etc.)
+- **/src/utils/** – Shared utilities (logger, timestamps, etc.)
+- **/src/servers/** – HTTP and WebSocket server bootstrap and wiring  
+  - Express server, WebSocket server, router registry, callback registry, and a single composed server
+- **/src/index.js** – Main entry point that starts the server
+- **/test/** – (reserved) WebSocket and API unit tests
+
+## Testing the Nav2 / ROS Setup
+To quickly spin up and test the Nav2 + ROS2 integration used by the `goal` module, you can use the helper script in the project root:
+
+```bash
+# From the repository root
+./nav2_setup.sh
+```
+
+This script is meant as a convenience for local development and testing; check the script body and comments for details and assumptions about your ROS2 environment.
 
 
 ## Contributing
-1. Fork the repository
-2. Create your feature branch
-3. Follow guide in DEVELOPER_GUIDE directory
-4. Commit your changes
-5. Push to the branch
-6. Create a Pull Request
+
+There is a dedicated contribution guide under the `DEVELOPER_GUIDE/` directory that explains conventions, workflows, and examples in more detail. In short:
+
+1. Fork the repository and create a feature branch.
+2. Read the docs in `DEVELOPER_GUIDE/` (especially module structure and coding standards).
+3. Implement and test your changes.
+4. Commit with clear messages, push your branch, and open a Pull Request.
+
+### Adding a New Module (High Level)
+To add a new feature module under `src/api/v1`:
+
+1. **Create a folder**: `src/api/v1/<feature>/`
+2. **Add core files**:
+   - `routes.js` – defines Express routes for the feature
+   - `<feature>.controller.js` – request handlers
+   - (optional) `<feature>.service.js` – shared business logic
+   - (optional) `ros/` – ROS topics/actions/services for this feature
+   - `swagger.yaml` – API documentation for the module
+3. **Register the module**:
+   - Create `<feature>.module.js` that exports `{ routers: [router], WSCallback: [...] }`
+   - Add the module to `RouterRegistry` / `CallbackRegistry` so its routes and WebSocket callbacks are picked up.
+4. **Document and test**:
+   - Update or add Swagger definitions in `swagger.yaml`
+   - Add or update tests under `test/` when relevant
 
 
 ## Notes
