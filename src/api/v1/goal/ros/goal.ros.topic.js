@@ -19,7 +19,7 @@ class GoalRosTopic {
         });
         this.goalListener = new ROSLIB.Topic({
             ros: this.ros,
-            name: '/navigate_to_pose/_action/send_goal',
+            name: '/navigate_to_pose/_action/goal',
             messageType: 'nav2_msgs/action/NavigateToPose_Goal',
         });
         this.feedbackListener = new ROSLIB.Topic({
