@@ -51,16 +51,17 @@ class GoalService {
 
     // some helper methods
 
-    _createPoseMessage(x, y, yaw, frame) {
+    _createPoseMessage(x, y, yaw, frame = 'map') {
+        // Default to 'map'
         const q = this._yawToQuaternion(yaw);
-        const now = Date.now();
+
         return {
             pose: {
                 header: {
                     frame_id: frame,
                     stamp: {
-                        secs: Math.floor(now / 1000),
-                        nsecs: (now % 1000) * 1e6,
+                        secs: 0,
+                        nsecs: 0,
                     },
                 },
                 pose: {
