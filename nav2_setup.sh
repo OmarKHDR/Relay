@@ -32,6 +32,7 @@ REPO_NAME="navigation2_ignition_gazebo_turtlebot3"
 # Tracking what needs to be done
 NEEDS_ROS_INSTALL=false
 NEEDS_REPO_FIX=false
+NEEDS_GAZEBO_FIX=false
 NEEDS_NAV2_INSTALL=false
 NEEDS_ROSDEP_INIT=false
 NEEDS_WORKSPACE_SETUP=false
@@ -111,7 +112,20 @@ check_ros_installation() {
 
 # Check if a package is installed
 check_package_installed() {
-    dpkg -l "$1" &> /dev/null
+    dpkg -l "$1" 2>/dev/null | grep -q "^ii"
+}
+
+# Check if classic Gazebo is installed (any version)
+check_classic_gazebo_installed() {
+    # Explicit check for classic gazebo package names
+    if dpkg -l "gazebo" 2>/dev/null | grep -q "^ii" || \
+       dpkg -l "gazebo11" 2>/dev/null | grep -q "^ii" || \
+       dpkg -l "gazebo9" 2>/dev/null | grep -q "^ii" || \
+       dpkg -l "libgazebo11" 2>/dev/null | grep -q "^ii" || \
+       dpkg -l "libgazebo11-dev" 2>/dev/null | grep -q "^ii"; then
+        return 0
+    fi
+    return 1
 }
 
 # Check if Nav2 packages are installed
@@ -192,8 +206,20 @@ analyze_system() {
     fi
     
     # Check for classic Gazebo (conflicts with Ignition)
-    if check_package_installed "gazebo" || check_package_installed "gazebo11"; then
-        log_warning "Classic Gazebo detected (will be removed for Ignition Gazebo)"
+    if check_classic_gazebo_installed; then
+        log_warning "Classic Gazebo detected - conflicts with Ignition Gazebo (will be removed and reinstalled)"
+        NEEDS_GAZEBO_FIX=true
+        NEEDS_NAV2_INSTALL=true  # Force reinstall Nav2 packages after Gazebo fix
+    else
+        # Check if Ignition Gazebo is properly installed
+        if ! dpkg -l "gz-garden" 2>/dev/null | grep -q "^ii" && \
+           ! dpkg -l "ros-humble-ros-gz" 2>/dev/null | grep -q "^ii"; then
+            log_info "Ignition Gazebo not found - will be installed"
+            NEEDS_GAZEBO_FIX=true
+            NEEDS_NAV2_INSTALL=true
+        else
+            log_success "Ignition Gazebo is properly installed"
+        fi
     fi
     
     # Check Nav2 packages
@@ -231,6 +257,7 @@ analyze_system() {
     # Determine if anything needs to be done
     if [ "$NEEDS_ROS_INSTALL" = false ] && \
        [ "$NEEDS_REPO_FIX" = false ] && \
+       [ "$NEEDS_GAZEBO_FIX" = false ] && \
        [ "$NEEDS_NAV2_INSTALL" = false ] && \
        [ "$NEEDS_ROSDEP_INIT" = false ] && \
        [ "$NEEDS_WORKSPACE_SETUP" = false ] && \
@@ -319,21 +346,31 @@ install_ros2() {
     log_success "ROS 2 Humble installed"
 }
 
-# Remove classic Gazebo if installed (conflicts with Ignition Gazebo)
-remove_classic_gazebo() {
-    log_info "Checking for classic Gazebo installation..."
-    
-    if check_package_installed "gazebo" || check_package_installed "gazebo11"; then
-        log_warning "Classic Gazebo detected - removing it to install Ignition Gazebo..."
-        
-        # Remove classic Gazebo packages
-        sudo apt remove -y gazebo* libgazebo* || log_warning "Some Gazebo packages may not have been removed"
-        sudo apt autoremove -y
-        
+# Remove classic Gazebo and install Ignition Gazebo
+fix_gazebo() {
+    log_info "Fixing Gazebo installation..."
+
+    # Remove classic Gazebo if present
+    if check_classic_gazebo_installed; then
+        log_info "Removing classic Gazebo packages..."
+        sudo apt remove -y gazebo gazebo11 gazebo9 \
+            libgazebo11 libgazebo11-dev \
+            libgazebo-dev libgazebo11* 2>/dev/null || true
+        sudo apt autoremove -y || true
         log_success "Classic Gazebo removed"
-    else
-        log_success "No classic Gazebo found"
     fi
+
+    # Verify classic Gazebo is gone
+    if check_classic_gazebo_installed; then
+        error_exit "Failed to remove classic Gazebo - please manually run: sudo apt remove gazebo* libgazebo*"
+    fi
+
+    # Install Ignition Gazebo via ros-gz
+    log_info "Installing Ignition Gazebo (ros-humble-ros-gz)..."
+    sudo apt update || error_exit "Failed to update package lists"
+    sudo apt install -y ros-humble-ros-gz || error_exit "Failed to install Ignition Gazebo"
+
+    log_success "Ignition Gazebo installed correctly"
 }
 
 # Install Nav2 and related packages
@@ -346,7 +383,6 @@ install_nav2_packages() {
     # Check if we can install without updating
     if ! sudo apt install -y --dry-run \
         ros-humble-nav2-bringup \
-        ros-humble-ros-gz \
         ros-humble-turtlebot3 \
         python3-colcon-common-extensions &>/dev/null; then
         need_update=true
@@ -358,15 +394,11 @@ install_nav2_packages() {
     fi
     
     # Remove classic Gazebo first to avoid conflicts
-    remove_classic_gazebo
+    # (Handled separately by fix_gazebo() before this function is called)
     
     # Install Nav2 packages
     log_info "Installing Nav2..."
     sudo apt install -y ros-humble-nav2-bringup || error_exit "Failed to install Nav2"
-    
-    # Install Ignition Gazebo integration BEFORE TurtleBot3
-    log_info "Installing Ignition Gazebo integration (ros-gz)..."
-    sudo apt install -y ros-humble-ros-gz || error_exit "Failed to install ros-gz (Ignition Gazebo)"
     
     # Install only TurtleBot3 core packages (NOT the ones that depend on classic Gazebo)
     log_info "Installing TurtleBot3 core packages (excluding classic Gazebo dependencies)..."
@@ -523,16 +555,16 @@ print_usage_instructions() {
         echo ""
         echo "Then simply run:"
         echo ""
-        echo -e "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True${NC}"
+        echo "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True${NC}"
     else
         echo "To use the workspace, run these commands in your terminal:"
         echo ""
-        echo -e "  ${CYAN}source ${WORKSPACE_DIR}/install/setup.bash${NC}"
-        echo -e "  ${CYAN}export TURTLEBOT3_MODEL=waffle${NC}"
+        echo "  ${CYAN}source ${WORKSPACE_DIR}/install/setup.bash${NC}"
+        echo "  ${CYAN}export TURTLEBOT3_MODEL=waffle${NC}"
         echo ""
         echo "Then launch the simulation:"
         echo ""
-        echo -e "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True${NC}"
+        echo "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True${NC}"
         echo ""
         echo "To make this permanent, add these lines to ~/.bashrc:"
         echo "  source /opt/ros/humble/setup.bash"
@@ -572,8 +604,8 @@ main() {
     
     [ "$NEEDS_REPO_FIX" = true ] && echo "  • Fix ROS repository conflicts"
     [ "$NEEDS_ROS_INSTALL" = true ] && echo "  • Install ROS 2 Humble"
+    [ "$NEEDS_GAZEBO_FIX" = true ] && echo "  • Remove classic Gazebo and install Ignition Gazebo"
     if [ "$NEEDS_NAV2_INSTALL" = true ]; then
-        echo "  • Remove classic Gazebo (if present) and install Ignition Gazebo"
         echo "  • Install Nav2 packages"
     fi
     [ "$NEEDS_ROSDEP_INIT" = true ] && echo "  • Initialize rosdep"
@@ -608,6 +640,11 @@ main() {
         if [ "$NEEDS_REPO_FIX" = true ]; then
             setup_ros_repository
         fi
+    fi
+    
+    # Fix Gazebo if needed (before Nav2 install)
+    if [ "$NEEDS_GAZEBO_FIX" = true ]; then
+        fix_gazebo
     fi
     
     # Install Nav2 if needed
