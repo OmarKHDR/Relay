@@ -15,7 +15,7 @@ export async function getMap(req, res) {
             meta: { timestamp: timestamper() }
         });
     } catch (err) {
-        logger.warn('[MapController] map data undefined or unavailable');
+        logger.error('[MapController] map data undefined or unavailable ', err);
         return res.status(503).json({
             status: 'fail',
             error: {

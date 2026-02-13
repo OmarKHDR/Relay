@@ -564,7 +564,7 @@ print_usage_instructions() {
         echo ""
         echo "Then launch the simulation:"
         echo ""
-        echo -e "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py headless:=True use_rviz:=True${NC}"
+        echo -e "  ${CYAN}ros2 launch turtlebot3 simulation.launch.py gz_args:='-s' use_sim_time:=true"
         echo ""
         echo "To make this permanent, add these lines to ~/.bashrc:"
         echo "  source /opt/ros/humble/setup.bash"

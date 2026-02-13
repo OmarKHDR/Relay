@@ -11,7 +11,7 @@ class MapService {
         if (!Array.isArray(map) || !info) {
             throw new Error('map data is not available');
         }
-        const yaw = quaternionToYaw(info.origin.orientation);
+        const yaw = this._quaternionToYaw(info.origin.orientation);
         return {
                 frame: 'map',
                 resolution: info.resolution,

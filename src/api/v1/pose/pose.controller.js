@@ -12,7 +12,7 @@ export async function getPose(req, res) {
         meta: { timestamp: timestamper() },
     });
     } catch (err) {
-        logger.error('[POSE CONTROLLER] Received request for robot pose');
+        logger.error('[POSE CONTROLLER] Error processing the pose', err);
         return res.status(503).json({
             status: 'fail',
             error: {

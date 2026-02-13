@@ -21,7 +21,7 @@ class Map {
 			name: '/map',
 			messageType: 'nav_msgs/OccupancyGrid',
 		});
-		logger.info('[Map] Topic created: /map (nav_msgs/OccupancyGrid)');
+		logger.info('[Map ROS TOPIC] Topic created: /map (nav_msgs/OccupancyGrid)');
 		return topic;
 	}
 
@@ -30,24 +30,24 @@ class Map {
             this.topic.subscribe(msg => {
                 this.map = msg.data;
                 this.info = msg.info;
-                logger.info(`[Map] recieved map data ${this.info}`)
+                logger.info(`[Map ROS TOPIC] recieved map data ${this.info}`)
             })
         }
         if (this.ros.isConnected) {
             startSubscription();
         } else {
-            logger.warn('[Map] ROS not connected — waiting for connection to subscribe');
+            logger.warn('[Map  ROS TOPIC] ROS not connected — waiting for connection to subscribe');
             this.ros.on('connection', () => {
-                logger.info('[Map] ROS connected — subscribing now');
+                logger.info('[Map ROS TOPIC] ROS connected — subscribing now');
                 startSubscription();
             });
         }
-
 	}
 
     getMap() {
         if (this.info !== undefined) {
             logger.info(`[Map] Returning map information value: ${this.info}`);
+            console.log(this.map, this.info)
             return {map: this.map, info: this.info};
         } else {
             logger.warn('[map] Distance value is undefined');
