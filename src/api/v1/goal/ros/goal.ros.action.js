@@ -1,11 +1,13 @@
 import rosHandler from '#lib/ros/connection.js';
 import ROSLIB from 'roslib';
-
+import logger from '#utils/logger.js';
 class GoalRosAction {
     constructor() {
-        this.ros = rosHandler.getRos();
-        this.createAction();
-        // Action Client strictly for sending new goals
+        rosHandler.on('ros_reconnected', (newRosInstance) => {
+            logger.info('[GOAL ROS ACTION] ROS reconnected, refreshing subscription...');
+            this.ros = newRosInstance;
+            this.createAction();
+        });
     }
 
     createAction() {

@@ -7,40 +7,44 @@ class Pose extends EventEmitter {
     constructor() {
         if (Pose.instance) return Pose.instance;
         super();
-        this.ros = rosHandler.getRos();
-        this.pose = null;
-        
-        this.tfClient = this.createTopic();
-        this.subscribe();
+        this.initParams();
+        rosHandler.on('ros_reconnected', (newRosInstance) => {
+            logger.info('[POSE ROS TOPIC] ROS reconnected, creating new subscription...');
+            this.ros = newRosInstance;
+            this.poseTopic = this.createTopic();
+            this.subscribe();
+        });
         Pose.instance = this;
     }
 
-    createTopic() {
-        const client = new ROSLIB.TFClient({
-            ros: this.ros,
-            fixedFrame: 'map',
-            angularThres: 0.01,
-            transThres: 0.01,
-            rate: 10.0,
-        });
-        return client;
+    initParams(){
+        this.pose = null;
     }
+    createTopic() {
+        return new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/amcl_pose',
+            messageType: 'geometry_msgs/msg/PoseWithCovarianceStamped'
+        });
+    }
+    
     subscribe() {
         const startSubscription = () => {
-            console.log(this.pose)
-            this.tfClient.subscribe('base_link', (tf) => {
+            console.log(this.pose);
+            this.poseTopic.subscribe((msg) => {
                 const newPose = {
-                    frame: 'map',
-                    x: tf.translation.x,
-                    y: tf.translation.y,
-                    q: tf.rotation,
+                    frame: msg.header.frame_id || 'map',
+                    x: msg.pose.pose.position.x,
+                    y: msg.pose.pose.position.y,
+                    q: msg.pose.pose.orientation,
                     stamp: Date.now(),
                 };
-                logger.info('[POSE ROS TOPIC] Pose = ', newPose);
+                logger.info(`[POSE ROS TOPIC] Pose =  ${newPose}`);
                 this.pose = newPose;
                 this.emit('pose', newPose);
             });
         }
+
         if (this.ros.isConnected) {
             logger.info('[POSE ROS TOPIC] ROS connected — subscribing now');
             startSubscription();
@@ -58,11 +62,10 @@ class Pose extends EventEmitter {
     }
     
     unsubscribe() {
-        if (this.tfClient) {
-            this.tfClient.unsubscribe('base_link');
+        if (this.poseTopic) {
+            this.poseTopic.unsubscribe();
         }
     }
 }
-
 
 export default new Pose();

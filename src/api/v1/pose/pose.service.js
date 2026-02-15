@@ -11,7 +11,7 @@ class PoseService {
             throw new Error('Pose info are not available');
         }
         const yaw = this._quaternionToYaw(pose.q)
-        data = {
+        const data = {
             frame: pose.frame,
             x: pose.x,
             y: pose.y,

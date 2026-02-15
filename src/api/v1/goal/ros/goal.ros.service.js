@@ -4,9 +4,12 @@ import logger from '#utils/logger.js';
 
 class GoalRosService {
     constructor() {
-        this.ros = rosHandler.getRos();
-        this.createService();
-        this.createCancelRequest()
+        rosHandler.on('ros_reconnected', (newRosInstance) => {
+            logger.info('[GOAL ROS SERIVCE] ROS reconnected, refreshing subscription...');
+            this.ros = newRosInstance;
+            this.createService();
+            this.createCancelRequest()
+        });
     }
 
     createService() {

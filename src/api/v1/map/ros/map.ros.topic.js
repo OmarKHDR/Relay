@@ -7,13 +7,20 @@ class Map {
 		if (Map.instance) return Map.instance;
 
 		logger.info('[MAP ROS TOPIC] Initializing Map topic handler');
-		this.ros = rosHandler.getRos();
-		this.topic = this.createTopic();
-		this.map;
-        this.info;
-        this.subscribe();
+        this.initParams();
+        rosHandler.on('ros_reconnected', (newRosInstance) => {
+            logger.info('[MAP ROS TOPIC] ROS reconnected, refreshing subscription...');
+            this.ros = newRosInstance;
+            this.topic = this.createTopic();
+            this.subscribe();
+        });
 		Map.instance = this;
 	}
+
+    initParams() {
+        this.map = undefined;
+        this.info = undefined;
+    }
 
 	createTopic() {
 		const topic = new ROSLIB.Topic({
@@ -46,11 +53,11 @@ class Map {
 
     getMap() {
         if (this.info !== undefined) {
-            logger.info(`[Map] Returning map information value: ${this.info}`);
+            logger.info(`[Map ROS TOPIC] Returning map information value: ${this.info}`);
             console.log(this.map, this.info)
             return {map: this.map, info: this.info};
         } else {
-            logger.warn('[map] Distance value is undefined');
+            logger.warn('[Map ROS TOPIC] Distance value is undefined');
             return {undefined, undefined};
         }
     }

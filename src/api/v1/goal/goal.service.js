@@ -37,6 +37,7 @@ class GoalService {
 
     getGoal() {
         const goal = goalRosTopic.goalCoordinates;
+        console.log(goal)
         goal.yaw = this._quaternionToYaw(goal.q);
         return {
             status: goalRosTopic.status,
