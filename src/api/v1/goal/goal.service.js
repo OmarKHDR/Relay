@@ -20,7 +20,7 @@ class GoalService {
 
         const poseMessage = this._createPoseMessage(x, y, yaw, frame);
         // goalRosAction.executeGoal(poseMessage);
-        goalRosTopic.sendGoal(poseMessage);
+        goalRosTopic.publishGoal(poseMessage);
     }
 
     async cancelGoal() {
@@ -58,18 +58,16 @@ class GoalService {
         const q = this._yawToQuaternion(yaw);
 
         return {
+            header: {
+                frame_id: frame,
+                stamp: {
+                    secs: 0,
+                    nsecs: 0,
+                },
+            },
             pose: {
-                header: {
-                    frame_id: frame,
-                    stamp: {
-                        secs: 0,
-                        nsecs: 0,
-                    },
-                },
-                pose: {
-                    position: { x, y, z: 0 },
-                    orientation: q,
-                },
+                position: { x, y, z: 0 },
+                orientation: q,
             },
         };
     }

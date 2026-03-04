@@ -9,28 +9,33 @@ class GoalRosTopic {
         rosHandler.on('ros_reconnected', newRosInstance => {
             logger.info('[GOAL ROS TOPIC] ROS reconnected, refreshing subscription...');
             this.ros = newRosInstance;
-            this.createTopic();
+            this.createTopicsAndClient();
             this.subscribe();
         });
     }
 
     initParams() {
         this.status = ROS_GOAL_STATUSES[0];
+        this.feedback = null;
+        this.goalCoordinates = null;
     }
 
-    createTopic() {
+    createTopicsAndClient() {
+        // Status topic - keeps your existing approach
         this.statusTopic = new ROSLIB.Topic({
             ros: this.ros,
             name: '/navigate_to_pose/_action/status',
             messageType: 'action_msgs/msg/GoalStatusArray',
         });
         
+        // Feedback listener - your existing approach is correct!
         this.feedbackListener = new ROSLIB.Topic({
             ros: this.ros,
             name: '/navigate_to_pose/_action/feedback',
             messageType: 'nav2_msgs/action/NavigateToPose_FeedbackMessage',
         });
 
+        // Goal pose listener
         this.goalListener = new ROSLIB.Topic({
             ros: this.ros,
             name: '/goal_pose', 
@@ -50,8 +55,10 @@ class GoalRosTopic {
             });
             
             this.goalListener.subscribe(msg => {
+                logger.info(`[GOAL ROS TOPIC] Caught external goal coordinates: ${JSON.stringify(msg)}`);
                 const poseData = msg.pose;
                 if (!poseData) return;
+                
                 this.goalCoordinates = {
                     x: poseData.position.x,
                     y: poseData.position.y,
@@ -59,10 +66,8 @@ class GoalRosTopic {
                     frame: msg.header?.frame_id || 'map',
                 };
             });
-            logger.info(`[GOAL ROS TOPIC] Caught external goal coordinates:${this.goalCoordinates}`);
 
             this.feedbackListener.subscribe(msg => {
-                // In ROS 2, the actual feedback data is nested inside a 'feedback' object
                 if (msg.feedback) {
                     this.feedback = this.formatFeedback(msg.feedback);
                 } else {
@@ -82,14 +87,41 @@ class GoalRosTopic {
         }
     }
 
+    // Method to send a goal using the action client
+    sendGoal(x, y, orientation, frame = 'map') {
+        const goal = new ROSLIB.Goal({
+            actionClient: this.actionClient,
+            goalMessage: {
+                pose: {
+                    header: {
+                        frame_id: frame,
+                        stamp: { sec: 0, nanosec: 0 } // ROS will populate this
+                    },
+                    pose: {
+                        position: { x, y, z: 0.0 },
+                        orientation: orientation || { x: 0, y: 0, z: 0, w: 1 }
+                    }
+                }
+            }
+        });
+
+        goal.on('result', result => {
+            logger.info(`[GOAL ROS TOPIC] Goal result: ${JSON.stringify(result)}`);
+        });
+
+        goal.send();
+        return goal;
+    }
+
     handleStatusCode(msg) {
         const statusList = msg.status_list || [];
         const lastGoal = statusList[statusList.length - 1];
-
+        
         if (!lastGoal) {
             this.status = ROS_GOAL_STATUSES[0];
             return;
         }
+        
         this.status = ROS_GOAL_STATUSES[lastGoal.status] || ROS_GOAL_STATUSES[0];
     }
 
