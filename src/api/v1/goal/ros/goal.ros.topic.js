@@ -36,6 +36,11 @@ class GoalRosTopic {
             name: '/goal_pose', 
             messageType: 'geometry_msgs/msg/PoseStamped',
         });
+        this.goalTopic = new ROSLIB.Topic({
+			ros: this.ros,
+			name: "/goal_pose",
+			messageType: "geometry_msgs/PoseStamped",
+		});
     }
 
     subscribe() {
@@ -97,6 +102,10 @@ class GoalRosTopic {
             number_of_recoveries: feedback.number_of_recoveries,
             distance_remaining: feedback.distance_remaining,
         };
+    }
+
+    publishGoal(message) {
+        this.goalTopic.publish(message);
     }
 }
 

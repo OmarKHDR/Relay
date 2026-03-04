@@ -19,7 +19,8 @@ class GoalService {
         logger.info(`[GoalService] Processing goal: x=${x}, y=${y}`);
 
         const poseMessage = this._createPoseMessage(x, y, yaw, frame);
-        goalRosAction.executeGoal(poseMessage);
+        // goalRosAction.executeGoal(poseMessage);
+        goalRosTopic.sendGoal(poseMessage);
     }
 
     async cancelGoal() {
@@ -37,7 +38,7 @@ class GoalService {
 
     getGoal() {
         const goal = goalRosTopic.goalCoordinates;
-        console.log(goal)
+        console.log(goal);
         goal.yaw = this._quaternionToYaw(goal.q);
         return {
             status: goalRosTopic.status,
