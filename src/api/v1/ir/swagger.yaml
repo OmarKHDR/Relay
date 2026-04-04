@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: IR Device Registry API
+  description: API for managing registered IR devices and translating commands to signal data. WebSocket frames (IR_TRY, IR_TRY_CONFIRM, IR_TRANSLATE) are documented in the description.
+  version: 1.0.0
+
+paths:
+  /api/v1/ir/devices:
+    get:
+      summary: Get full device registry
+      description: Returns the full registry with all registered IR devices.
+      responses:
+        '200':
+          description: Registry with devices array.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+
+  /api/v1/ir/devices/{id}:
+    get:
+      summary: Get device by ID
+      description: Returns a single registered device.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found.
+    delete:
+      summary: Delete a device
+      description: Removes the device from the registry.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: deleted
+        '404':
+          description: Device not found.
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        room:
+          type: string
+        icon:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        source:
+          type: object
+          properties:
+            category:
+              type: string
+            brand:
+              type: string
+            model:
+              type: string
+        commands:
+          type: object
+        registered_at:
+          type: string
+          format: date-time

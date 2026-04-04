@@ -69,7 +69,7 @@ registerPubCallback(callbackRegistry, socket) {
 registerSubCallback(callbackRegistry, socket) {
     callbackRegistry.forEach(registry => {
         registry.subscribe.forEach(sub => {
-            sub.callback(socket, sub.eventName);
+            sub.callback(socket, sub.eventName, this.io);
         });
     });
 }

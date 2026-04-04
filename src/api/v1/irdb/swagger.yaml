@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: IRDB API
+  description: API for browsing the Flipper IRDB catalog (categories, brands, models).
+  version: 1.0.0
+
+paths:
+  /api/v1/irdb/categories:
+    get:
+      summary: List IRDB categories
+      description: Returns top-level folder names in the IRDB.
+      responses:
+        '200':
+          description: List of category names.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["TVs", "Air_Conditioners", "Fans"]
+
+  /api/v1/irdb/{category}/brands:
+    get:
+      summary: List brands in a category
+      description: Returns subfolder names for the given category.
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of brand names.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Category not found.
+
+  /api/v1/irdb/{category}/{brand}/models:
+    get:
+      summary: List models for a category and brand
+      description: Returns .ir filenames without extension.
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: brand
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of model names.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Category or brand not found.
