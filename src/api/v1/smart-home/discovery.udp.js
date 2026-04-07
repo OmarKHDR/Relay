@@ -1,4 +1,5 @@
 import dgram from 'dgram';
+import e from 'express';
 import process from 'process';
 
 const BROADCAST_IP = process.env.BROADCAST_IP || '255.255.255.255';
@@ -70,5 +71,8 @@ class LocalDiscovery {
     }
 }
 
-export default LocalDiscovery;
 export const localDiscovery = new LocalDiscovery();
+
+const devices = localDiscovery.getDevices()
+
+console.log(devices)
