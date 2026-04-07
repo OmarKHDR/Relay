@@ -1,7 +1,7 @@
 {
   "name": "sanad-server",
   "version": "1.0.0",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "description": "a server to connect the rosbridge websocket to the outer system components",
   "main": "src/index.js",
@@ -14,6 +14,7 @@
   },
   "scripts": {
     "dev": "nodemon src/index.js",
+    "mock:smart-home": "nodemon src/mocks/smart-home/index.js",
     "test": "NODE_ENV=testing NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest --detectOpenHandles --runInBand --testTimeout=5000",
     "setup:irdb": "git clone --depth=1 https://github.com/UberGuidoZ/Flipper-IRDB ./irdb",
     "update:irdb": "git -C ./irdb pull"
