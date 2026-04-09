@@ -3,18 +3,21 @@ import process from 'process';
 import fs from 'fs';
 import logger from '../../utils/logger.js';
 
+const PORT = process.env.BROADCAST_SMART_DEVICE_PORT || 9988;
 class MockDeviceDiscovery {
     constructor() {
         this.client = dgram.createSocket({ type: 'udp4', reuseAddr: true });
         this.__config();
-        this.__attachResponse();
         this.__startListening();
-        this.client.bind(Number(process.env.BROADCAST_PORT || 41234));
+        this.__attachResponseCallback();
+        this.client.bind(PORT, () => {
+            this.client.setBroadcast(true);
+        });
     }
 
     __config() {
-        const specs = fs.readFileSync("./src/mocks/smart-home/smart-dev.json");
-        this.specs = JSON.parse(specs)
+        const specs = fs.readFileSync('./src/mocks/smart-home/smart-dev.json');
+        this.specs = JSON.parse(specs);
     }
 
     __startListening() {
@@ -24,8 +27,11 @@ class MockDeviceDiscovery {
         });
     }
 
-    __attachResponse() {
+    __attachResponseCallback() {
         this.client.on('message', (msg, rinfo) => {
+            logger.info(
+                `[MOCK-DEVICE-DISCOVERY] recieved a message from: ${rinfo.address}:${rinfo.port} ${msg.toString()}`
+            );
             let payload;
             try {
                 payload = JSON.parse(msg.toString());
@@ -43,7 +49,7 @@ class MockDeviceDiscovery {
                 })
             );
 
-            this.client.send(response, 0, response.length, rinfo.port, rinfo.address);
+            this.client.send(response, 0, response.length, payload.port, rinfo.address);
         });
     }
 }

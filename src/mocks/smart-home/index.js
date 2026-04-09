@@ -4,9 +4,9 @@ import process from 'process';
 import bodyParser from 'body-parser';
 import logger from '../../utils/logger.js';
 import { mockDeviceDiscovery } from './discovery.js';
-import { mockSmartHomeRouter } from './mock-router.js';
+import mockSmartHomeRouter from './routes.js';
 
-const PORT = process.env.MOCK_SMART_HOME_SERVER_PORT || 5555;
+const PORT = process.env.MOCK_SMART_DEVICE_SERVER_PORT || 5555;
 const app = express();
 
 logger.info(`loaded device data: ${JSON.stringify(mockDeviceDiscovery.specs)}`);
