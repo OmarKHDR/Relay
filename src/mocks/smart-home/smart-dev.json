@@ -1,9 +1,9 @@
 {
-	"deviceId": "relay-a3f9c1",
-	"deviceName": "Kitchen-lights",
-	"position": "Kitchen",
-	"version": "1.0.0",
-	"ip": "192.168.1.42",
-	"controlType": "binary",
-	"state": 1
+    "deviceId": "light-a3f9c1",
+    "deviceName": "room-lights",
+    "position": "room 1",
+    "version": "2.0.0",
+    "port": "5552",
+    "controlType": "binary",
+    "state": "1"
 }

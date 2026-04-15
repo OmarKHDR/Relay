@@ -31,7 +31,6 @@ class LocalDiscovery {
                 return;
             }
             logger.info(`[SERVER-DISCOVERY] recieved a response`);
-            console.log(payload);
             if (payload?.type !== 'discovery:response') return;
             logger.info(`[SERVER-DISCOVERY] PASSING type check`);
             if (payload?.requestId !== this.activeRequestId) return;
@@ -40,7 +39,7 @@ class LocalDiscovery {
             logger.info(`[SERVER-DISCOVERY] PASSING deviceId check`);
             this.devices[payload.deviceId] = {
                 ...payload,
-                ip: payload.ip || rinfo.address,
+                ip: rinfo.address || payload.ip,
             };
         });
     }
@@ -76,4 +75,3 @@ class LocalDiscovery {
 }
 
 export const localDiscovery = new LocalDiscovery();
-const devices = localDiscovery.getDevices().then(res => console.log(res));

@@ -1,4 +1,5 @@
 import { smartHomeService } from './smart-home.service.js';
+import { smartHomeDevicesDB } from './smart-home.db.js';
 
 class SmartHomeController {
     async discover(req, res, next) {
@@ -15,37 +16,52 @@ class SmartHomeController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                reason: 'bad request'
-            })
+                reason: 'bad request',
+            });
         }
-    };
+    }
 
-    async getStatus(req, res, next) {
+    async getAllDevices(req, res, next) {
         try {
-            const { deviceId } = req.query;
-            if (!deviceId) return res.status(400).json({ success: false, reason: 'deviceId is required' });
-            const response = await smartHomeService.getDevStatus(deviceId);
-            let data = null;
-            if (response && response.ok) {
-                data = await response.json().catch(() => null);
-            }
+            const devices = await smartHomeDevicesDB.getDb();
             res.status(200).json({
                 success: true,
-                data,
+                data: devices,
             });
         } catch (error) {
             res.status(500).json({
                 success: false,
-                reason: 'bad request'
-            })
+                reason: 'failed to retrieve devices',
+            });
+        }
+    }
+
+    async getStatus(req, res, next) {
+        try {
+            const { deviceId } = req.query;
+            if (!deviceId)
+                return res.status(400).json({ success: false, reason: 'deviceId is required' });
+            const response = await smartHomeService.getDevStatus(deviceId);
+            return res.status(200).json({
+                success: true,
+                data: response,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                reason: 'bad request',
+            });
         }
     }
 
     async getInfo(req, res, next) {
         try {
             const { deviceId } = req.query;
-            if (!deviceId) return res.status(400).json({ success: false, reason: 'deviceId is required' });
+            if (!deviceId)
+                return res.status(400).json({ success: false, reason: 'deviceId is required' });
             const device = smartHomeService.devices[deviceId];
+            if (!device)
+                return res.status(404).json({ success: false, reason: 'device not found' });
             res.status(200).json({
                 success: true,
                 data: device,
@@ -53,15 +69,18 @@ class SmartHomeController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                reason: 'bad request'
-            })
+                reason: 'bad request',
+            });
         }
     }
 
     async control(req, res, next) {
         try {
             const { deviceId, state } = req.body;
-            if (!deviceId || state === undefined) return res.status(400).json({ success: false, reason: 'deviceId and state are required' });
+            if (!deviceId || state === undefined)
+                return res
+                    .status(400)
+                    .json({ success: false, reason: 'deviceId and state are required' });
             const response = await smartHomeService.controlDev(deviceId, state);
             let data = null;
             if (response && response.ok) {
@@ -74,8 +93,83 @@ class SmartHomeController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                reason: 'bad request'
-            })
+                reason: 'bad request',
+            });
+        }
+    }
+
+    async registerDevice(req, res, next) {
+        try {
+            const  device = req.body;
+            console.log(req.body)
+            if (!device || !device.deviceId)
+                return res
+                    .status(400)
+                    .json({ success: false, reason: 'device object with id is required' });
+
+            await smartHomeDevicesDB.addDevice(device);
+            smartHomeService.devices[device.deviceId] = device;
+
+            res.status(201).json({
+                success: true,
+                reason: 'device registered successfully',
+                data: device,
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                reason: error.message || 'failed to register device',
+            });
+        }
+    }
+
+    async updateDeviceLocation(req, res, next) {
+        try {
+            const { deviceId, location } = req.body;
+            if (!deviceId || !location)
+                return res
+                    .status(400)
+                    .json({ success: false, reason: 'deviceId and location are required' });
+
+            await smartHomeDevicesDB.updateDevice({
+                deviceId,
+                position: location,
+                lastUpdated: new Date().toISOString(),
+            });
+
+            smartHomeService.devices[deviceId].position = location;
+
+            res.status(200).json({
+                success: true,
+                reason: 'device location updated successfully',
+                data: smartHomeService.devices[deviceId],
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                reason: error.message || 'failed to update device location',
+            });
+        }
+    }
+
+    async deleteDevice(req, res, next) {
+        try {
+            const { deviceId } = req.params;
+            if (!deviceId)
+                return res.status(400).json({ success: false, reason: 'deviceId is required' });
+
+            await smartHomeDevicesDB.deleteDevice(deviceId);
+            delete smartHomeService.devices[deviceId];
+
+            res.status(200).json({
+                success: true,
+                reason: 'device deleted successfully',
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                reason: error.message || 'failed to delete device',
+            });
         }
     }
 }

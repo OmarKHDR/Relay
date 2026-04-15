@@ -1,0 +1,22 @@
+{
+  "relay-a3f9c1": {
+    "type": "discovery:response",
+    "requestId": 0,
+    "deviceId": "relay-a3f9c1",
+    "deviceName": "Kitchen-lights",
+    "position": "living room",
+    "version": "1.0.0",
+    "port": "5551",
+    "controlType": "binary",
+    "state": "0",
+    "ip": "192.168.56.1",
+    "lastUpdated": "2026-04-09T21:25:37.098Z"
+  },
+  "lights-1342rt24": {
+    "deviceId": "lights-1342rt24",
+    "deviceName": "room-lights",
+    "position": "room",
+    "version": "1.0.0",
+    "port": "5551"
+  }
+}

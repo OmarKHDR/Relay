@@ -3,11 +3,10 @@ import process from 'process';
 
 let specs;
 
-
 function BootstrapController() {
     const specsString = fs.readFileSync('./src/mocks/smart-home/smart-dev.json');
     specs = JSON.parse(specsString);
-    specs['serverPort'] = process.env.MOCK_SMART_DEVICE_SERVER_PORT || 5551;
+    specs['port'] = process.env.MOCK_SMART_DEVICE_SERVER_PORT || 5551;
 }
 
 BootstrapController();
@@ -29,9 +28,13 @@ export function getStatus(req, res) {
 export function controlDev(req, res) {
     if (req.body && req.body.deviceId === specs.deviceId && req.body.state !== undefined) {
         specs.state = req.body.state;
-        fs.writeFileSync('./src/mocks/smart-home/smart-dev.json', JSON.stringify(specs), {
-            flag: 'w',
-        });
+        fs.writeFileSync(
+            './src/mocks/smart-home/smart-dev.json',
+            JSON.stringify(specs, undefined, 2),
+            {
+                flag: 'w',
+            }
+        );
         return res.status(201).send({ status: 'success' });
     }
     return res.status(401).send({ status: 'failed', reason: 'not matched device Id' });
