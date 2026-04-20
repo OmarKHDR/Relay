@@ -17,6 +17,6 @@ export const smartHomeApi = {
     getDeviceStatus: (deviceId) => apiClient.get(`/status?deviceId=${deviceId}`).then(res => res.data.data),
     controlDevice: (deviceId, state) => apiClient.post('/control', { deviceId, state }).then(res => res.data),
     registerDevice: (device) => apiClient.post('/register', device).then(res => res.data),
-    updateLocation: (deviceId, location) => apiClient.put('/location', { deviceId, location }).then(res => res.data),
+    updateDeviceInfo: (deviceId, location, name) => apiClient.post('/info', { deviceId, location, name }).then(res => res.data),
     deleteDevice: (deviceId) => apiClient.delete(`/devices/${deviceId}`).then(res => res.data)
 };

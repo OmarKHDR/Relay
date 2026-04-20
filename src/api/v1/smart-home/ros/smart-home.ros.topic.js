@@ -32,8 +32,8 @@ class SmartHomeRosTopic {
         try {
             const msg = new ROSLIB.Message({
                 action: action, // 'ADD', 'UPDATE', 'DELETE', 'DISCONNECT'
-                deviceId: deviceId,
-                deviceData: deviceData ? JSON.stringify(deviceData) : '',
+                device_id: deviceId,
+                device_data: deviceData ? JSON.stringify(deviceData) : '',
             });
             this.deviceTopic.publish(msg);
         } catch (error) {

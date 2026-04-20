@@ -1,0 +1,9 @@
+{
+  "light-a3f9c1": {
+    "deviceId": "light-a3f9c1",
+    "controlType": "binary",
+    "state": 1,
+    "port": "19803",
+    "ip": "192.168.56.1"
+  }
+}

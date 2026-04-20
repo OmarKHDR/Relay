@@ -1,55 +1,36 @@
 import React, { useState } from 'react';
 import { smartHomeApi } from '../api/client';
-import { Power, Settings2, MapPin, Search } from 'lucide-react';
+import { Radar } from 'lucide-react';
 
 const NetworkDiscovery = ({ onDiscoveryComplete }) => {
   const [isDiscovering, setIsDiscovering] = useState(false);
-  const [error, setError] = useState(null);
 
-  const handleDiscovery = async () => {
+  const startDiscovery = async () => {
     setIsDiscovering(true);
-    setError(null);
     try {
-      const devices = await smartHomeApi.discover(4000);
-      if (onDiscoveryComplete) {
-        onDiscoveryComplete(devices);
-      }
+      const devs = await smartHomeApi.discover(4000);
+      if (onDiscoveryComplete) onDiscoveryComplete(devs);
     } catch (err) {
-      setError('Failed to discover devices on network');
-      console.error(err);
+      console.error('Discovery failed', err);
     } finally {
       setIsDiscovering(false);
     }
   };
 
   return (
-    <div className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center text-center space-y-4">
-      <div className="relative">
-        <div className={`p-4 rounded-full ${isDiscovering ? 'bg-primary-500/20 animate-pulse' : 'bg-dark-700'}`}>
-          <Search className={`w-8 h-8 ${isDiscovering ? 'text-primary-400' : 'text-slate-400'}`} />
-        </div>
-        {isDiscovering && (
-          <div className="absolute inset-0 rounded-full border-2 border-primary-500/50 animate-ping" />
-        )}
-      </div>
-      
-      <div>
-        <h3 className="text-xl font-semibold text-white">Network Sweeper</h3>
-        <p className="text-sm text-slate-400 max-w-sm mt-2">
-          Broadcast a UDP signal to find unregistered smart home nodes.
-        </p>
-      </div>
-
-      <button
-        onClick={handleDiscovery}
+    <div className="brutal-card p-6 border-b-8 border-b-accent-orange">
+      <h3 className="text-2xl mb-2">RADAR SWEEP</h3>
+      <p className="text-ink-light text-xs font-mono mb-6 leading-tight max-w-xs">
+        BROADCAST UDP PACKETS ACROSS THE NETWORK TOPOLOGY TO RESOLVE UNMAPPED NODES.
+      </p>
+      <button 
+        onClick={startDiscovery}
         disabled={isDiscovering}
-        className={`glass-button px-6 py-2.5 rounded-xl font-medium flex items-center space-x-2
-          ${isDiscovering ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-500/20 text-primary-400'}`}
+        className={`brutal-button w-full py-4 text-lg ${isDiscovering ? 'bg-paper text-ink-light cursor-not-allowed shadow-none translate-x-[4px] translate-y-[4px]' : 'bg-accent-orange text-white hover:bg-orange-600'}`}
       >
-        <span>{isDiscovering ? 'Scanning Subnet...' : 'Run Discovery'}</span>
+        <Radar className={isDiscovering ? "animate-spin" : ""} />
+        {isDiscovering ? 'SWEEPING...' : 'INITIATE T-4000MS'}
       </button>
-
-      {error && <p className="text-accent-red text-sm mt-2">{error}</p>}
     </div>
   );
 };
