@@ -1,7 +1,6 @@
 import { localDiscovery } from './discovery.udp.js';
-import { smartHomeRosService } from './ros/smart-home.ros.service.js';
+import { smartHomeDevicesDB } from './smart-home.db.js';
 import { smartHomeRosTopic } from './ros/smart-home.ros.topic.js';
-import SmartHomeDevicesDB, { smartHomeDevicesDB } from './smart-home.db.js';
 import logger from '#utils/logger.js';
 
 const SMART_DEV_PORT = process.env.SMART_DEV_PORT;
@@ -14,7 +13,7 @@ class SmartHomeService {
 
     async initializeDB() {
         try {
-            this.devices = await SmartHomeDevicesDB.getDb();
+            this.devices = await smartHomeDevicesDB.getDb();
             // taking a copy of initialization for future comp to identify changes
             this.previousDevices = { ...this.devices };
         } catch (err) {

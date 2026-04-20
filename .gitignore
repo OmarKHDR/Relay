@@ -61,3 +61,7 @@ navigation2_ignition_gazebo_turtlebot3/
 nav2_ws/
 
 irdb/
+
+install/
+log/
+build/

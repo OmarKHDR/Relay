@@ -51,8 +51,6 @@
     "nodemon": "^3.1.10"
   },
   "nodemonConfig": {
-    "watch": ["src/mocks/smart-home"],
-    "ext": "js,mjs,cjs,json",
     "ignore": ["src/mocks/smart-home/smart-dev.json", "src/api/v1/smart-home/smart-home.db.json"]
   }
 }
