@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { smartHomeApi } from '../api/client';
-import { Radar } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 const NetworkDiscovery = ({ onDiscoveryComplete }) => {
   const [isDiscovering, setIsDiscovering] = useState(false);
@@ -18,18 +18,21 @@ const NetworkDiscovery = ({ onDiscoveryComplete }) => {
   };
 
   return (
-    <div className="brutal-card p-6 border-b-8 border-b-accent-orange">
-      <h3 className="text-2xl mb-2">RADAR SWEEP</h3>
-      <p className="text-ink-light text-xs font-mono mb-6 leading-tight max-w-xs">
-        BROADCAST UDP PACKETS ACROSS THE NETWORK TOPOLOGY TO RESOLVE UNMAPPED NODES.
+    <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm p-6 text-center">
+      <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Search className="w-6 h-6" />
+      </div>
+      <h3 className="text-lg font-bold text-slate-800 mb-2">Network Discovery</h3>
+      <p className="text-sm text-slate-500 mb-6 max-w-[200px] mx-auto leading-relaxed">
+        Scan the local network for new unmapped smart devices.
       </p>
       <button 
         onClick={startDiscovery}
         disabled={isDiscovering}
-        className={`brutal-button w-full py-4 text-lg ${isDiscovering ? 'bg-paper text-ink-light cursor-not-allowed shadow-none translate-x-[4px] translate-y-[4px]' : 'bg-accent-orange text-white hover:bg-orange-600'}`}
+        className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors hover:bg-indigo-700 disabled:opacity-70 flex justify-center items-center gap-2"
       >
-        <Radar className={isDiscovering ? "animate-spin" : ""} />
-        {isDiscovering ? 'SWEEPING...' : 'INITIATE T-4000MS'}
+        {isDiscovering && <Loader2 className="w-4 h-4 animate-spin" />}
+        {isDiscovering ? 'Scanning Subnet...' : 'Find Devices'}
       </button>
     </div>
   );

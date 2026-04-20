@@ -1,6 +1,6 @@
 import React from 'react';
 import { smartHomeApi } from '../api/client';
-import { Trash, Power } from 'lucide-react';
+import { Trash2, MapPin, Activity } from 'lucide-react';
 
 const DeviceCard = ({ device, onStateChange, onDelete }) => {
     const { deviceId, name, position, controlType, state } = device;
@@ -26,32 +26,36 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
     }
 
     return (
-        <div className="brutal-card flex flex-col relative overflow-hidden group">
-            {/* Status Strip */}
-            <div className={`absolute top-0 left-0 w-3 h-full border-r-2 border-ink ${isActive ? 'bg-accent-green' : 'bg-ink'}`}></div>
+        <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                    <div className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-300'}`}></div>
+                    <span className="text-xs font-semibold text-slate-400 tracking-wider">ID: {deviceId}</span>
+                </div>
+                <button onClick={handleDelete} className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50">
+                    <Trash2 className="w-4 h-4"/>
+                </button>
+            </div>
             
-            <div className="pl-6 p-5 pb-4 flex-1">
-                <div className="flex justify-between items-start mb-4">
-                    <span className="bg-ink text-surface px-2 shadow-[2px_2px_0px_#ccc] font-bold text-xs py-0.5 tracking-widest">{deviceId}</span>
-                    <button onClick={handleDelete} className="text-ink hover:text-accent-orange hover:scale-110 active:scale-95 transition-transform"><Trash className="w-5 h-5"/></button>
-                </div>
-                
-                <h2 className="text-3xl leading-none mb-1 break-words">{name}</h2>
-                <div className="text-xs font-mono text-ink-light bg-paper border border-ink w-max px-2 py-0.5 mt-2">
-                    ZONE: {position || 'UNASSIGNED'}
-                </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-1 line-clamp-1">{name}</h3>
+            
+            <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-6">
+                <MapPin className="w-3.5 h-3.5" />
+                <span className="truncate">{position || 'Unassigned Zone'}</span>
+                <span className="mx-1 text-slate-300">•</span>
+                <Activity className="w-3.5 h-3.5" />
+                <span className="capitalize">{controlType}</span>
             </div>
 
-            <div className="border-t-2 border-ink bg-paper p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-ink-light">
-                    TYPE: [{controlType.toUpperCase()}]
-                </div>
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{isActive ? 'Operating' : 'Standby'}</span>
+                
+                {/* iOS Style Toggle Switch */}
                 <button 
                   onClick={toggleState}
-                  className={`brutal-button px-4 py-2 border-2 border-ink ${isActive ? 'bg-accent-green text-ink shadow-[2px_2px_0_#111]' : 'bg-surface text-ink shadow-[2px_2px_0_#111]'}`}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${isActive ? 'bg-indigo-600' : 'bg-slate-200'}`}
                 >
-                    <Power className={`w-4 h-4 ${isActive ? '!text-ink' : ''}`} />
-                    {isActive ? 'HALT' : 'ENGAGE'}
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${isActive ? 'translate-x-6' : 'translate-x-[4px]'}`} />
                 </button>
             </div>
         </div>

@@ -3,6 +3,7 @@ import { smartHomeApi } from './api/client';
 import NetworkDiscovery from './components/NetworkDiscovery';
 import DeviceCard from './components/DeviceCard';
 import TestPanel from './components/TestPanel';
+import { Home, LayoutGrid } from 'lucide-react';
 
 function App() {
   const [devices, setDevices] = useState({});
@@ -49,61 +50,60 @@ function App() {
   const activeCount = deviceList.filter(d => Number(d.state) === 1).length;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 overflow-hidden font-mono text-ink">
-        <div className="max-w-[1600px] mx-auto">
-            {/* Massive Header */}
-            <header className="border-b-[4px] border-ink pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h1 className="text-6xl md:text-8xl tracking-tighter leading-none">SANAD</h1>
-                    <h2 className="text-2xl md:text-4xl text-ink-light tracking-wide mt-[-5px]">DOMOTICS_SYS</h2>
+    <div className="min-h-screen pb-16">
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div className="flex items-center gap-3 text-indigo-600">
+                    <Home className="w-5 h-5 stroke-[2.5]" />
+                    <span className="text-lg font-bold text-slate-800 tracking-tight">Sanad Home</span>
                 </div>
-                
-                <div className="flex gap-4 items-end">
-                    <div className="bg-ink text-surface p-4 border-[3px] border-ink min-w-32">
-                        <div className="text-xs text-ink-light mb-1 border-b border-ink-light/30 pb-1">TOTAL_NODES</div>
-                        <div className="text-4xl font-display">{deviceList.length}</div>
-                    </div>
-                    <div className="bg-accent-green text-ink p-4 border-[3px] border-ink min-w-32 shadow-[4px_4px_0_#111]">
-                        <div className="text-xs font-bold mb-1 border-b border-ink/30 pb-1">ACTIVE_LINK</div>
-                        <div className="text-4xl font-display">{activeCount}</div>
-                    </div>
-                </div>
-            </header>
-
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                
-                {/* Left Side: Ops */}
-                <div className="xl:col-span-4 flex flex-col gap-8">
-                    <NetworkDiscovery onDiscoveryComplete={handleDiscoveryComplete} />
-                    <TestPanel onActionSuccess={fetchDevices} />
-                </div>
-
-                {/* Right Side: Grid */}
-                <div className="xl:col-span-8">
-                    {isLoading ? (
-                        <div className="h-64 flex items-center justify-center border-4 border-dashed border-ink bg-surface">
-                            <div className="font-display text-2xl animate-pulse">FETCHING_TOPOLOGY...</div>
-                        </div>
-                    ) : deviceList.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {deviceList.map((dev) => (
-                                <DeviceCard 
-                                    key={dev.deviceId} 
-                                    device={dev} 
-                                    onStateChange={handleStateChange}
-                                    onDelete={handleDelete}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="h-64 flex flex-col items-center justify-center border-[4px] border-dashed border-ink bg-surface p-8 text-center text-ink-light">
-                            <h3 className="font-display text-4xl text-ink mb-2">VOID</h3>
-                            <p className="max-w-md font-mono text-sm leading-relaxed">No topological nodes found in the current subspace. Initiate radar sweep to broadcast UDP packets across the 1004 port.</p>
-                        </div>
-                    )}
+                <div className="flex space-x-6 text-sm font-semibold">
+                    <div className="text-slate-500">Nodes: <span className="text-slate-800">{deviceList.length}</span></div>
+                    <div className="text-slate-500">Active: <span className="text-green-600">{activeCount}</span></div>
                 </div>
             </div>
-        </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-6 lg:px-8 mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-3 space-y-6">
+                <NetworkDiscovery onDiscoveryComplete={handleDiscoveryComplete} />
+            </div>
+
+            <div className="lg:col-span-9 flex flex-col gap-8">
+                <div className="flex items-center gap-2 text-slate-800 mb-2">
+                    <LayoutGrid className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-xl font-bold tracking-tight">Device Dashboard</h2>
+                </div>
+
+                {isLoading ? (
+                    <div className="h-48 flex items-center justify-center bg-transparent rounded-3xl border-2 border-slate-200 border-dashed">
+                        <div className="text-slate-400 font-medium animate-pulse flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-slate-300 border-t-indigo-500 rounded-full animate-spin"/> Loading systems...
+                        </div>
+                    </div>
+                ) : deviceList.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                        {deviceList.map((dev) => (
+                            <DeviceCard 
+                                key={dev.deviceId} 
+                                device={dev} 
+                                onStateChange={handleStateChange}
+                                onDelete={handleDelete}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="h-48 flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 text-center shadow-sm">
+                        <p className="text-slate-800 font-bold text-lg mb-1">No devices mapped</p>
+                        <p className="text-sm text-slate-500">Run a network discovery scan to find connected instances.</p>
+                    </div>
+                )}
+
+                <div className="pt-8">
+                    <TestPanel onActionSuccess={fetchDevices} />
+                </div>
+            </div>
+        </main>
     </div>
   );
 }

@@ -1,50 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Syne", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-  
-  --color-paper: #e3e1d9;
-  --color-surface: #f4f3ec;
-  --color-ink: #111111;
-  --color-ink-light: #555555;
-  --color-accent-blue: #0044ff;
-  --color-accent-orange: #ff4500;
-  --color-accent-green: #00cc44;
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
 @layer base {
   body {
-    background-color: var(--color-paper);
-    color: var(--color-ink);
-    font-family: var(--font-mono); /* Default to mono for that utilitarian technical feel */
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    background-image: radial-gradient(var(--color-ink-light) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-color: var(--color-paper);
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-  }
-}
-
-@layer components {
-  .brutal-card {
-    @apply bg-surface border-2 border-ink shadow-[4px_4px_0px_#111111] transition-transform duration-200;
-  }
-  .brutal-card:hover {
-    @apply translate-x-[2px] translate-y-[2px] shadow-[2px_2px_0px_#111111];
-  }
-  
-  .brutal-button {
-    @apply font-display font-bold uppercase tracking-wider bg-surface border-2 border-ink shadow-[4px_4px_0px_#111111] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-75 flex items-center justify-center gap-2;
-  }
-
-  .brutal-input {
-    @apply font-mono bg-paper border-2 border-ink px-3 py-2 outline-none focus:bg-white transition-colors placeholder:text-ink-light;
   }
 }
