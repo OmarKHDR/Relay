@@ -12,7 +12,7 @@ SmartHomeRoutes.get('/status', smartHomeController.getStatus);
 // Device Control & Management
 SmartHomeRoutes.post('/control', smartHomeController.control);
 SmartHomeRoutes.post('/register', smartHomeController.registerDevice);
-SmartHomeRoutes.put('/location', smartHomeController.updateDeviceLocation);
+SmartHomeRoutes.post('/info', smartHomeController.updateDeviceInfo);
 
 SmartHomeRoutes.delete('/devices/:deviceId', smartHomeController.deleteDevice);
 

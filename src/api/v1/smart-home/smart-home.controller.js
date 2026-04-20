@@ -125,10 +125,10 @@ class SmartHomeController {
         }
     }
 
-    async updateDeviceLocation(req, res, next) {
+    async updateDeviceInfo(req, res, next) {
         try {
-            const { deviceId, location } = req.body;
-            if (!deviceId || !location)
+            const { deviceId, location, name} = req.body;
+            if (!deviceId || !(location || name))
                 return res
                     .status(400)
                     .json({ success: false, reason: 'deviceId and location are required' });
@@ -136,6 +136,7 @@ class SmartHomeController {
             const success = await smartHomeService.updateDevice({
                 deviceId,
                 position: location,
+                name,
                 lastUpdated: new Date().toISOString(),
             });
 
