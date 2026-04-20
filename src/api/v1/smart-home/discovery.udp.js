@@ -37,6 +37,8 @@ class LocalDiscovery {
             logger.info(`[SERVER-DISCOVERY] PASSING Request id check`);
             if (!payload?.deviceId) return;
             logger.info(`[SERVER-DISCOVERY] PASSING deviceId check`);
+            delete payload.type;
+            delete payload.requestId;
             this.devices[payload.deviceId] = {
                 ...payload,
                 ip: rinfo.address || payload.ip,

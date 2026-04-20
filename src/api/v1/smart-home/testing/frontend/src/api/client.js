@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // By default assuming the backend is running on the same host but port 3000
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1/smart-home';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5051/api/v1/smart-home';
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,

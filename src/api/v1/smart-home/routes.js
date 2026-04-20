@@ -16,4 +16,6 @@ SmartHomeRoutes.put('/location', smartHomeController.updateDeviceLocation);
 
 SmartHomeRoutes.delete('/devices/:deviceId', smartHomeController.deleteDevice);
 
+SmartHomeRoutes.use('/smart-home', SmartHomeRoutes)
+
 export { SmartHomeRoutes };

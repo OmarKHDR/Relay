@@ -6,7 +6,7 @@ let specs;
 function BootstrapController() {
     const specsString = fs.readFileSync('./src/mocks/smart-home/smart-dev.json');
     specs = JSON.parse(specsString);
-    specs['port'] = process.env.MOCK_SMART_DEVICE_SERVER_PORT || 5551;
+    specs['port'] = process.env.SMART_DEV_PORT || 19803;
 }
 
 BootstrapController();
@@ -18,8 +18,6 @@ export function getInfo(req, res) {
 export function getStatus(req, res) {
     return res.status(200).json({
         deviceId: specs.deviceId,
-        deviceName: specs.deviceName,
-        devicePosition: specs.devicePosition,
         state: specs.state,
         controlType: specs.controlType,
     });
