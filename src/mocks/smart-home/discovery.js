@@ -4,7 +4,6 @@ import fs from 'fs';
 import logger from '../../utils/logger.js';
 
 const PORT = process.env.BROADCAST_SMART_DEVICE_PORT || 9988;
-const deviceIndex = process.argv[2] ?? 0;
 class MockDeviceDiscovery {
     constructor() {
         this.client = dgram.createSocket({ type: 'udp4', reuseAddr: true });
@@ -18,8 +17,7 @@ class MockDeviceDiscovery {
 
     __config() {
         const devices = fs.readFileSync('./src/mocks/smart-home/smart-dev.json');
-        const specs = JSON.parse(devices);
-        this.specs = specs[deviceIndex];
+        this.specs = JSON.parse(devices);
     }
 
     __startListening() {
