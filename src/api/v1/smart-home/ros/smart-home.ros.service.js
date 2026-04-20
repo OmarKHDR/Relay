@@ -32,7 +32,7 @@ class SmartHomeRosService {
         this.getAllDevicesService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/all_devices',
-            serviceType: 'sanad_interfaces/srv/devices',
+            serviceType: 'sanad_interfaces/srv/Devices',
         });
 
         this.getAllDevicesService.advertise((request, response) => {
@@ -46,7 +46,7 @@ class SmartHomeRosService {
         this.discoveryService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/discover',
-            serviceType: 'sanad_interfaces/srv/discover',
+            serviceType: 'sanad_interfaces/srv/Discover',
         });
 
         this.discoveryService.advertise((request, response) => {
@@ -69,7 +69,7 @@ class SmartHomeRosService {
         this.controlService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/control',
-            serviceType: 'sanad_interfaces/srv/deviceControl',
+            serviceType: 'sanad_interfaces/srv/DeviceControl',
         });
 
         this.controlService.advertise((request, response) => {
@@ -91,7 +91,7 @@ class SmartHomeRosService {
         this.deviceInfoService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/device',
-            serviceType: 'sanad_interfaces/srv/device',
+            serviceType: 'sanad_interfaces/srv/Device',
         });
 
         this.deviceInfoService.advertise((request, response) => {
@@ -116,7 +116,7 @@ class SmartHomeRosService {
         this.registerDeviceService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/register_device',
-            serviceType: 'sanad_interfaces/srv/device',
+            serviceType: 'sanad_interfaces/srv/Device',
         });
 
         this.registerDeviceService.advertise((request, response) => {
@@ -140,7 +140,7 @@ class SmartHomeRosService {
         this.updateDeviceService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/update_device',
-            serviceType: 'sanad_interfaces/srv/device',
+            serviceType: 'sanad_interfaces/srv/Device',
         });
 
         this.updateDeviceService.advertise((request, response) => {
@@ -164,7 +164,7 @@ class SmartHomeRosService {
         this.deleteDeviceService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/delete_device',
-            serviceType: 'sanad_interfaces/srv/device',
+            serviceType: 'sanad_interfaces/srv/Device',
         });
 
         this.deleteDeviceService.advertise((request, response) => {
