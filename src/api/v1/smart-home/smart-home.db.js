@@ -43,16 +43,39 @@ class SmartHomeDevicesDB {
         return 0; // Success
     }
 
-    async updateDevice(device) {
+    async updateDeviceState(deviceId, state) {
+        if (!this.devices[deviceId]) {
+            logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);
+            throw new Error('Device does not exist');
+        }
+        this.devices[deviceId].state = state;
+        await this.saveToDb();
+        logger.info(`[SMART HOME DB] Updated device: ${deviceId}`);
+    }
+
+    async updateDeviceInfo(device) {
         if (!this.devices[device.deviceId]) {
             logger.error(`[SMART HOME DB] Device ${device.deviceId} doesn't exist`);
             throw new Error('Device does not exist');
         }
+        device = this.validateUpdate(device);
         this.devices[device.deviceId] = { ...this.devices[device.deviceId], ...device };
         await this.saveToDb();
         logger.info(`[SMART HOME DB] Updated device: ${device.deviceId}`);
     }
 
+    validateUpdate(device) {
+        const keys = Object.keys(device);
+        //keys must only contain (position or/and name) and deviceId
+        const {deviceId, position, name} = device;
+        if (!deviceId && (!position || !name)) 
+            throw new Error(`data is not enough to update device:${deviceId}, Position: ${position}, name: ${name}`);
+        const data = {}
+        if (deviceId) data.deviceId = deviceId;
+        if (position) data.position = position;
+        if (name) data.name = name;
+        return data;
+    }
     async deleteDevice(deviceId) {
         if (this.devices[deviceId]) {
             delete this.devices[deviceId];

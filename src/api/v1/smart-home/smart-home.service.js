@@ -1,8 +1,10 @@
 import { localDiscovery } from './discovery.udp.js';
 import { smartHomeRosService } from './ros/smart-home.ros.service.js';
-import { smartHomeDevicesDB } from './smart-home.db.js';
+import { smartHomeRosTopic } from './ros/smart-home.ros.topic.js';
+import SmartHomeDevicesDB, { smartHomeDevicesDB } from './smart-home.db.js';
 import logger from '#utils/logger.js';
 
+const SMART_DEV_PORT = process.env.SMART_DEV_PORT;
 class SmartHomeService {
     constructor() {
         this.devices = {};
@@ -12,88 +14,85 @@ class SmartHomeService {
 
     async initializeDB() {
         try {
-            this.devices = await smartHomeDevicesDB.getDb();
+            this.devices = await SmartHomeDevicesDB.getDb();
+            // taking a copy of initialization for future comp to identify changes
             this.previousDevices = { ...this.devices };
         } catch (err) {
             logger.error(`[SMART HOME] Failed to initialize DB:`, err);
         }
     }
 
-    async discoverDevices(timeoutMs = 400) {
-        const discoveredDevices = await localDiscovery.discoverDevices(timeoutMs);
-
-        // Detect new devices
+    async discoverNewDevice(discoveredDevices) {
         for (const [deviceId, device] of Object.entries(discoveredDevices)) {
             if (!this.devices[deviceId]) {
-                try {
-                    await smartHomeDevicesDB.addDevice(device);
-                    this.devices[deviceId] = device;
-                    logger.info(`[SMART HOME] New device discovered: ${deviceId}`);
-                    await smartHomeRosService.notifyNewDevice(deviceId, device);
-                } catch (err) {
-                    logger.error(`[SMART HOME] Failed to add new device ${deviceId}:`, err);
-                }
+                await smartHomeDevicesDB.addDevice(device);
+                this.devices[deviceId] = device;
+                logger.info(`[SMART HOME] New device discovered: ${deviceId}`);
+                smartHomeRosTopic.publishDeviceEvent('ADD', deviceId, device);
             }
         }
-
-        // Detect disconnected devices
-        for (const [deviceId, device] of Object.entries(this.devices)) {
-            if (!discoveredDevices[deviceId]) {
-                try {
-                    await smartHomeDevicesDB.deleteDevice(deviceId);
-                    delete this.devices[deviceId];
-                    logger.info(`[SMART HOME] Device disconnected: ${deviceId}`);
-                    await smartHomeRosService.notifyDisconnectDevice(deviceId);
-                } catch (err) {
-                    logger.error(`[SMART HOME] Failed to remove device ${deviceId}:`, err);
-                }
-            }
-        }
-
-        // Register newly discovered devices with ROS
-        for (const [deviceId, device] of Object.entries(discoveredDevices)) {
-            if (!this.previousDevices[deviceId]) {
-                try {
-                    const roomName = device.position || device.room || '';
-                    await smartHomeRosService.registerDevice(device, roomName);
-                } catch (err) {
-                    logger.error(
-                        `[SMART HOME] Failed to register device ${deviceId} with ROS:`,
-                        err
-                    );
-                }
-            }
-        }
-
-        this.previousDevices = { ...this.devices };
-        return this.devices;
     }
 
-    async getDevStatus(deviceId) {
-        if (!this.devices[deviceId]) return;
+    async discoverDeletedDevices(discoveredDevices) {
+        for (const [deviceId] of Object.entries(this.devices)) {
+            if (!discoveredDevices[deviceId]) {
+                await smartHomeDevicesDB.deleteDevice(deviceId);
+                delete this.devices[deviceId];
+                logger.info(`[SMART HOME] Device disconnected: ${deviceId}`);
+                smartHomeRosTopic.publishDeviceEvent('DISCONNECT', deviceId);
+            }
+        }
+    }
+
+    async discoverDevices(timeoutMs = 400) {
+        try {
+            const discoveredDevices = await localDiscovery.discoverDevices(timeoutMs);
+
+            // Detect new devices
+            await this.discoverNewDevice(discoveredDevices);
+            // Detect disconnected devices
+            await this.discoverDeletedDevices(discoveredDevices);
+            return this.devices;
+        } catch (err) {
+            logger.error(`[SMART HOME] Error running discovery`, err);
+            throw err;
+        }
+    }
+
+    async getDevInfo(deviceId) {
+        if (!this.devices[deviceId])
+            throw new Error(`device doesn't currently exist on the network`);
 
         try {
             const device = this.devices[deviceId];
-            console.log(device);
-            const response = await fetch(`http://${device.ip}:${device.port || 8080}/status`);
+            const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/info`);
             const data = await response.json();
-            console.log('status: ', data);
-            // if (data) {
-            //     await smartHomeRosService.notifyDeviceStatus(deviceId, data);
-            // }
             return data;
         } catch (err) {
             logger.error(`[SMART HOME] Error getting status for device ${deviceId}:`, err);
+            throw err;
         }
-        return null;
+    }
+
+    validateState(state, controlType) {
+        switch (controlType) {
+            case 'binary':
+                if (Number(state) === 0 || Number(state) === 1) return Number(state);
+                else
+                    throw new Error(
+                        `state: ${state} doesn't match device controlType: ${controlType}`
+                    );
+            default:
+                throw new Error(`this device ControlType is not implemented yet`);
+        }
     }
 
     async controlDev(deviceId, state) {
-        if (!this.devices[deviceId]) return null;
-
+        if (!this.devices[deviceId]) return false;
         try {
             const device = this.devices[deviceId];
-            const response = await fetch(`http://${device.ip}:${device.port || 8080}/control`, {
+            state = this.validateState(state, device.controlType);
+            const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/control`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,18 +100,75 @@ class SmartHomeService {
                 body: JSON.stringify({ state, deviceId }),
             });
 
-            const data = await response.json();
-            // await smartHomeRosService.notifyDeviceStatus(deviceId, { state });
-            await smartHomeDevicesDB.updateDevice({
-                deviceId,
-                state,
-                lastUpdated: new Date().toISOString(),
-            });
-            return data;
+            await smartHomeDevicesDB.updateDeviceState(deviceId, state);
+            this.devices[deviceId].state = state;
+
+            smartHomeRosTopic.publishDeviceEvent('UPDATE', deviceId, this.devices[deviceId]);
+            return true;
         } catch (err) {
             logger.error(`[SMART HOME] Error controlling device ${deviceId}:`, err);
+            return false;
         }
-        return null;
+    }
+
+    getAllDevices() {
+        return this.devices;
+    }
+
+    getDevice(deviceId) {
+        return this.devices[deviceId];
+    }
+
+    async addDevice(device) {
+        try {
+            if (device && device.deviceId && this.devices[device.deviceId]) {
+                logger.warn(`[SMART HOME] device ${device.deviceId} already exist`);
+                return false;
+            }
+            await smartHomeDevicesDB.addDevice(device);
+            this.devices[device.deviceId] = device;
+            smartHomeRosTopic.publishDeviceEvent('ADD', device.deviceId, device);
+            return true;
+        } catch (err) {
+            logger.error(`[SMART HOME] error registering new device ${device?.deviceId}: ${err}`);
+            return false;
+        }
+    }
+
+    async updateDevice(device) {
+        try {
+            if (!device || !device.deviceId || !this.devices[device.deviceId]) {
+                logger.warn(`[SMART HOME] device doesn't exist or undefined`);
+                return false;
+            }
+            await smartHomeDevicesDB.updateDeviceInfo(device);
+            this.devices[device.deviceId] = { ...this.devices[device.deviceId], ...device };
+            smartHomeRosTopic.publishDeviceEvent(
+                'UPDATE',
+                device.deviceId,
+                this.devices[device.deviceId]
+            );
+            return true;
+        } catch (err) {
+            logger.error(`[SMART HOME] error updating device ${device?.deviceId}: ${err}`);
+            return false;
+        }
+    }
+
+    async deleteDevice(deviceId) {
+        try {
+            if (!deviceId || !this.devices[deviceId]) {
+                logger.warn(`[SMART HOME] device ${deviceId} doesn't exist`);
+                return false;
+            }
+            await smartHomeDevicesDB.deleteDevice(deviceId);
+            delete this.devices[deviceId];
+            smartHomeRosTopic.publishDeviceEvent('DELETE', deviceId);
+            return true;
+        } catch (err) {
+            logger.error(`[SMART HOME] error deleting device ${deviceId}: ${err}`);
+            return false;
+        }
     }
 }
 

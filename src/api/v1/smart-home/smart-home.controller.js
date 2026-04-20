@@ -1,5 +1,4 @@
 import { smartHomeService } from './smart-home.service.js';
-import { smartHomeDevicesDB } from './smart-home.db.js';
 
 class SmartHomeController {
     async discover(req, res, next) {
@@ -23,7 +22,7 @@ class SmartHomeController {
 
     async getAllDevices(req, res, next) {
         try {
-            const devices = await smartHomeDevicesDB.getDb();
+            const devices = smartHomeService.getAllDevices();
             res.status(200).json({
                 success: true,
                 data: devices,
@@ -41,7 +40,7 @@ class SmartHomeController {
             const { deviceId } = req.query;
             if (!deviceId)
                 return res.status(400).json({ success: false, reason: 'deviceId is required' });
-            const response = await smartHomeService.getDevStatus(deviceId);
+            const response = await smartHomeService.getDevInfo(deviceId);
             return res.status(200).json({
                 success: true,
                 data: response,
@@ -59,9 +58,11 @@ class SmartHomeController {
             const { deviceId } = req.query;
             if (!deviceId)
                 return res.status(400).json({ success: false, reason: 'deviceId is required' });
-            const device = smartHomeService.devices[deviceId];
+
+            const device = smartHomeService.getDevice(deviceId);
             if (!device)
                 return res.status(404).json({ success: false, reason: 'device not found' });
+
             res.status(200).json({
                 success: true,
                 data: device,
@@ -81,34 +82,35 @@ class SmartHomeController {
                 return res
                     .status(400)
                     .json({ success: false, reason: 'deviceId and state are required' });
-            const response = await smartHomeService.controlDev(deviceId, state);
-            let data = null;
-            if (response && response.ok) {
-                data = await response.json().catch(() => null);
-            }
+
+            const success = await smartHomeService.controlDev(deviceId, state);
+            if (!success)
+                return res
+                    .status(500)
+                    .json({ success: false, reason: 'failed to change device state' });
+
             res.status(200).json({
                 success: true,
-                data,
+                data: null,
             });
         } catch (error) {
             res.status(500).json({
                 success: false,
-                reason: 'bad request',
+                reason: error.message || 'bad request',
             });
         }
     }
 
     async registerDevice(req, res, next) {
         try {
-            const  device = req.body;
-            console.log(req.body)
+            const device = req.body;
             if (!device || !device.deviceId)
                 return res
                     .status(400)
                     .json({ success: false, reason: 'device object with id is required' });
 
-            await smartHomeDevicesDB.addDevice(device);
-            smartHomeService.devices[device.deviceId] = device;
+            const success = await smartHomeService.addDevice(device);
+            if (!success) throw new Error('Device already exists or failed to register');
 
             res.status(201).json({
                 success: true,
@@ -131,18 +133,18 @@ class SmartHomeController {
                     .status(400)
                     .json({ success: false, reason: 'deviceId and location are required' });
 
-            await smartHomeDevicesDB.updateDevice({
+            const success = await smartHomeService.updateDevice({
                 deviceId,
                 position: location,
                 lastUpdated: new Date().toISOString(),
             });
 
-            smartHomeService.devices[deviceId].position = location;
+            if (!success) throw new Error('Failed to update device');
 
             res.status(200).json({
                 success: true,
                 reason: 'device location updated successfully',
-                data: smartHomeService.devices[deviceId],
+                data: smartHomeService.getDevice(deviceId),
             });
         } catch (error) {
             res.status(400).json({
@@ -158,8 +160,8 @@ class SmartHomeController {
             if (!deviceId)
                 return res.status(400).json({ success: false, reason: 'deviceId is required' });
 
-            await smartHomeDevicesDB.deleteDevice(deviceId);
-            delete smartHomeService.devices[deviceId];
+            const success = await smartHomeService.deleteDevice(deviceId);
+            if (!success) throw new Error('Failed to delete device');
 
             res.status(200).json({
                 success: true,

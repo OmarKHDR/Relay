@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import fs from 'fs';
 import { controlDev, getInfo, getStatus } from './smart-dev.controller.js';
 const mockSmartHomeRouter = Router();
 

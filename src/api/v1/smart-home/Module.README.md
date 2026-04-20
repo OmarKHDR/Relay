@@ -1,35 +1,20 @@
-Absolutely — here is a clearer, enhanced version of your README with the **same system behavior and specifications**.
+# Smart Home Module
 
-````markdown
-# Smart Home Module — Interface Between Hardware and Users
+The Smart Home module is responsible for device discovery (UDP broadcasting), HTTP REST APIs for interacting with smart home devices, and maintaining communication with a Robot Operating System (ROS) environment.
 
-This module is a **stateful service** that interfaces with the current design in [Smart Modules](https://github.com/sanadChair/Smart-Home-Light).
+## Architecture & Workflow
 
-## Capabilities
+The architecture strictly follows the separation of concerns:
+### 1. HTTP Interface (`smart-home.controller.js`)
+Exposes REST endpoints to list devices, get their status, change state (control), and register/update/delete records securely. Controllers should strictly interface with the service, never directly with the database or caches. Error handling parses requests and handles HTTP response framing.
 
-The system works as follows:
+### 2. ROS Interface (`ros/smart-home.ros.service.js` & `ros/smart-home.ros.topic.js`)
+Hooks into the ROS environment via `roslib.js`. It mimics endpoints by keeping internal ROS services analogous to typical API endpoints (e.g. `getAllDevices`, `discover`, `control`). Errors are parsed to boolean flags within the response payload.
 
-- Sends a UDP broadcast to all devices on the network using port `9999`.
-- All devices listen for this UDP packet and respond with:
-  - required metadata
-  - current local IP address
-- The Smart Home module stores all received device responses in an **in-memory object**.
-- This object is treated as the **current source of truth** for connected devices.
-- The frontend can mark previously discovered devices as disconnected if they are no longer discovered.
-- Each device has a unique, permanent ID, making disconnect detection reliable.
-- After discovery, the system can monitor and control each device using its stored data.
+All state discrepancies and real-time device updates (e.g., location changes, deletions, new device availability on network) are dispatched asynchronously to ROS via topics (configured in `smart-home.ros.topic.js`).
 
-## Available Endpoints
+### 3. Business Service Layer (`smart-home.service.js`)
+Acts as the intermediary and brain. Both HTTP controllers and ROS Services push their commands to the service layer. The service layer interacts with the Device UDP discoverer, validates commands, updates the database if required, updates the in-memory dictionary, and publishes the necessary `/device` topic events across ROS.
 
-The module exposes three endpoints:
-
-- `/info`  
-  Returns module information such as ID, name, and components  
-  (same as the one retrieved during the network-wide broadcast discovery).
-
-- `/status`  
-  Returns the current state of the device components.
-
-- `/control`  
-  Updates/changes the state of the system.
-````
+### 4. Data Layer (`smart-home.db.js`)
+Only accessed by `smart-home.service.js` to persist changes. Uses a local JSON store. No business rules are managed here.
