@@ -10,6 +10,12 @@ class GoalRosService {
             this.createService();
             this.createCancelRequest()
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.createService();
+            this.createCancelRequest();
+        }
     }
 
     createService() {

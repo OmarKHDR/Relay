@@ -12,6 +12,12 @@ class GoalRosTopic {
             this.createTopicsAndClient();
             this.subscribe();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.createTopicsAndClient();
+            this.subscribe();
+        }
     }
 
     initParams() {

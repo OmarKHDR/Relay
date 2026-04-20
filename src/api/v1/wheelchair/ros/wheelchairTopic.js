@@ -14,6 +14,11 @@ class WheelChair extends EventEmitter {
             this.ros = newRosInstance;
             this.topic = this.createTopic();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.topic = this.createTopic();
+        }
         WheelChair.instance = this;
     }
 

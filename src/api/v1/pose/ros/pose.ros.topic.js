@@ -14,6 +14,12 @@ class Pose extends EventEmitter {
             this.poseTopic = this.createTopic();
             this.subscribe();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.poseTopic = this.createTopic();
+            this.subscribe();
+        }
         Pose.instance = this;
     }
 

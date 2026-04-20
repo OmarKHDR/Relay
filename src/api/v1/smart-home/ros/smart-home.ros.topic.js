@@ -12,6 +12,11 @@ class SmartHomeRosTopic {
             this.ros = newRosInstance;
             this.createTopics();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.createTopics();
+        }
     }
 
     createTopics() {

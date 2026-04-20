@@ -14,6 +14,12 @@ class Map {
             this.topic = this.createTopic();
             this.subscribe();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.topic = this.createTopic();
+            this.subscribe();
+        }
 		Map.instance = this;
 	}
 

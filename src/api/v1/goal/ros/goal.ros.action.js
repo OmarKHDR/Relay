@@ -8,6 +8,11 @@ class GoalRosAction {
             this.ros = newRosInstance;
             this.createAction();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.createAction();
+        }
     }
 
     createAction() {

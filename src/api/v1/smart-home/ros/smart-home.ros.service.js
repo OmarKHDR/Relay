@@ -11,6 +11,11 @@ class SmartHomeRosService {
             this.ros = newRosInstance;
             this.createServers();
         });
+
+        if (rosHandler.isConnected()) {
+            this.ros = rosHandler.getRos();
+            this.createServers();
+        }
     }
 
     createServers() {
