@@ -4,6 +4,9 @@
     "controlType": "binary",
     "state": 1,
     "port": "19803",
-    "ip": "192.168.56.1"
+    "ip": "192.168.56.1",
+    "position": "room-light",
+    "name": "room light",
+    "lastUpdated": "2026-04-21T06:03:22.406Z"
   }
 }
