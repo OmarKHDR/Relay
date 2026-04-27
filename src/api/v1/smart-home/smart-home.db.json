@@ -1,12 +1,9 @@
 {
-  "light-a3f9c1": {
-    "deviceId": "light-a3f9c1",
+  "00d43b8c-cb9b-45b0-8646-9f54457bb81b": {
+    "deviceId": "00d43b8c-cb9b-45b0-8646-9f54457bb81b",
+    "name": "room 1",
     "controlType": "binary",
-    "state": 1,
-    "port": "19803",
-    "ip": "192.168.56.1",
-    "position": "room-light",
-    "name": "room light",
-    "lastUpdated": "2026-04-21T06:03:22.406Z"
+    "state": 0,
+    "ip": "192.168.60.134"
   }
 }

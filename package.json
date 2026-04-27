@@ -36,11 +36,12 @@
   },
   "homepage": "https://github.com/sanadChair/server#readme",
   "dependencies": {
+    "broadcast-address": "^1.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mqtt": "^5.15.0",
     "morgan": "^1.10.1",
+    "mqtt": "^5.15.0",
     "roslib": "^1.4.1",
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
@@ -51,6 +52,9 @@
     "nodemon": "^3.1.10"
   },
   "nodemonConfig": {
-    "ignore": ["src/mocks/smart-home/smart-dev.json", "src/api/v1/smart-home/smart-home.db.json"]
+    "ignore": [
+      "src/mocks/smart-home/smart-dev.json",
+      "src/api/v1/smart-home/smart-home.db.json"
+    ]
   }
 }

@@ -1,12 +1,13 @@
 import dgram from 'dgram';
 import process from 'process';
+import broadcastAddress from '#utils/broadcast-interfaces.js';
 import logger from '../../../utils/logger.js';
 import 'dotenv/config';
 
-const BROADCAST_IP = process.env.BROADCAST_IP || '255.255.255.255';
-const BROADCASTER_PORT = Number(process.env.BROADCASTER_PORT || 9999);
-const BROADCAST_SMART_DEVICE_PORT = process.env.BROADCAST_SMART_DEVICE_PORT || 9988;
+const BROADCAST_IP = broadcastAddress.broadcast;
+const BROADCAST_PORT = process.env.BROADCAST_PORT || 9988;
 
+console.log('broadcast IP: ', BROADCAST_IP);
 class LocalDiscovery {
     constructor() {
         this.udpSender = dgram.createSocket({ type: 'udp4', reuseAddr: true });
@@ -47,7 +48,7 @@ class LocalDiscovery {
     }
 
     startServer() {
-        this.udpSender.bind(BROADCASTER_PORT, () => {
+        this.udpSender.bind(BROADCAST_PORT, () => {
             this.udpSender.setBroadcast(true);
         });
     }
@@ -67,12 +68,11 @@ class LocalDiscovery {
         const payload = Buffer.from(
             JSON.stringify({
                 type: 'discovery',
-                port: BROADCASTER_PORT,
                 requestId,
             })
         );
-        console.log(`sending broadcasts through: ${BROADCAST_SMART_DEVICE_PORT}, ${BROADCAST_IP}`);
-        this.udpSender.send(payload, 0, payload.length, BROADCAST_SMART_DEVICE_PORT, BROADCAST_IP);
+        console.log(`sending broadcasts through: ${BROADCAST_PORT}, ${BROADCAST_IP}`);
+        this.udpSender.send(payload, 0, payload.length, BROADCAST_PORT, BROADCAST_IP);
     }
 }
 
