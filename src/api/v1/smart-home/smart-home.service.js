@@ -64,7 +64,9 @@ class SmartHomeService {
 
         try {
             const device = this.devices[deviceId];
-            const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/info`);
+            const response = await fetch(
+                `http://${device.ip}:${SMART_DEV_PORT}/info?deviceId=${deviceId}`
+            );
             const data = await response.json();
             return data;
         } catch (err) {
@@ -140,6 +142,19 @@ class SmartHomeService {
                 logger.warn(`[SMART HOME] device doesn't exist or undefined`);
                 return false;
             }
+            const existingDevice = this.devices[device.deviceId];
+            if (device.name) {
+                await fetch(`http://${existingDevice.ip}:${SMART_DEV_PORT}/name`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        deviceId: device.deviceId,
+                        name: device.name,
+                    }),
+                });
+            }
             await smartHomeDevicesDB.updateDeviceInfo(device);
             this.devices[device.deviceId] = { ...this.devices[device.deviceId], ...device };
             smartHomeRosTopic.publishDeviceEvent(
@@ -160,6 +175,25 @@ class SmartHomeService {
                 logger.warn(`[SMART HOME] device ${deviceId} doesn't exist`);
                 return false;
             }
+            const device = this.devices[deviceId];
+
+            try {
+                const response = await fetch(
+                    `http://${device.ip}:${SMART_DEV_PORT}/factoryReset?deviceId=${deviceId}`,
+                    {
+                        method: 'DELETE',
+                    }
+                );
+                logger.info(
+                    `[SMART HOME] Factory reset sent to device ${deviceId}: ${response.status}`
+                );
+            } catch (fetchErr) {
+                logger.warn(
+                    `[SMART HOME] Failed to send factory reset to device ${deviceId}:`,
+                    fetchErr
+                );
+            }
+
             await smartHomeDevicesDB.deleteDevice(deviceId);
             delete this.devices[deviceId];
             smartHomeRosTopic.publishDeviceEvent('DELETE', deviceId);

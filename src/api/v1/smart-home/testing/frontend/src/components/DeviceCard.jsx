@@ -17,6 +17,11 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
     };
 
     const handleDelete = async () => {
+        const confirmed = window.confirm(
+            'This will factory reset and permanently remove the device from the system. Continue?'
+        );
+        if (!confirmed) return;
+
         try {
             await smartHomeApi.deleteDevice(deviceId);
             if (onDelete) onDelete(deviceId);

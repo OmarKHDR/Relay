@@ -13,8 +13,10 @@ export const apiClient = axios.create({
 export const smartHomeApi = {
     getAllDevices: () => apiClient.get('/devices').then(res => res.data.data),
     discover: (timeoutMs = 4000) => apiClient.get(`/discover?timeoutMs=${timeoutMs}`).then(res => res.data.data),
+    // Returns device data from local server DB (old "info")
+    getDeviceFromDb: (deviceId) => apiClient.get(`/device?deviceId=${deviceId}`).then(res => res.data.data),
+    // Returns current runtime info directly from device API (old "status")
     getDeviceInfo: (deviceId) => apiClient.get(`/info?deviceId=${deviceId}`).then(res => res.data.data),
-    getDeviceStatus: (deviceId) => apiClient.get(`/status?deviceId=${deviceId}`).then(res => res.data.data),
     controlDevice: (deviceId, state) => apiClient.post('/control', { deviceId, state }).then(res => res.data),
     registerDevice: (device) => apiClient.post('/register', device).then(res => res.data),
     updateDeviceInfo: (deviceId, location, name) => apiClient.post('/info', { deviceId, location, name }).then(res => res.data),

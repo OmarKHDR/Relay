@@ -39,21 +39,21 @@ const TestPanel = ({ onActionSuccess }) => {
     }
   };
 
-  const handleInfo = async () => {
+  const handleRuntimeInfo = async () => {
     try {
       const info = await smartHomeApi.getDeviceInfo(targetId);
-      logResult(`Info [${targetId}]: ${JSON.stringify(info)}`);
+      logResult(`Runtime Device Info [${targetId}]: ${JSON.stringify(info)}`);
     } catch (e) {
-      logResult(`Info Error: ${e.message}`);
+      logResult(`Runtime Info Error: ${e.message}`);
     }
   };
 
-  const handleStatus = async () => {
+  const handleDbDevice = async () => {
     try {
-      const status = await smartHomeApi.getDeviceStatus(targetId);
-      logResult(`Status [${targetId}]: ${JSON.stringify(status)}`);
+      const device = await smartHomeApi.getDeviceFromDb(targetId);
+      logResult(`DB Device [${targetId}]: ${JSON.stringify(device)}`);
     } catch (e) {
-      logResult(`Status Error: ${e.message}`);
+      logResult(`DB Device Error: ${e.message}`);
     }
   };
 
@@ -97,13 +97,13 @@ const TestPanel = ({ onActionSuccess }) => {
             <div className="space-y-3">
                 <input className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none bg-white shadow-sm" placeholder="Target Device ID" value={targetId} onChange={e => setTargetId(e.target.value)} />
                 <div className="flex gap-2">
-                    <input className="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none bg-white shadow-sm" placeholder="Update Location" value={updatePos} onChange={e => setUpdatePos(e.target.value)} />
-                    <input className="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none bg-white shadow-sm" placeholder="Update Name" value={updateName} onChange={e => setUpdateName(e.target.value)} />
+                    <input className="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none bg-white shadow-sm" placeholder="Update Location (server only)" value={updatePos} onChange={e => setUpdatePos(e.target.value)} />
+                    <input className="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none bg-white shadow-sm" placeholder="Update Real Name (device API)" value={updateName} onChange={e => setUpdateName(e.target.value)} />
                     <button onClick={handleUpdate} className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition-colors shadow-md">Update</button>
                 </div>
                 <div className="flex gap-2 pt-2">
-                    <button onClick={handleInfo} className="flex-1 py-2 border border-slate-200 bg-white shadow-sm text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 flex items-center justify-center gap-2"><Send className="w-3.5 h-3.5"/> Ping Info</button>
-                    <button onClick={handleStatus} className="flex-1 py-2 border border-slate-200 bg-white shadow-sm text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 flex items-center justify-center gap-2"><Send className="w-3.5 h-3.5"/> Ping Status</button>
+                    <button onClick={handleRuntimeInfo} className="flex-1 py-2 border border-slate-200 bg-white shadow-sm text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 flex items-center justify-center gap-2"><Send className="w-3.5 h-3.5"/> Ping Runtime Info</button>
+                    <button onClick={handleDbDevice} className="flex-1 py-2 border border-slate-200 bg-white shadow-sm text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 flex items-center justify-center gap-2"><Send className="w-3.5 h-3.5"/> Ping DB Device</button>
                 </div>
             </div>
           </div>

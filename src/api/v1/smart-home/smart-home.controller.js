@@ -35,7 +35,7 @@ class SmartHomeController {
         }
     }
 
-    async getStatus(req, res, next) {
+    async getInfo(req, res, next) {
         try {
             const { deviceId } = req.query;
             if (!deviceId)
@@ -53,7 +53,7 @@ class SmartHomeController {
         }
     }
 
-    async getInfo(req, res, next) {
+    async getDev(req, res, next) {
         try {
             const { deviceId } = req.query;
             if (!deviceId)
@@ -131,7 +131,10 @@ class SmartHomeController {
             if (!deviceId || !(location || name))
                 return res
                     .status(400)
-                    .json({ success: false, reason: 'deviceId and location are required' });
+                    .json({
+                        success: false,
+                        reason: 'deviceId and at least one of location/name are required',
+                    });
 
             const success = await smartHomeService.updateDevice({
                 deviceId,
@@ -144,7 +147,7 @@ class SmartHomeController {
 
             res.status(200).json({
                 success: true,
-                reason: 'device location updated successfully',
+                reason: 'device info updated successfully',
                 data: smartHomeService.getDevice(deviceId),
             });
         } catch (error) {

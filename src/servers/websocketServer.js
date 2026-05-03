@@ -21,7 +21,6 @@ createWS(options = {}) {
             origin: options.cors || '*',
             methods: ['GET', 'POST'],
         },
-        ...options,
     });
     return this
 }
