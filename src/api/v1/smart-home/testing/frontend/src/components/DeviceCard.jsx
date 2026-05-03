@@ -40,9 +40,7 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
                         className={`w-2.5 h-2.5 rounded-full ${
                             !isConnected
                                 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]'
-                                : isActive
-                                  ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
-                                  : 'bg-slate-300'
+                                : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
                         }`}
                     ></div>
                     <span className="text-xs font-semibold text-slate-400 tracking-wider">ID: {deviceId}</span>
