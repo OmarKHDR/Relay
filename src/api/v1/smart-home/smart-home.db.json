@@ -1,9 +1,12 @@
 {
-  "00d43b8c-cb9b-45b0-8646-9f54457bb81b": {
-    "deviceId": "00d43b8c-cb9b-45b0-8646-9f54457bb81b",
-    "name": "room 1",
+  "relay-ct2112rx1": {
+    "deviceId": "relay-ct2112rx1",
+    "name": "",
     "controlType": "binary",
-    "state": 0,
-    "ip": "192.168.60.134"
+    "state": 1,
+    "ip": "192.168.1.3",
+    "connectionState": false,
+    "position": "Ketchin",
+    "lastUpdated": "2026-05-03T17:40:15.321Z"
   }
 }

@@ -53,6 +53,16 @@ class SmartHomeDevicesDB {
         logger.info(`[SMART HOME DB] Updated device: ${deviceId}`);
     }
 
+    async updateDeviceConnectionState(deviceId, connectionState) {
+        if (!this.devices[deviceId]) {
+            logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);
+            throw new Error('Device does not exist');
+        }
+        this.devices[deviceId].connectionState = Boolean(connectionState);
+        await this.saveToDb();
+        logger.info(`[SMART HOME DB] Updated device connectionState: ${deviceId}`);
+    }
+
     async updateDeviceInfo(device) {
         if (!this.devices[device.deviceId]) {
             logger.error(`[SMART HOME DB] Device ${device.deviceId} doesn't exist`);
@@ -67,13 +77,16 @@ class SmartHomeDevicesDB {
     validateUpdate(device) {
         const keys = Object.keys(device);
         //keys must only contain (position or/and name) and deviceId
-        const {deviceId, position, name} = device;
-        if (!deviceId && (!position || !name)) 
-            throw new Error(`data is not enough to update device:${deviceId}, Position: ${position}, name: ${name}`);
+        const { deviceId, position, name, connectionState } = device;
+        if (!deviceId || (position === undefined && name === undefined && connectionState === undefined))
+            throw new Error(
+                `data is not enough to update device:${deviceId}, Position: ${position}, name: ${name}, connectionState: ${connectionState}`
+            );
         const data = {}
         if (deviceId) data.deviceId = deviceId;
-        if (position) data.position = position;
-        if (name) data.name = name;
+        if (position !== undefined) data.position = position;
+        if (name !== undefined) data.name = name;
+        if (connectionState !== undefined) data.connectionState = Boolean(connectionState);
         return data;
     }
     async deleteDevice(deviceId) {

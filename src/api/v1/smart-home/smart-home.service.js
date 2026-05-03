@@ -14,6 +14,10 @@ class SmartHomeService {
     async initializeDB() {
         try {
             this.devices = await smartHomeDevicesDB.getDb();
+            // On server start, default all devices to disconnected until a discovery run confirms presence.
+            for (const dev of Object.values(this.devices)) {
+                dev.connectionState = false;
+            }
             // taking a copy of initialization for future comp to identify changes
             this.previousDevices = { ...this.devices };
         } catch (err) {
@@ -24,21 +28,44 @@ class SmartHomeService {
     async discoverNewDevice(discoveredDevices) {
         for (const [deviceId, device] of Object.entries(discoveredDevices)) {
             if (!this.devices[deviceId]) {
-                await smartHomeDevicesDB.addDevice(device);
-                this.devices[deviceId] = device;
+                const deviceToStore = { ...device, connectionState: true };
+                await smartHomeDevicesDB.addDevice(deviceToStore);
+                this.devices[deviceId] = deviceToStore;
                 logger.info(`[SMART HOME] New device discovered: ${deviceId}`);
-                smartHomeRosTopic.publishDeviceEvent('ADD', deviceId, device);
+                smartHomeRosTopic.publishDeviceEvent('ADD', deviceId, deviceToStore);
+                continue;
             }
+
+            // Existing device: merge discovery data without overwriting stored metadata like position.
+            const existing = this.devices[deviceId];
+            const merged = {
+                ...existing,
+                ...device,
+                position: existing.position ?? device.position,
+                name: existing.name ?? device.name,
+                connectionState: true,
+            };
+            this.devices[deviceId] = merged;
+            await smartHomeDevicesDB.updateDeviceInfo({
+                deviceId,
+                connectionState: true,
+            });
         }
     }
 
     async discoverDeletedDevices(discoveredDevices) {
         for (const [deviceId] of Object.entries(this.devices)) {
             if (!discoveredDevices[deviceId]) {
-                await smartHomeDevicesDB.deleteDevice(deviceId);
-                delete this.devices[deviceId];
-                logger.info(`[SMART HOME] Device disconnected: ${deviceId}`);
-                smartHomeRosTopic.publishDeviceEvent('DISCONNECT', deviceId);
+                // Device exists in DB but not currently discovered: mark as disconnected (do not delete).
+                if (this.devices[deviceId]?.connectionState !== false) {
+                    this.devices[deviceId].connectionState = false;
+                    await smartHomeDevicesDB.updateDeviceInfo({
+                        deviceId,
+                        connectionState: false,
+                    });
+                    logger.info(`[SMART HOME] Device disconnected: ${deviceId}`);
+                    smartHomeRosTopic.publishDeviceEvent('DISCONNECT', deviceId);
+                }
             }
         }
     }

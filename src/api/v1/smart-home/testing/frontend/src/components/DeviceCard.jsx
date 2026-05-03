@@ -3,10 +3,12 @@ import { smartHomeApi } from '../api/client';
 import { Trash2, MapPin, Activity } from 'lucide-react';
 
 const DeviceCard = ({ device, onStateChange, onDelete }) => {
-    const { deviceId, name, position, controlType, state } = device;
+    const { deviceId, name, position, controlType, state, connectionState } = device;
     const isActive = Number(state) === 1;
+    const isConnected = Boolean(connectionState);
 
     const toggleState = async () => {
+        if (!isConnected) return;
         const newState = isActive ? 0 : 1;
         try {
             await smartHomeApi.controlDevice(deviceId, newState);
@@ -34,7 +36,15 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
         <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-300'}`}></div>
+                    <div
+                        className={`w-2.5 h-2.5 rounded-full ${
+                            !isConnected
+                                ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.35)]'
+                                : isActive
+                                  ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
+                                  : 'bg-slate-300'
+                        }`}
+                    ></div>
                     <span className="text-xs font-semibold text-slate-400 tracking-wider">ID: {deviceId}</span>
                 </div>
                 <button onClick={handleDelete} className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50">
@@ -53,12 +63,17 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{isActive ? 'Operating' : 'Standby'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                    {!isConnected ? 'Disconnected' : isActive ? 'Operating' : 'Standby'}
+                </span>
                 
                 {/* iOS Style Toggle Switch */}
                 <button 
                   onClick={toggleState}
-                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${isActive ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                  disabled={!isConnected}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${
+                      !isConnected ? 'bg-slate-100 opacity-60 cursor-not-allowed' : isActive ? 'bg-indigo-600' : 'bg-slate-200'
+                  }`}
                 >
                   <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${isActive ? 'translate-x-6' : 'translate-x-[4px]'}`} />
                 </button>
