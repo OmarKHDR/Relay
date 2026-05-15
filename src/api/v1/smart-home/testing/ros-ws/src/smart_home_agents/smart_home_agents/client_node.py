@@ -13,7 +13,17 @@ class SmartHomeClientNode(Node):
         self.cli_all_devices = self.create_client(Devices, '/sanad/smart_home/all_devices')
         self.cli_discover = self.create_client(Discover, '/sanad/smart_home/discover')
         self.cli_control = self.create_client(DeviceControl, '/sanad/smart_home/control')
-        self.cli_device_info = self.create_client(Device, '/sanad/smart_home/device')
+        self.cli_device = self.create_client(Device, '/sanad/smart_home/device')
+        self.cli_device_info = self.create_client(Device, '/sanad/smart_home/device_info')
+
+    def _decode_json(self, payload, fallback):
+        if not payload:
+            return fallback
+        try:
+            return json.loads(payload)
+        except Exception:
+            self.get_logger().warn('Failed to parse JSON payload from service response')
+            return fallback
 
     def fetch_all_devices(self):
         while not self.cli_all_devices.wait_for_service(timeout_sec=1.0):
@@ -23,7 +33,7 @@ class SmartHomeClientNode(Node):
         rclpy.spin_until_future_complete(self, future)
         if future.result() is not None:
             self.get_logger().info(f"Devices fetched successfully. Success: {future.result().success}")
-            return future.result().devices
+            return self._decode_json(future.result().devices, {})
         else:
             self.get_logger().error('Exception while calling service')
 
@@ -35,7 +45,7 @@ class SmartHomeClientNode(Node):
         rclpy.spin_until_future_complete(self, future)
         if future.result() is not None:
              self.get_logger().info(f"Discovery completed. Success: {future.result().success}")
-             return future.result().devices
+             return self._decode_json(future.result().devices, {})
         else:
              self.get_logger().error('Exception while calling discover service')
 
@@ -48,6 +58,28 @@ class SmartHomeClientNode(Node):
         future = self.cli_control.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         return future.result().success
+
+    def fetch_device_from_db(self, device_id):
+        while not self.cli_device.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service /sanad/smart_home/device not available, waiting...')
+        req = Device.Request()
+        req.device_id = device_id
+        future = self.cli_device.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        if future.result() is not None and future.result().success:
+            return self._decode_json(future.result().device, {})
+        return None
+
+    def fetch_device_runtime_info(self, device_id):
+        while not self.cli_device_info.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service /sanad/smart_home/device_info not available, waiting...')
+        req = Device.Request()
+        req.device_id = device_id
+        future = self.cli_device_info.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        if future.result() is not None and future.result().success:
+            return self._decode_json(future.result().device, {})
+        return None
 
 def main(args=None):
     rclpy.init(args=args)

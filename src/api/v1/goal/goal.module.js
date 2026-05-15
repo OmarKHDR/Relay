@@ -1,5 +1,4 @@
 import goalRouter from './routes.js';
-import './ros/goal.ros.topic.js';
 import './ros/goal.ros.service.js';
 import './ros/goal.ros.action.js';
 

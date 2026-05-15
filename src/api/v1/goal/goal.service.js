@@ -1,33 +1,24 @@
-import goalRosTopic from './ros/goal.ros.topic.js';
 import goalRosAction from './ros/goal.ros.action.js';
 import goalRosService from './ros/goal.ros.service.js';
 import logger from '#utils/logger.js';
 
 class GoalService {
     constructor() {
-        if (GoalService.instance) return GoalService.instance;
+        if (GoalService.instance) return;
 
         this.feedback = null;
         GoalService.instance = this;
     }
 
     sendGoal({ x, y, yaw, frame = 'map' }) {
-        if (goalRosTopic.status.isActive) {
-            throw new Error('Robot is already executing a goal.');
-        }
-
         logger.info(`[GoalService] Processing goal: x=${x}, y=${y}`);
 
         const poseMessage = this._createPoseMessage(x, y, yaw, frame);
         // goalRosAction.executeGoal(poseMessage);
-        goalRosTopic.publishGoal(poseMessage);
+        goalRosAction.executeGoal(poseMessage);
     }
 
     async cancelGoal() {
-        // 1. Check Topic (Eyes) - only cancel if actually busy
-        if (!goalRosTopic.status.isActive) {
-            return false;
-        }
 
         logger.info('[GOAL SERVICE] Initiating cancel sequence...');
 
@@ -37,18 +28,18 @@ class GoalService {
     }
 
     getGoal() {
-        const goal = goalRosTopic.goalCoordinates;
+        const goal = goalRosAction.goalCoordinates;
         console.log(goal);
         goal.yaw = this._quaternionToYaw(goal.q);
         return {
-            status: goalRosTopic.status,
+            status: goalRosAction.status,
             goal,
         };
     }
 
     getFeedback() {
-        const feedback = goalRosTopic.feedback;
-        return { status: goalRosTopic.status, feedback: feedback || {} };
+        const feedback = goalRosAction.feedback;
+        return { status: goalRosAction.status, feedback: feedback || {} };
     }
 
     // some helper methods
@@ -58,26 +49,25 @@ class GoalService {
         const q = this._yawToQuaternion(yaw);
 
         return {
-            header: {
-                frame_id: frame,
-                stamp: {
-                    secs: 0,
-                    nsecs: 0,
-                },
-            },
             pose: {
-                position: { x, y, z: 0 },
-                orientation: q,
+                header: {
+                    frame_id: frame,
+                    stamp: { sec: Math.floor(Date.now() / 1000), nanosec: 0 },
+                },
+                pose: {
+                    position: { x, y, z: 0.0 },
+                    orientation: q,
+                }
             },
         };
     }
 
     _yawToQuaternion(yaw) {
         return {
-            x: 0,
-            y: 0,
-            z: Math.sin(yaw / 2),
-            w: Math.cos(yaw / 2),
+            x: 0.0,
+            y: 0.0,
+            z: Math.sin(yaw / 2) ?? 0,
+            w: Math.cos(yaw / 2) || 1,
         };
     }
 

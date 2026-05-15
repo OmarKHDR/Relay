@@ -22,10 +22,28 @@ class SmartHomeRosService {
         this.createGetDevicesService();
         this.createDiscoveryService();
         this.createControlService();
+        this.createDeviceService();
         this.createDeviceInfoService();
         this.createRegisterDeviceService();
         this.createUpdateDeviceService();
         this.createDeleteDeviceService();
+    }
+
+    getRequestDeviceId(request) {
+        return request?.device_id ?? request?.deviceId ?? null;
+    }
+
+    parseDevicePayload(request) {
+        const payload = request?.device;
+        if (!payload) return null;
+        if (typeof payload === 'string') {
+            try {
+                return JSON.parse(payload);
+            } catch {
+                return null;
+            }
+        }
+        return payload;
     }
 
     createGetDevicesService() {
@@ -37,7 +55,8 @@ class SmartHomeRosService {
 
         this.getAllDevicesService.advertise((request, response) => {
             logger.info(`[SMART HOME ROS] Received request to get all devices`);
-            response.devices = smartHomeService.getAllDevices()
+            response.success = true;
+            response.devices = JSON.stringify(smartHomeService.getAllDevices());
             return true;
         });
     }
@@ -55,11 +74,12 @@ class SmartHomeRosService {
                 .discoverDevices()
                 .then(res => {
                     response.success = true;
-                    response.devices = Object.values(res);
+                    response.devices = JSON.stringify(res);
                 })
                 .catch(err => {
                     logger.error(`[SMART HOME ROS] Error returning devices to ros:`, err);
                     response.success = false;
+                    response.devices = '{}';
                 });
             return true;
         });
@@ -73,11 +93,12 @@ class SmartHomeRosService {
         });
 
         this.controlService.advertise((request, response) => {
+            const deviceId = this.getRequestDeviceId(request);
             logger.info(`[SMART HOME ROS] Received request to change device state`);
             smartHomeService
-                .controlDev(request.deviceId, request.state)
-                .then(() => {
-                    response.success = true;
+                .controlDev(deviceId, request.state)
+                .then(success => {
+                    response.success = success;
                 })
                 .catch(err => {
                     logger.error(`[SMART HOME ROS] Error returning devices to ros:`, err);
@@ -87,26 +108,47 @@ class SmartHomeRosService {
         });
     }
 
-    createDeviceInfoService() {
-        this.deviceInfoService = new ROSLIB.Service({
+    createDeviceService() {
+        this.deviceService = new ROSLIB.Service({
             ros: this.ros,
             name: '/sanad/smart_home/device',
             serviceType: 'sanad_interfaces/srv/Device',
         });
 
-        this.deviceInfoService.advertise((request, response) => {
+        this.deviceService.advertise((request, response) => {
             logger.info(
-                `[SMART HOME ROS] Received request to get device info: deviceId: ${request.deviceId}`
+                `[SMART HOME ROS] Received request to get device from DB: deviceId: ${this.getRequestDeviceId(request)}`
+            );
+            const deviceId = this.getRequestDeviceId(request);
+            const device = smartHomeService.getDevice(deviceId);
+            response.success = Boolean(device);
+            response.device = JSON.stringify(device || {});
+            return true;
+        });
+    }
+
+    createDeviceInfoService() {
+        this.deviceInfoService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/sanad/smart_home/device_info',
+            serviceType: 'sanad_interfaces/srv/Device',
+        });
+
+        this.deviceInfoService.advertise((request, response) => {
+            const deviceId = this.getRequestDeviceId(request);
+            logger.info(
+                `[SMART HOME ROS] Received request to get runtime device info: deviceId: ${deviceId}`
             );
             smartHomeService
-                .getDevInfo(request.deviceId)
+                .getDevInfo(deviceId)
                 .then(res => {
                     response.success = true;
-                    response.device = res;
+                    response.device = JSON.stringify(res || {});
                 })
                 .catch(err => {
-                    logger.error(`[SMART HOME ROS] Error returning devices to ros:`, err);
+                    logger.error(`[SMART HOME ROS] Error returning device info to ros:`, err);
                     response.success = false;
+                    response.device = '{}';
                 });
             return true;
         });
@@ -120,11 +162,12 @@ class SmartHomeRosService {
         });
 
         this.registerDeviceService.advertise((request, response) => {
+            const device = this.parseDevicePayload(request);
             logger.info(
-                `[SMART HOME ROS] Received request to register new device: deviceId: ${request.device.deviceId}`
+                `[SMART HOME ROS] Received request to register new device: deviceId: ${device?.deviceId}`
             );
             smartHomeService
-                .addDevice(request.device)
+                .addDevice(device)
                 .then(res => {
                     response.success = res;
                 })
@@ -144,11 +187,12 @@ class SmartHomeRosService {
         });
 
         this.updateDeviceService.advertise((request, response) => {
+            const device = this.parseDevicePayload(request);
             logger.info(
-                `[SMART HOME ROS] Received request to update device: deviceId: ${request.device.deviceId}`
+                `[SMART HOME ROS] Received request to update device: deviceId: ${device?.deviceId}`
             );
             smartHomeService
-                .updateDevice(request.device)
+                .updateDevice(device)
                 .then(res => {
                     response.success = res;
                 })
@@ -168,11 +212,12 @@ class SmartHomeRosService {
         });
 
         this.deleteDeviceService.advertise((request, response) => {
+            const deviceId = this.getRequestDeviceId(request);
             logger.info(
-                `[SMART HOME ROS] Received request to delete device: deviceId: ${request.deviceId}`
+                `[SMART HOME ROS] Received request to delete device: deviceId: ${deviceId}`
             );
             smartHomeService
-                .deleteDevice(request.deviceId)
+                .deleteDevice(deviceId)
                 .then(res => {
                     response.success = res;
                 })

@@ -26,6 +26,7 @@ class Map {
     initParams() {
         this.map = undefined;
         this.info = undefined;
+        this.mapHeader = undefined;
     }
 
 	createTopic() {
@@ -33,6 +34,7 @@ class Map {
 			ros: this.ros,
 			name: '/map',
 			messageType: 'nav_msgs/OccupancyGrid',
+            compression: "png"
 		});
 		logger.info('[Map ROS TOPIC] Topic created: /map (nav_msgs/OccupancyGrid)');
 		return topic;
@@ -43,6 +45,7 @@ class Map {
             this.topic.subscribe(msg => {
                 this.map = msg.data;
                 this.info = msg.info;
+                this.mapHeader = msg.MapHandler;
                 logger.info(`[Map ROS TOPIC] recieved map data ${this.info}`)
             })
         }
@@ -61,7 +64,7 @@ class Map {
         if (this.info !== undefined) {
             logger.info(`[Map ROS TOPIC] Returning map information value: ${this.info}`);
             console.log(this.map, this.info)
-            return {map: this.map, info: this.info};
+            return {map: this.map, info: this.info, header: this.mapHeader};
         } else {
             logger.warn('[Map ROS TOPIC] Distance value is undefined');
             return {undefined, undefined};

@@ -8,9 +8,6 @@ class MapService {
 
     getMap() {
         const { map, info } = MapHandler.getMap();
-        if (!Array.isArray(map) || !info) {
-            throw new Error('map data is not available');
-        }
         const yaw = this._quaternionToYaw(info.origin.orientation);
         return {
                 frame: 'map',

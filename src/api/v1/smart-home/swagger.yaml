@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: SANAD Smart Home API
+  description: API to control and manage all the smart home devices connected to the network
+  version: 1.0.0
+
+paths:
+  /api/v1/smart-home/discover:
+    get:
+      summary: Scan the network
+      description: Get all devices connected to the network by using UDP broadcast.
+      parameters:
+        - in: query
+          name: timeoutMs
+          schema:
+            type: integer
+            minimum: 1
+          description: Discovery timeout in milliseconds.
+      responses:
+        '200':
+          description: Devices discovered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDevicesResponse'
+        '500':
+          description: Discovery failed.
+
+  /api/v1/smart-home/devices:
+    get:
+      summary: Get all devices
+      responses:
+        '200':
+          description: Devices retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDevicesResponse'
+
+  /api/v1/smart-home/device:
+    get:
+      summary: Get a device by id
+      parameters:
+        - in: query
+          name: deviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDeviceResponse'
+        '400':
+          description: deviceId is required.
+        '404':
+          description: Device not found.
+
+  /api/v1/smart-home/info:
+    get:
+      summary: Get device info from device
+      parameters:
+        - in: query
+          name: deviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device info retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAnyResponse'
+        '400':
+          description: deviceId is required.
+        '500':
+          description: Failed to retrieve device info.
+
+    post:
+      summary: Update device info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceInfoRequest'
+      responses:
+        '200':
+          description: Device info updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDeviceResponse'
+        '400':
+          description: Validation error.
+
+  /api/v1/smart-home/control:
+    post:
+      summary: Control a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ControlRequest'
+      responses:
+        '200':
+          description: Device state updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessNullResponse'
+        '400':
+          description: Validation error.
+        '500':
+          description: Failed to change device state.
+
+  /api/v1/smart-home/register:
+    post:
+      summary: Register a new device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '201':
+          description: Device registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDeviceResponse'
+        '400':
+          description: Failed to register device.
+
+  /api/v1/smart-home/devices/{deviceId}:
+    delete:
+      summary: Delete a device
+      parameters:
+        - in: path
+          name: deviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+        '400':
+          description: Failed to delete device.
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        name:
+          type: string
+        ip:
+          type: string
+        controlType:
+          type: string
+        state:
+          oneOf:
+            - type: integer
+            - type: string
+            - type: boolean
+        position:
+          type: string
+        connectionState:
+          type: boolean
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - deviceId
+
+    DevicesMap:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Device'
+
+    SuccessDevicesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/DevicesMap'
+
+    SuccessDeviceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Device'
+
+    SuccessNullResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          nullable: true
+
+    SuccessAnyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+
+    SuccessMessageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        reason:
+          type: string
+
+    ControlRequest:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        state:
+          oneOf:
+            - type: integer
+            - type: string
+            - type: boolean
+      required:
+        - deviceId
+        - state
+
+    RegisterDeviceRequest:
+      allOf:
+        - $ref: '#/components/schemas/Device'
+
+    UpdateDeviceInfoRequest:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        location:
+          type: string
+        name:
+          type: string
+      required:
+        - deviceId

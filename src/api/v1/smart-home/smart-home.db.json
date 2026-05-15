@@ -5,8 +5,8 @@
     "controlType": "binary",
     "state": 0,
     "ip": "192.168.1.3",
-    "connectionState": false,
-    "position": "Ketchin",
+    "connectionState": true,
+    "position": "living room",
     "lastUpdated": "2026-05-03T17:40:15.321Z"
   }
 }

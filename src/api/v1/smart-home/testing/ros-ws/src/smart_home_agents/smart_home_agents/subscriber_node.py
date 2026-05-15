@@ -40,10 +40,16 @@ class SmartHomeSubscriber(Node):
                 self.get_logger().info(f'Updated device: {device_id}')
             else:
                 self.get_logger().warn(f'Tried to update unknown device: {device_id}')
-        elif action in ['DELETE', 'DISCONNECT']:
+        elif action == 'DISCONNECT':
+            if device_id in self.device_registry:
+                self.device_registry[device_id]['connectionState'] = False
+            else:
+                self.device_registry[device_id] = {'deviceId': device_id, 'connectionState': False}
+            self.get_logger().info(f'Marked device disconnected: {device_id}')
+        elif action == 'DELETE':
             if device_id in self.device_registry:
                 del self.device_registry[device_id]
-                self.get_logger().info(f'Removed device: {device_id} ({action})')
+                self.get_logger().info(f'Removed device: {device_id} (DELETE)')
 
 def main(args=None):
     rclpy.init(args=args)
