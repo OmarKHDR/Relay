@@ -1,5 +1,0 @@
-string device_id
-string device
----
-bool success
-string device

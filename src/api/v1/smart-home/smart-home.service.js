@@ -1,6 +1,5 @@
 import { localDiscovery } from './discovery.udp.js';
 import { smartHomeDevicesDB } from './smart-home.db.js';
-import { smartHomeRosTopic } from './ros/smart-home.ros.topic.js';
 import logger from '#utils/logger.js';
 
 const SMART_DEV_PORT = process.env.SMART_DEV_PORT;
@@ -16,7 +15,7 @@ class SmartHomeService {
             this.devices = await smartHomeDevicesDB.getDb();
             // On server start, default all devices to disconnected until a discovery run confirms presence.
             for (const dev of Object.values(this.devices)) {
-                dev.connectionState = false;
+                dev.connected = false;
             }
             // taking a copy of initialization for future comp to identify changes
             this.previousDevices = { ...this.devices };
@@ -28,8 +27,8 @@ class SmartHomeService {
     async discoverNewDevice(discoveredDevices) {
         for (const [deviceId, device] of Object.entries(discoveredDevices)) {
             if (!this.devices[deviceId]) {
-                const deviceToStore = { ...device, connectionState: true };
-                await smartHomeDevicesDB.addDevice(deviceToStore);
+                const deviceToStore = { ...device, connected: true };
+                await smartHomeDevicesDB.saveDevice(deviceToStore);
                 this.devices[deviceId] = deviceToStore;
                 logger.info(`[SMART HOME] New device discovered: ${deviceId}`);
                 smartHomeRosTopic.publishDeviceEvent('ADD', deviceId, deviceToStore);
@@ -43,12 +42,12 @@ class SmartHomeService {
                 ...device,
                 position: existing.position ?? device.position,
                 name: existing.name ?? device.name,
-                connectionState: true,
+                connected: true,
             };
             this.devices[deviceId] = merged;
             await smartHomeDevicesDB.updateDeviceInfo({
                 deviceId,
-                connectionState: true,
+                connected: true,
             });
         }
     }
@@ -57,11 +56,11 @@ class SmartHomeService {
         for (const [deviceId] of Object.entries(this.devices)) {
             if (!discoveredDevices[deviceId]) {
                 // Device exists in DB but not currently discovered: mark as disconnected (do not delete).
-                if (this.devices[deviceId]?.connectionState !== false) {
-                    this.devices[deviceId].connectionState = false;
+                if (this.devices[deviceId]?.connected !== false) {
+                    this.devices[deviceId].connected = false;
                     await smartHomeDevicesDB.updateDeviceInfo({
                         deviceId,
-                        connectionState: false,
+                        connected: false,
                     });
                     logger.info(`[SMART HOME] Device disconnected: ${deviceId}`);
                     smartHomeRosTopic.publishDeviceEvent('DISCONNECT', deviceId);

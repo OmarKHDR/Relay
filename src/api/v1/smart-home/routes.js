@@ -1,22 +1,75 @@
-import { Router } from 'express';
 import { smartHomeController } from './smart-home.controller.js';
-
-const SmartHomeRoutes = Router();
-
-// Device Discovery & Query
-SmartHomeRoutes.get('/discover', smartHomeController.discover);
-SmartHomeRoutes.get('/devices', smartHomeController.getAllDevices);
-SmartHomeRoutes.get('/device', smartHomeController.getDev);
-SmartHomeRoutes.get('/info', smartHomeController.getInfo);
-
-// Device Control & Management
-SmartHomeRoutes.post('/control', smartHomeController.control);
-SmartHomeRoutes.post('/register', smartHomeController.registerDevice);
-SmartHomeRoutes.post('/info', smartHomeController.updateDeviceInfo);
-
-SmartHomeRoutes.delete('/devices/:deviceId', smartHomeController.deleteDevice);
-
-
-SmartHomeRoutes.use('/smart-home', SmartHomeRoutes)
-
-export { SmartHomeRoutes };
+import { deviceDiscoveryDto } from './dto/discovery.dto.js';
+import { getDeviceDto } from './dto/device.dto.js';
+export const SmartHomeRouter = {
+    customRouter: true,
+    base: '/smart-home',
+    routes: [
+        {
+            name: 'discover',
+            description: 'discover devices on network',
+            method: 'GET',
+            path: '/discover',
+            controller: smartHomeController.discover,
+            dto: deviceDiscoveryDto,
+            middlewares: [],
+        },
+        {
+            name: 'getAllDevices',
+            description: 'get all devices',
+            method: 'GET',
+            path: '/devices',
+            controller: smartHomeController.getAllDevices,
+            middlewares: [],
+        },
+        {
+            name: 'getDevice',
+            description: 'get one device',
+            method: 'GET',
+            path: '/device',
+            dto: getDevice,
+            controller: smartHomeController.getDevice,
+            middlewares: [],
+        },
+        {
+            name: 'getInfo',
+            description: 'get device info',
+            method: 'GET',
+            path: '/info',
+            controller: smartHomeController.getInfo,
+            middlewares: [],
+        },
+        {
+            name: 'control',
+            description: 'control device',
+            method: 'POST',
+            path: '/control',
+            controller: smartHomeController.control,
+            middlewares: [],
+        },
+        {
+            name: 'registerDevice',
+            description: 'register a new device',
+            method: 'POST',
+            path: '/register',
+            controller: smartHomeController.registerDevice,
+            middlewares: [],
+        },
+        {
+            name: 'updateDeviceInfo',
+            description: 'update existing device info',
+            method: 'POST',
+            path: '/info',
+            controller: smartHomeController.updateDeviceInfo,
+            middlewares: [],
+        },
+        {
+            name: 'deleteDevice',
+            description: 'delete a device by id',
+            method: 'DELETE',
+            path: '/devices/:id',
+            controller: smartHomeController.deleteDevice,
+            middlewares: [],
+        },
+    ],
+};

@@ -176,9 +176,12 @@ components:
             - type: boolean
         position:
           type: string
-        connectionState:
+        connected:
           type: boolean
-        lastUpdated:
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
           type: string
           format: date-time
       required:

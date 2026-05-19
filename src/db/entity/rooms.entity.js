@@ -1,0 +1,48 @@
+import { EntitySchema } from 'typeorm';
+
+export const RoomSchema = new EntitySchema({
+	name: "rooms",
+	columns: {
+		id: {
+			type: 'integer', 
+			primary: true,
+			generated: 'increment',
+		},
+		name: {
+			type: "text",
+		},
+		min_x: {
+			type: "real",
+		},
+		min_y: {
+			type: "real",
+		},
+		max_x: {
+			type: "real",
+		},
+		max_y: {
+			type: "real",
+		},
+		theta: {
+			type: "real",
+			default: 0.0
+		},
+		pose_x: {
+			type: "real",
+		},
+		pose_y: {
+		type: "real",
+		},
+		pose_theta: {
+			type: "real",
+			default: 0.0,
+		}
+	},
+	relations: {
+        devices: {
+            type: "one-to-many",
+            target: "devices",
+            inverseSide: "room",
+        },
+    },
+})

@@ -41,7 +41,10 @@ class LocalDiscovery {
             delete payload.type;
             delete payload.requestId;
             this.devices[payload.deviceId] = {
-                ...payload,
+                id: payload.deviceId,
+                name: payload.name,
+                controlType: payload.controlType,
+                state: payload.state,
                 ip: rinfo.address || payload.ip,
             };
         });

@@ -2,139 +2,61 @@ import { smartHomeService } from './smart-home.service.js';
 
 class SmartHomeController {
     async discover(req, res, next) {
-        try {
-            const timeoutMs = Number(req.query?.timeoutMs ?? 4000);
-            const devices = await smartHomeService.discoverDevices(
-                timeoutMs < 10_000 && timeoutMs > 0 ? timeoutMs : 400
-            );
-
-            res.status(200).json({
-                success: true,
-                data: devices,
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                reason: 'bad request',
-            });
-        }
+        const timeoutMs = Number(req.query?.timeoutMs ?? 4000);
+        const devices = await smartHomeService.discoverDevices(
+            timeoutMs < 10_000 && timeoutMs > 0 ? timeoutMs : 400
+        );
+        return devices;
     }
 
     async getAllDevices(req, res, next) {
-        try {
-            const devices = smartHomeService.getAllDevices();
-            res.status(200).json({
-                success: true,
-                data: devices,
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                reason: 'failed to retrieve devices',
-            });
-        }
+        const devices = smartHomeService.getAllDevices();
+        return devices;
     }
 
     async getInfo(req, res, next) {
-        try {
-            const { deviceId } = req.query;
-            if (!deviceId)
-                return res.status(400).json({ success: false, reason: 'deviceId is required' });
-            const response = await smartHomeService.getDevInfo(deviceId);
-            return res.status(200).json({
-                success: true,
-                data: response,
-            });
-        } catch (error) {
-            return res.status(500).json({
-                success: false,
-                reason: 'bad request',
-            });
-        }
+        const { id } = req.query;
+        const response = await smartHomeService.getDevInfo(id);
+        return response;
     }
 
-    async getDev(req, res, next) {
-        try {
-            const { deviceId } = req.query;
-            if (!deviceId)
-                return res.status(400).json({ success: false, reason: 'deviceId is required' });
-
-            const device = smartHomeService.getDevice(deviceId);
-            if (!device)
-                return res.status(404).json({ success: false, reason: 'device not found' });
-
-            res.status(200).json({
-                success: true,
-                data: device,
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                reason: 'bad request',
-            });
-        }
+    async getDevice(req, res, next) {
+        const { id } = req.query;
+        const device = smartHomeService.getDevice(id);
+        return device;
     }
 
     async control(req, res, next) {
-        try {
-            const { deviceId, state } = req.body;
-            if (!deviceId || state === undefined)
-                return res
-                    .status(400)
-                    .json({ success: false, reason: 'deviceId and state are required' });
-
-            const success = await smartHomeService.controlDev(deviceId, state);
-            if (!success)
-                return res
-                    .status(500)
-                    .json({ success: false, reason: 'failed to change device state' });
-
-            res.status(200).json({
-                success: true,
-                data: null,
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                reason: error.message || 'bad request',
-            });
-        }
+        const { id, state } = req.body;
+        const device = await smartHomeService.controlDev(id, state);
+        return device;
     }
 
     async registerDevice(req, res, next) {
-        try {
-            const device = req.body;
-            if (!device || !device.deviceId)
-                return res
-                    .status(400)
-                    .json({ success: false, reason: 'device object with id is required' });
+        const device = req.body;
+        if (!device || !device.id)
+            return res
+                .status(400)
+                .json({ success: false, reason: 'device object with id is required' });
 
-            const success = await smartHomeService.addDevice(device);
-            if (!success) throw new Error('Device already exists or failed to register');
+        const success = await smartHomeService.addDevice(device);
+        if (!success) throw new Error('Device already exists or failed to register');
 
-            res.status(201).json({
-                success: true,
-                reason: 'device registered successfully',
-                data: device,
-            });
-        } catch (error) {
-            res.status(400).json({
-                success: false,
-                reason: error.message || 'failed to register device',
-            });
-        }
+        res.status(201).json({
+            success: true,
+            reason: 'device registered successfully',
+            data: device,
+        });
     }
 
     async updateDeviceInfo(req, res, next) {
         try {
-            const { deviceId, location, name} = req.body;
+            const { deviceId, location, name } = req.body;
             if (!deviceId || !(location || name))
-                return res
-                    .status(400)
-                    .json({
-                        success: false,
-                        reason: 'deviceId and at least one of location/name are required',
-                    });
+                return res.status(400).json({
+                    success: false,
+                    reason: 'deviceId and at least one of location/name are required',
+                });
 
             const success = await smartHomeService.updateDevice({
                 deviceId,

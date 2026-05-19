@@ -7,7 +7,7 @@ import { CallbackRegistry } from '#servers/callbackRegistry.js';
 
 dotenv.config();
 
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.SERVER_PORT || 5051;
 const HOST = process.env.SERVER_HOSTNAME || 'localhost';
 
 const server = new Server();
@@ -33,7 +33,10 @@ server.registerModules({
     callback: CallbackRegistry,
 });
 
-server.start({
-    host: HOST,
-    port: PORT,
-});
+server.initializeDb().then(_ => {
+        server.start({
+            host: HOST,
+            port: PORT,
+        });
+    }
+);

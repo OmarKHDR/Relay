@@ -4,7 +4,7 @@ import WebsocketServer from '#servers/websocketServer.js';
 import logger from '#utils/logger.js';
 import { createServer } from 'http';
 import express from 'express';
-
+import {AppDataSource} from '../db/datasources.js'
 
 export default class Server {
     constructor() {
@@ -18,12 +18,17 @@ export default class Server {
         this.expressServer = new ExpressServer(this.app);
         this.websocketServer = new WebsocketServer(this.httpServer);
     }
-	
-		reset() {
-			Server.instance = null;
-			this.expressServer.reset();
-			this.websocketServer.reset();
-		}
+
+
+    async initializeDb() {
+        await AppDataSource.initialize();
+    }
+
+    reset() {
+        Server.instance = null;
+        this.expressServer.reset();
+        this.websocketServer.reset();
+    }
 
     configureExpress(options) {
         this.expressServer
@@ -45,7 +50,7 @@ export default class Server {
     }
 
     registerModules(modules) {
-        this.expressServer.mountRoutes(modules.routes.RouterRegistry, modules.routes.prefix);
+        this.expressServer.mountRoutesAndMiddlewares(modules.routes.RouterRegistry, modules.routes.prefix);
         this.websocketServer.registerCallback(modules.callback);
     }
 

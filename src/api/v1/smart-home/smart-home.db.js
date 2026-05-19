@@ -1,16 +1,19 @@
 import logger from '#utils/logger.js';
-import fs from 'fs/promises';
+import { dbRepositories } from '#src/db/db.repositories.js';
 
 class SmartHomeDevicesDB {
     constructor() {
         this.devices = {};
-        this.dbPath = `./src/api/v1/smart-home/smart-home.db.json`;
+        this.devicesDb = dbRepositories.device;
     }
 
     async readDbContent() {
         try {
-            const content = await fs.readFile(this.dbPath, 'utf-8');
-            this.devices = JSON.parse(content);
+            const devicesArr = await this.devicesDb.find({});
+            this.devices = {};
+            for (const dev of devicesArr) {
+                this.devices[dev.id] = dev;
+            }
             return this.devices;
         } catch (err) {
             logger.warn(`[SMART HOME DB] Failed to read DB, initializing empty:`, err.message);
@@ -19,28 +22,48 @@ class SmartHomeDevicesDB {
         }
     }
 
-    async saveToDb() {
-        try {
-            await fs.writeFile(this.dbPath, JSON.stringify(this.devices, null, 2));
-        } catch (err) {
-            logger.error(`[SMART HOME DB] Failed to save DB:`, err);
-            throw err;
-        }
-    }
-
     async getDb() {
         return await this.readDbContent();
     }
 
+    async saveDevice(device) {
+        const id = device.deviceId || device.id;
+        const fullDevice = {
+            ...device,
+            id,
+            connected: device.connected ?? false,
+            created_at: device.created_at ?? new Date(),
+            updated_at: new Date(),
+        };
+        await this.devicesDb.save(fullDevice);
+        this.devices[id] = fullDevice;
+        logger.info(`[SMART HOME DB] Saved device: ${id}`);
+    }
+
     async addDevice(device) {
-        if (this.devices[device.deviceId]) {
-            logger.warn(`[SMART HOME DB] Device ${device.deviceId} already exists`);
-            return 1; // Device already exists
+        const id = device.deviceId || device.id;
+        if (this.devices[id]) {
+            logger.warn(`[SMART HOME DB] Device ${id} already exist, use UPDATE api instead`);
+            throw new Error('Device Already exists');
         }
-        this.devices[device.deviceId] = device;
-        await this.saveToDb();
-        logger.info(`[SMART HOME DB] Added device: ${device.deviceId}`);
-        return 0; // Success
+        await this.saveDevice(device);
+    }
+
+    async updateDeviceInfo(device) {
+        const id = device.deviceId || device.id;
+        if (!this.devices[id]) {
+            logger.error(`[SMART HOME DB] Device ${id} doesn't exist`);
+            throw new Error('Device does not exist');
+        }
+        
+        const updateData = {};
+        if (device.connected !== undefined) updateData.connected = Boolean(device.connected);
+        if (device.name !== undefined) updateData.name = device.name;
+        updateData.updated_at = new Date();
+
+        await this.devicesDb.update({ id }, updateData);
+        this.devices[id] = { ...this.devices[id], ...updateData };
+        logger.info(`[SMART HOME DB] Updated device info: ${id}`);
     }
 
     async updateDeviceState(deviceId, state) {
@@ -48,51 +71,16 @@ class SmartHomeDevicesDB {
             logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);
             throw new Error('Device does not exist');
         }
-        this.devices[deviceId].state = state;
-        await this.saveToDb();
-        logger.info(`[SMART HOME DB] Updated device: ${deviceId}`);
+        const updateData = { state, updated_at: new Date() };
+        await this.devicesDb.update({ id: deviceId }, updateData);
+        this.devices[deviceId] = { ...this.devices[deviceId], ...updateData };
+        logger.info(`[SMART HOME DB] Updated device state: ${deviceId}`);
     }
 
-    async updateDeviceConnectionState(deviceId, connectionState) {
-        if (!this.devices[deviceId]) {
-            logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);
-            throw new Error('Device does not exist');
-        }
-        this.devices[deviceId].connectionState = Boolean(connectionState);
-        await this.saveToDb();
-        logger.info(`[SMART HOME DB] Updated device connectionState: ${deviceId}`);
-    }
-
-    async updateDeviceInfo(device) {
-        if (!this.devices[device.deviceId]) {
-            logger.error(`[SMART HOME DB] Device ${device.deviceId} doesn't exist`);
-            throw new Error('Device does not exist');
-        }
-        device = this.validateUpdate(device);
-        this.devices[device.deviceId] = { ...this.devices[device.deviceId], ...device };
-        await this.saveToDb();
-        logger.info(`[SMART HOME DB] Updated device: ${device.deviceId}`);
-    }
-
-    validateUpdate(device) {
-        const keys = Object.keys(device);
-        //keys must only contain (position or/and name) and deviceId
-        const { deviceId, position, name, connectionState } = device;
-        if (!deviceId || (position === undefined && name === undefined && connectionState === undefined))
-            throw new Error(
-                `data is not enough to update device:${deviceId}, Position: ${position}, name: ${name}, connectionState: ${connectionState}`
-            );
-        const data = {}
-        if (deviceId) data.deviceId = deviceId;
-        if (position !== undefined) data.position = position;
-        if (name !== undefined) data.name = name;
-        if (connectionState !== undefined) data.connectionState = Boolean(connectionState);
-        return data;
-    }
     async deleteDevice(deviceId) {
         if (this.devices[deviceId]) {
+            await this.devicesDb.delete({ id: deviceId });
             delete this.devices[deviceId];
-            await this.saveToDb();
             logger.info(`[SMART HOME DB] Deleted device: ${deviceId}`);
         } else {
             logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);

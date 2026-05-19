@@ -1,4 +1,0 @@
-string device_id
-int32 state
----
-bool success

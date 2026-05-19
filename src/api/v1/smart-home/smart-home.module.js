@@ -1,8 +1,7 @@
-import { SmartHomeRoutes } from './routes.js';
-import './ros/smart-home.ros.service.js';
+import { SmartHomeRouter } from './routes.js';
 
 export const SmartHomeModule = {
-    routers: [SmartHomeRoutes],
+    routers: [SmartHomeRouter],
 };
 
 export default SmartHomeModule;
