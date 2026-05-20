@@ -4,42 +4,34 @@ import logger from '#utils/logger.js';
 
 class GoalService {
     constructor() {
-        if (GoalService.instance) return;
-
+        if (GoalService.instance) return GoalService.instance;
         this.feedback = null;
         GoalService.instance = this;
     }
 
     sendGoal({ x, y, yaw, frame = 'map' }) {
         logger.info(`[GoalService] Processing goal: x=${x}, y=${y}`);
-
         const poseMessage = this._createPoseMessage(x, y, yaw, frame);
-        // goalRosAction.executeGoal(poseMessage);
-        goalRosAction.executeGoal(poseMessage);
+        const goalId = goalRosAction.executeGoal(poseMessage);
+        return goalId;
     }
 
     async cancelGoal() {
-
         logger.info('[GOAL SERVICE] Initiating cancel sequence...');
-
         await goalRosService.forceCancelAll();
+        console.log("cleared goal")
+        goalRosAction.clearGoal();
 
         return true;
     }
 
     getGoal() {
-        const goal = goalRosAction.goalCoordinates;
-        console.log(goal);
-        goal.yaw = this._quaternionToYaw(goal.q);
-        return {
-            status: goalRosAction.status,
-            goal,
-        };
+        return goalRosAction.getGoal();
     }
 
     getFeedback() {
-        const feedback = goalRosAction.feedback;
-        return { status: goalRosAction.status, feedback: feedback || {} };
+        const feedback = goalRosAction.getFeedback();
+        return { feedback: feedback };
     }
 
     // some helper methods
@@ -57,7 +49,7 @@ class GoalService {
                 pose: {
                     position: { x, y, z: 0.0 },
                     orientation: q,
-                }
+                },
             },
         };
     }

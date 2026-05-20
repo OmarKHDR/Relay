@@ -7,12 +7,18 @@ class GoalRosAction {
             logger.info('[GOAL ROS ACTION] ROS reconnected, refreshing subscription...');
             this.ros = newRosInstance;
             this.currentGoal = null;
+            this.feedback = null;
+            this.result = null;
+            this.status = null;
             this.createAction();
         });
 
         if (rosHandler.isConnected()) {
             this.ros = rosHandler.getRos();
             this.currentGoal = null;
+            this.feedback = null;
+            this.result = null;
+            this.status = null;
             this.createAction();
         }
     }
@@ -24,32 +30,74 @@ class GoalRosAction {
             actionName: 'nav2_msgs/action/NavigateToPose',
         });
     }
-    /**
-     * Sends the goal and returns the ROSLIB Goal object.
-     * This object emits events (feedback, result) that the Service layer listens to.
-     */
+
     executeGoal(poseMessage) {
+        if (!this.client) throw new Error('goal action client is not connected');
         const goal = new ROSLIB.Goal({
             actionClient: this.client,
             goalMessage: poseMessage,
         });
         this.currentGoal = goal;
-        this.attachGoalFeedback();
-        this.attachGoalResult();
+        this.feedback = null;
+        this.result = null;
+        this.status = null;
+        this.attachGoalFeedback(goal);
+        this.attachGoalResult(goal);
+        this.attachGoalStatus(goal);
         goal.send();
-        return goal;
+        return goal.goalID;
     }
 
-    attachGoalFeedback() {
+    attachGoalFeedback(goal) {
         goal.on('feedback', feedback => {
-            console.log('navigation feedback', feedback);
+            this.feedback = feedback;
         });
     }
 
-    attachGoalResult() {
-        goal.on('result', result => {
-            console.log('navigation result', result);
+    attachGoalStatus(goal) {
+        goal.on('status', status => {
+            this.status = status;
         });
+    }
+
+    getFeedback() {
+        return this.feedback;
+    }
+
+    getGoal() {
+        if (!this.currentGoal) throw new Error('no active goal');
+        const pose = this.currentGoal.goalMessage?.goal?.pose;
+        const position = pose?.pose?.position ?? {};
+        const orientation = pose?.pose?.orientation ?? {};
+        return {
+            goal_id: this.currentGoal.goalID,
+            frame_id: pose?.header?.frame_id,
+            x: position.x,
+            y: position.y,
+            yaw: this.quaternionToYaw(orientation),
+            status: this.status,
+            feedback: this.feedback,
+            result: this.result,
+            is_finished: this.currentGoal.isFinished,
+        };
+    }
+
+    attachGoalResult(goal) {
+        goal.on('result', result => {
+            this.result = result;
+        });
+    }
+
+    clearGoal() {
+        this.currentGoal = null;
+        this.feedback = null;
+        this.result = null;
+        this.status = null;
+    }
+
+    quaternionToYaw(quaternion = {}) {
+        const { x = 0, y = 0, z = 0, w = 1 } = quaternion;
+        return Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
     }
 }
 

@@ -3,7 +3,7 @@ import { smartHomeApi } from '../api/client';
 import { Trash2, MapPin, Activity } from 'lucide-react';
 
 const DeviceCard = ({ device, onStateChange, onDelete }) => {
-    const { deviceId, name, position, controlType, state, connectionState } = device;
+    const { deviceId, name, position, control_type, state, connectionState } = device;
     const isActive = Number(state) === 1;
     const isConnected = Boolean(connectionState);
 
@@ -57,7 +57,7 @@ const DeviceCard = ({ device, onStateChange, onDelete }) => {
                 <span className="truncate">{position || 'Unassigned Zone'}</span>
                 <span className="mx-1 text-slate-300">•</span>
                 <Activity className="w-3.5 h-3.5" />
-                <span className="capitalize">{controlType}</span>
+                <span className="capitalize">{control_type}</span>
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between">

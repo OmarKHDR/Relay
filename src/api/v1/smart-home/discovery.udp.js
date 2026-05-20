@@ -43,7 +43,7 @@ class LocalDiscovery {
             this.devices[payload.deviceId] = {
                 id: payload.deviceId,
                 name: payload.name,
-                controlType: payload.controlType,
+                control_type: payload.control_type,
                 state: payload.state,
                 ip: rinfo.address || payload.ip,
             };

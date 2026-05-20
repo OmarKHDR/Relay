@@ -56,16 +56,16 @@ class SmartHomeService {
         return data;
     }
 
-    validateState(state, controlType) {
-        switch (controlType) {
+    validateState(state, control_type) {
+        switch (control_type) {
             case 'binary':
                 if (Number(state) === 0 || Number(state) === 1) return Number(state);
                 else
                     throw new Error(
-                         `state: ${state} doesn't match device controlType: ${controlType}`
+                         `state: ${state} doesn't match device control_type: ${control_type}`
                     );
             default:
-                throw new Error(`this device ControlType is not implemented yet`);
+                throw new Error(`this device control_type is not implemented yet`);
         }
     }
 
@@ -73,7 +73,7 @@ class SmartHomeService {
         if (!await smartHomeDevicesDB.getDevice(id)) return false;
 
         const device = await smartHomeDevicesDB.getDevice(id);
-        state = this.validateState(state, device.controlType ?? device.control_type);
+        state = this.validateState(state,  device.control_type);
         const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/control`, {
             method: 'POST',
             headers: {

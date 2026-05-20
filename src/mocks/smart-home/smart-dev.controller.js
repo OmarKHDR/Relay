@@ -19,7 +19,7 @@ export function getStatus(req, res) {
     return res.status(200).json({
         deviceId: specs.deviceId,
         state: specs.state,
-        controlType: specs.controlType,
+        control_type: specs.control_type,
     });
 }
 

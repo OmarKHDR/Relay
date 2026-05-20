@@ -6,7 +6,6 @@ import swaggerUiExpress from 'swagger-ui-express';
 import { dataValidation } from '#src/middleware/validationMiddleware.js';
 import { globalControllerWrapper } from '#utils/controller.wrapper.js';
 import { errorHandler } from '#src/middleware/global.error.handler.middleware.js';
-import e from 'express';
 
 export default class ExpressServer {
     constructor(app) {
@@ -61,7 +60,7 @@ export default class ExpressServer {
                     handlers.push(dataValidation(route.dto));
                 }
                 handlers.push(globalControllerWrapper(route.controller));
-
+                console.log("initializing: ",  route.method,  routerConfig.base + route.path)
                 switch (route.method?.toUpperCase()) {
                     case 'GET':
                         this.app.get(path, ...handlers);

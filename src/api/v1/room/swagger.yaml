@@ -137,25 +137,25 @@ components:
 
     RegisterRoomRequest:
       type: object
-      description: Request body uses camelCase field names per the DTO validation.
+      description: Request body uses snake_case field names per the DTO validation.
       properties:
         name:
           type: string
-        minX:
+        min_x:
           type: number
-        maxX:
+        max_x:
           type: number
-        minY:
+        min_y:
           type: number
-        maxY:
+        max_y:
           type: number
         theta:
           type: number
-        poseX:
+        pose_x:
           type: number
-        poseY:
+        pose_y:
           type: number
-        poseTheta:
+        pose_theta:
           type: number
         devices:
           type: array
@@ -163,38 +163,38 @@ components:
             type: object
       required:
         - name
-        - minX
-        - maxX
-        - minY
-        - maxY
+        - min_x
+        - max_x
+        - min_y
+        - max_y
         - theta
-        - poseX
-        - poseY
-        - poseTheta
+        - pose_x
+        - pose_y
+        - pose_theta
 
     UpdateRoomRequest:
       type: object
-      description: All fields optional except id. Uses camelCase per the DTO.
+      description: All fields optional except id. Uses snake_case per the DTO.
       properties:
         id:
           type: string
         name:
           type: string
-        minX:
+        min_x:
           type: number
-        maxX:
+        max_x:
           type: number
-        minY:
+        min_y:
           type: number
-        maxY:
+        max_y:
           type: number
         theta:
           type: number
-        poseX:
+        pose_x:
           type: number
-        poseY:
+        pose_y:
           type: number
-        poseTheta:
+        pose_theta:
           type: number
         devices:
           type: array

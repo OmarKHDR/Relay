@@ -4,11 +4,11 @@ import logger from '#utils/logger.js';
 
 class GoalRosService {
     constructor() {
-        rosHandler.on('ros_reconnected', (newRosInstance) => {
+        rosHandler.on('ros_reconnected', newRosInstance => {
             logger.info('[GOAL ROS SERIVCE] ROS reconnected, refreshing subscription...');
             this.ros = newRosInstance;
             this.createService();
-            this.createCancelRequest()
+            this.createCancelRequest();
         });
 
         if (rosHandler.isConnected()) {
@@ -39,17 +39,20 @@ class GoalRosService {
         if (!this.cancelRequest) {
             this.createCancelRequest();
         }
-        this.cancelService.callService(
-            this.cancelRequest,
-            result => {
-                logger.info('[GOAL ROS SERVICE] Cancel command executed successfully');
-                return result;
-            },
-            error => {
-                logger.error('[GOAL ROS SERVICE] Failed to execute cancel command:', error);
-                return error;
-            }
-        );
+        if (!this.cancelService) throw new Error('goal cancel service is not connected');
+        return new Promise( (resolve, reject) => {
+            this.cancelService.callService(
+                this.cancelRequest,
+                result => {
+                    logger.info('[GOAL ROS SERVICE] Cancel command executed successfully');
+                    resolve(result)
+                },
+                error => {
+                    logger.error('[GOAL ROS SERVICE] Failed to execute cancel command:');
+                    reject(error instanceof Error ? error : new Error(String(error)));
+                }
+            );
+        })
     }
 }
 

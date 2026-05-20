@@ -16,7 +16,7 @@ class RoomDB {
             const roomsArr = await this.roomsDb.find({});
             this.rooms = {};
             for (const room of roomsArr) {
-                this.rooms[room.id] = room;
+                this.rooms[room.name] = room;
             }
             return this.rooms;
         } catch (err) {
@@ -46,6 +46,13 @@ class RoomDB {
 
     async registerRoom(room) {
         const rooms = await this.getAllRooms();
+        for (const [_, ro] of Object.entries(rooms)) {
+            if (ro.name === room.name) {
+                logger.warn(`[room db] trying to register a room that already exist`)
+                throw new Error(` trying to register a room that already exist: ${room.name}`)
+            }
+        }
+        console.log(room)
         const saved = await this.roomsDb.save(room);
         rooms[saved.id] = saved;
         logger.info(`[ROOM DB] Saved room: ${saved.id}`);

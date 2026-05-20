@@ -20,7 +20,7 @@ const TestPanel = ({ onActionSuccess }) => {
   const handleRegister = async () => {
     try {
       await smartHomeApi.registerDevice({
-        deviceId: regId, name: regName, controlType: regType, position: regPos, state: 0
+        deviceId: regId, name: regName, control_type: regType, position: regPos, state: 0
       });
       logResult(`Registered successfully: ${regId}`);
       if (onActionSuccess) onActionSuccess();

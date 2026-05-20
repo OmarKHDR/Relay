@@ -3,14 +3,14 @@ import { z } from 'zod';
 export const registerRoomDto = {
     body: z.object({
         name: z.string(),
-        minX: z.number(),
-        maxX: z.number(),
-        minY: z.number(),
-        maxY: z.number(),
+        min_x: z.number(),
+        max_x: z.number(),
+        min_y: z.number(),
+        max_y: z.number(),
         theta: z.number(),
-        poseX: z.number(),
-        poseY: z.number(),
-        poseTheta: z.number(),
+        pose_x: z.number(),
+        pose_y: z.number(),
+        pose_theta: z.number(),
         devices: z.array(z.object()).optional(),
     }),
 };
@@ -18,14 +18,14 @@ export const registerRoomDto = {
 export const updateRoomDto = {
     body: z.object({
         name: z.string().optional(),
-        minX: z.number().optional(),
-        maxX: z.number().optional(),
-        minY: z.number().optional(),
-        maxY: z.number().optional(),
+        min_x: z.number().optional(),
+        max_x: z.number().optional(),
+        min_y: z.number().optional(),
+        max_y: z.number().optional(),
         theta: z.number().optional(),
-        poseX: z.number().optional(),
-        poseY: z.number().optional(),
-        poseTheta: z.number().optional(),
+        pose_x: z.number().optional(),
+        pose_y: z.number().optional(),
+        pose_theta: z.number().optional(),
         devices: z.array(z.object()).optional(),
     }),
 };

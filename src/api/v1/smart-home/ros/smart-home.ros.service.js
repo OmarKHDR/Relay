@@ -6,11 +6,11 @@ import { smartHomeService } from '../smart-home.service.js';
 const mapToRosDevice = (dev = {}) => ({
     id: dev.id || '',
     name: dev.name || '',
-    control_type: dev.controlType || dev.control_type || '',
+    control_type: dev.control_type || '',
     state: Number(dev.state) || 0,
     connected: Boolean(dev.connected),
-    created_at: dev.createdAt ? String(dev.createdAt) : '',
-    updated_at: dev.updatedAt ? String(dev.updatedAt) : '',
+    created_at: dev.created_at ? String(dev.created_at) : '',
+    updated_at: dev.updated_at ? String(dev.updated_at) : '',
 });
 
 class SmartHomeService {
@@ -55,6 +55,13 @@ class SmartHomeService {
             serviceType: 'sanad_interfaces/srv/RegisterDevice',
         });
         this.registerDevice.advertise(this.registerDeviceCallback.bind(this));
+
+        this.registerDevice = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/smarthome/controlDevice',
+            serviceType: 'sanad_interfaces/srv/ControlDevice',
+        });
+        this.registerDevice.advertise(this.registerDeviceCallback.bind(this));
     }
 
     async getAllDevicesCallback(req, res) {
@@ -80,11 +87,11 @@ class SmartHomeService {
         const device = {
             id: devMsg.id,
             name: devMsg.name,
-            controlType: devMsg.control_type,
+            control_type: devMsg.control_type,
             state: devMsg.state,
             connected: devMsg.connected,
-            createdAt: devMsg.created_at,
-            updatedAt: devMsg.updated_at,
+            created_at: devMsg.created_at,
+            updated_at: devMsg.updated_at,
         };
         await smartHomeService.addDevice(device);
         res.success = true;

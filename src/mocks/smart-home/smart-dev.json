@@ -1,6 +1,6 @@
 {
   "deviceId": "light-a3f9c1",
-  "controlType": "binary",
+  "control_type": "binary",
   "state": 1,
   "port": "19803"
 }

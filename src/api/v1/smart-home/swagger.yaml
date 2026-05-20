@@ -170,7 +170,7 @@ components:
           type: string
         ip:
           type: string
-        controlType:
+        control_type:
           type: string
         state:
           type: integer
@@ -269,7 +269,7 @@ components:
           type: string
         state:
           type: integer
-          description: For binary controlType, must be 0 or 1.
+          description: For binary control_type, must be 0 or 1.
       required:
         - id
         - state

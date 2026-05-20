@@ -55,7 +55,7 @@ class SmartHomeDevicesDB {
         const fullDevice = {
             ...device,
             id,
-            control_type: device.control_type ?? device.controlType,
+            control_type: device.control_type,
             connected: device.connected ?? false,
             created_at: device.created_at ?? new Date(),
             updated_at: new Date(),
@@ -73,8 +73,8 @@ class SmartHomeDevicesDB {
         const updateData = {};
         if (device.connected !== undefined) updateData.connected = Boolean(device.connected);
         if (device.name !== undefined) updateData.name = device.name;
-        if (device.control_type !== undefined || device.controlType !== undefined) {
-            updateData.control_type = device.control_type ?? device.controlType;
+        if (device.control_type !== undefined) {
+            updateData.control_type = device.control_type;
         }
         updateData.updated_at = new Date();
 

@@ -13,12 +13,12 @@ export function dataValidation(SchemaObject) {
                 const message = error.errors.map(issue => ({
                     message: `${issue.path.join('.')} is ${issue.message}`,
                 }));
-                res.status(StatusCodes.BAD_REQUEST).json({
+                return res.status(StatusCodes.BAD_REQUEST).json({
                     error: 'Invalid data',
                     details: message,
                 });
             }
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal Server Error' });
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal Server Error' });
         }
     };
 }

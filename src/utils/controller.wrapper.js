@@ -1,29 +1,31 @@
-export const errorWrapper = (controller) => {
-	return async (req, res, next) => {
-		try {
-			const result = await controller(req, res, next);
-			res.send({
-				success: true, 
-				data: result,
-			})
-		} catch(err) {
-			next(err);
-		}
-	}
-}
+import timestamper from "./timestamp.js";
 
-export const resultDefinedWrapper = (controller) => {
-	return async (req, res, next) => {
-		const result = await controller(req, res, next);
-		if (result === undefined) {
-			throw new Error('result is undefined');
-		}
-		return result;
-	}
-}
+export const errorWrapper = controller => {
+    return async (req, res, next) => {
+        try {
+            console.log("inside error wrapper")
+            const result = await controller(req, res, next);
+            return res.send({
+                success: true,
+                data: result,
+                meta: { timestamp: timestamper() }
+            });
+        } catch (err) {
+            next(err);
+        }
+    };
+};
 
-export const globalControllerWrapper = (controller) => {
-	return errorWrapper(
-		resultDefinedWrapper(controller)
-	);
-}
+export const resultDefinedWrapper = controller => {
+    return async (req, res, next) => {
+        const result = await controller(req, res, next);
+        if (result === undefined) {
+            throw new Error('result is undefined');
+        }
+        return result;
+    };
+};
+
+export const globalControllerWrapper = controller => {
+    return errorWrapper(resultDefinedWrapper(controller));
+};
