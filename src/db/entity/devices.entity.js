@@ -1,18 +1,19 @@
 import { EntitySchema } from 'typeorm';
+import { nullable } from 'zod';
 
 export const DevicesSchema = new EntitySchema({
     name: 'devices',
     columns: {
         id: {
-            type: "text",
+            type: 'text',
             primary: true,
         },
         name: {
-            type: "text",
+            type: 'text',
             nullable: false,
         },
         control_type: {
-            type: "text",
+            type: 'text',
             nullable: false,
         },
         state: {
@@ -21,7 +22,7 @@ export const DevicesSchema = new EntitySchema({
             default: 0,
         },
         connected: {
-            type: "boolean",
+            type: 'boolean',
             nullable: false,
             default: false,
         },
@@ -36,10 +37,11 @@ export const DevicesSchema = new EntitySchema({
     },
     relations: {
         room: {
-            type: "many-to-one",
-            target: "rooms",
+            type: 'many-to-one',
+            target: 'rooms',
             joinColumn: true,
-            inverseSide: "devices",
-        }
-    }
+            inverseSide: 'devices',
+            nullable: true,
+        },
+    },
 });

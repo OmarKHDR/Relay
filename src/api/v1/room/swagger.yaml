@@ -1,0 +1,251 @@
+openapi: 3.0.3
+info:
+  title: SANAD Room API
+  description: API to manage rooms and navigation within the map
+  version: 1.0.0
+
+paths:
+  /api/v1/room:
+    get:
+      summary: Get all rooms
+      responses:
+        '200':
+          description: All cached rooms returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessRoomsMapResponse'
+
+    post:
+      summary: Register a new room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRoomRequest'
+      responses:
+        '200':
+          description: Room registered. Returns the entire rooms map.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessRoomsMapResponse'
+
+    patch:
+      summary: Update existing room info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoomRequest'
+      responses:
+        '200':
+          description: Room updated. Returns the updated single room.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessSingleRoomResponse'
+
+  /api/v1/room/{id}:
+    get:
+      summary: Get a room by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Single room returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessSingleRoomResponse'
+
+    delete:
+      summary: Delete a room by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Room deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDeleteResponse'
+
+  /api/v1/room/{id}/navigate:
+    post:
+      summary: Navigate robot to room
+      description: Sends a nav2 NavigateToPose goal using the room's stored pose.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Navigation goal sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessNavigateResponse'
+
+components:
+  schemas:
+    Room:
+      type: object
+      description: Room object as stored in DB and kept in memory.
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        min_x:
+          type: number
+        min_y:
+          type: number
+        max_x:
+          type: number
+        max_y:
+          type: number
+        theta:
+          type: number
+          default: 0.0
+        pose_x:
+          type: number
+        pose_y:
+          type: number
+        pose_theta:
+          type: number
+          default: 0.0
+
+    RoomsMap:
+      type: object
+      description: Object keyed by room id, each value is a Room.
+      additionalProperties:
+        $ref: '#/components/schemas/Room'
+
+    RegisterRoomRequest:
+      type: object
+      description: Request body uses camelCase field names per the DTO validation.
+      properties:
+        name:
+          type: string
+        minX:
+          type: number
+        maxX:
+          type: number
+        minY:
+          type: number
+        maxY:
+          type: number
+        theta:
+          type: number
+        poseX:
+          type: number
+        poseY:
+          type: number
+        poseTheta:
+          type: number
+        devices:
+          type: array
+          items:
+            type: object
+      required:
+        - name
+        - minX
+        - maxX
+        - minY
+        - maxY
+        - theta
+        - poseX
+        - poseY
+        - poseTheta
+
+    UpdateRoomRequest:
+      type: object
+      description: All fields optional except id. Uses camelCase per the DTO.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        minX:
+          type: number
+        maxX:
+          type: number
+        minY:
+          type: number
+        maxY:
+          type: number
+        theta:
+          type: number
+        poseX:
+          type: number
+        poseY:
+          type: number
+        poseTheta:
+          type: number
+        devices:
+          type: array
+          items:
+            type: object
+
+    SuccessRoomsMapResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/RoomsMap'
+
+    SuccessSingleRoomResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Room'
+
+    SuccessDeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            deleted:
+              type: boolean
+              example: true
+
+    SuccessNavigateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+            message:
+              type: string
+              example: Navigating to room <id>

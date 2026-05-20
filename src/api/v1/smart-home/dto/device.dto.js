@@ -1,9 +1,47 @@
 import z from 'zod';
 
 export const getDeviceDto = {
-    query: z.object({
+    params: z.object({
         id: z.string(),
     }),
 };
 
-export const controlDeviceDto = {};
+export const controlDeviceDto = {
+    body: z.object({
+        id: z.string(),
+        state: z.number(),
+    }),
+};
+
+export const registerDeviceDto = {
+    body: z.object({
+        device: z.object({
+            id: z.string(),
+            name: z.string(),
+            control_type: z.string(),
+            state: z.number(),
+        }),
+    }),
+};
+
+export const updateDeviceDto = {
+    body: z.object({
+        id: z.string(),
+        name: z.string(),
+    }),
+};
+
+export const deleteDeviceDto = {
+    params: z.object({
+        id: z.string(),
+    }),
+};
+
+export const changeDeviceRoomDto = {
+    params: z.object({
+        id: z.string(),
+    }),
+    body: z.object({
+        roomId: z.string(),
+    }),
+};

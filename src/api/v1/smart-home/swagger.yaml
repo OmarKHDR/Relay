@@ -15,72 +15,44 @@ paths:
           schema:
             type: integer
             minimum: 1
-          description: Discovery timeout in milliseconds.
+          description: Discovery timeout in milliseconds (clamped between 1-9999, default 400).
       responses:
         '200':
           description: Devices discovered successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessDevicesResponse'
-        '500':
-          description: Discovery failed.
+                $ref: '#/components/schemas/SuccessDevicesMapResponse'
 
   /api/v1/smart-home/devices:
     get:
       summary: Get all devices
       responses:
         '200':
-          description: Devices retrieved successfully.
+          description: All cached devices returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessDevicesResponse'
-
-  /api/v1/smart-home/device:
-    get:
-      summary: Get a device by id
-      parameters:
-        - in: query
-          name: deviceId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Device retrieved successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessDeviceResponse'
-        '400':
-          description: deviceId is required.
-        '404':
-          description: Device not found.
-
-  /api/v1/smart-home/info:
-    get:
-      summary: Get device info from device
-      parameters:
-        - in: query
-          name: deviceId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Device info retrieved successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessAnyResponse'
-        '400':
-          description: deviceId is required.
-        '500':
-          description: Failed to retrieve device info.
+                $ref: '#/components/schemas/SuccessDevicesMapResponse'
 
     post:
-      summary: Update device info
+      summary: Register a new device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '200':
+          description: Device registered. Returns entire devices map.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDevicesMapResponse'
+
+    patch:
+      summary: Update existing device info
       requestBody:
         required: true
         content:
@@ -89,15 +61,13 @@ paths:
               $ref: '#/components/schemas/UpdateDeviceInfoRequest'
       responses:
         '200':
-          description: Device info updated successfully.
+          description: Device updated. Returns the updated single device.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessDeviceResponse'
-        '400':
-          description: Validation error.
+                $ref: '#/components/schemas/SuccessSingleDeviceResponse'
 
-  /api/v1/smart-home/control:
+  /api/v1/smart-home/devices/control:
     post:
       summary: Control a device
       requestBody:
@@ -108,60 +78,93 @@ paths:
               $ref: '#/components/schemas/ControlRequest'
       responses:
         '200':
-          description: Device state updated successfully.
+          description: Device state changed. Returns the updated device.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessNullResponse'
-        '400':
-          description: Validation error.
-        '500':
-          description: Failed to change device state.
+                $ref: '#/components/schemas/SuccessSingleDeviceResponse'
 
-  /api/v1/smart-home/register:
-    post:
-      summary: Register a new device
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterDeviceRequest'
-      responses:
-        '201':
-          description: Device registered successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessDeviceResponse'
-        '400':
-          description: Failed to register device.
-
-  /api/v1/smart-home/devices/{deviceId}:
-    delete:
-      summary: Delete a device
+  /api/v1/smart-home/devices/{id}/info:
+    get:
+      summary: Get device info from device hardware
+      description: Fetches live info directly from the physical device over HTTP.
       parameters:
         - in: path
-          name: deviceId
+          name: id
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Device deleted successfully.
+          description: Device info retrieved. Shape depends on the physical device response.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessMessageResponse'
-        '400':
-          description: Failed to delete device.
+                $ref: '#/components/schemas/SuccessAnyResponse'
+
+  /api/v1/smart-home/devices/{id}/room:
+    patch:
+      summary: Change device room
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeDeviceRoomRequest'
+      responses:
+        '200':
+          description: Device room changed. Returns TypeORM UpdateResult.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessUpdateResultResponse'
+
+  /api/v1/smart-home/devices/{id}:
+    get:
+      summary: Get a device by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Single device returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessSingleDeviceResponse'
+
+    delete:
+      summary: Delete a device
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessDeleteResponse'
 
 components:
   schemas:
     Device:
       type: object
+      description: In-memory device object (merged from DB + discovery data).
       properties:
-        deviceId:
+        id:
           type: string
         name:
           type: string
@@ -170,94 +173,142 @@ components:
         controlType:
           type: string
         state:
-          oneOf:
-            - type: integer
-            - type: string
-            - type: boolean
-        position:
-          type: string
+          type: integer
         connected:
           type: boolean
+        position:
+          type: string
+          nullable: true
+        room:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
-      required:
-        - deviceId
 
     DevicesMap:
       type: object
+      description: Object keyed by device id, each value is a Device.
       additionalProperties:
         $ref: '#/components/schemas/Device'
 
-    SuccessDevicesResponse:
+    SuccessDevicesMapResponse:
       type: object
       properties:
         success:
           type: boolean
+          example: true
         data:
           $ref: '#/components/schemas/DevicesMap'
 
-    SuccessDeviceResponse:
+    SuccessSingleDeviceResponse:
       type: object
       properties:
         success:
           type: boolean
+          example: true
         data:
           $ref: '#/components/schemas/Device'
 
-    SuccessNullResponse:
+    SuccessDeleteResponse:
       type: object
       properties:
         success:
           type: boolean
+          example: true
         data:
-          nullable: true
+          type: object
+          properties:
+            id:
+              type: string
+            deleted:
+              type: boolean
+              example: true
 
     SuccessAnyResponse:
       type: object
       properties:
         success:
           type: boolean
+          example: true
         data:
           type: object
+          description: Shape depends on the physical device response.
 
-    SuccessMessageResponse:
+    SuccessUpdateResultResponse:
       type: object
       properties:
         success:
           type: boolean
-        reason:
-          type: string
+          example: true
+        data:
+          type: object
+          description: TypeORM UpdateResult.
+          properties:
+            generatedMaps:
+              type: array
+              items:
+                type: object
+            raw:
+              type: array
+              items:
+                type: object
+            affected:
+              type: integer
 
     ControlRequest:
       type: object
       properties:
-        deviceId:
+        id:
           type: string
         state:
-          oneOf:
-            - type: integer
-            - type: string
-            - type: boolean
+          type: integer
+          description: For binary controlType, must be 0 or 1.
       required:
-        - deviceId
+        - id
         - state
 
     RegisterDeviceRequest:
-      allOf:
-        - $ref: '#/components/schemas/Device'
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        control_type:
+          type: string
+        state:
+          type: integer
+        roomName:
+          type: string
+          description: Optional room name to associate the device with on registration.
+      required:
+        - id
+        - name
+        - control_type
+        - state
 
     UpdateDeviceInfoRequest:
       type: object
       properties:
-        deviceId:
-          type: string
-        location:
+        id:
           type: string
         name:
           type: string
       required:
-        - deviceId
+        - id
+        - name
+
+    ChangeDeviceRoomRequest:
+      type: object
+      properties:
+        roomId:
+          type: string
+      required:
+        - roomId

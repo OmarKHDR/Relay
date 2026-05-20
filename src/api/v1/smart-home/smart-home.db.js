@@ -28,12 +28,20 @@ class SmartHomeDevicesDB {
 
     async saveDevice(device) {
         const id = device.deviceId || device.id;
+        if (device.roomName) {
+            const room = await dbRepositories.room.findOne({ name: device.roomName });
+            if (!room) {
+                throw new Error(`room ${device.roomName} doesn't exist`);
+            }
+            device.roomId = room.id;
+        }
         const fullDevice = {
             ...device,
             id,
             connected: device.connected ?? false,
             created_at: device.created_at ?? new Date(),
             updated_at: new Date(),
+            room: device.roomId ? { id: device.roomId } : undefined,
         };
         await this.devicesDb.save(fullDevice);
         this.devices[id] = fullDevice;
@@ -42,20 +50,11 @@ class SmartHomeDevicesDB {
 
     async addDevice(device) {
         const id = device.deviceId || device.id;
-        if (this.devices[id]) {
-            logger.warn(`[SMART HOME DB] Device ${id} already exist, use UPDATE api instead`);
-            throw new Error('Device Already exists');
-        }
         await this.saveDevice(device);
     }
 
     async updateDeviceInfo(device) {
         const id = device.deviceId || device.id;
-        if (!this.devices[id]) {
-            logger.error(`[SMART HOME DB] Device ${id} doesn't exist`);
-            throw new Error('Device does not exist');
-        }
-        
         const updateData = {};
         if (device.connected !== undefined) updateData.connected = Boolean(device.connected);
         if (device.name !== undefined) updateData.name = device.name;
@@ -78,14 +77,13 @@ class SmartHomeDevicesDB {
     }
 
     async deleteDevice(deviceId) {
-        if (this.devices[deviceId]) {
-            await this.devicesDb.delete({ id: deviceId });
-            delete this.devices[deviceId];
-            logger.info(`[SMART HOME DB] Deleted device: ${deviceId}`);
-        } else {
-            logger.error(`[SMART HOME DB] Device ${deviceId} doesn't exist`);
-            throw new Error('Device does not exist');
-        }
+        await this.devicesDb.delete({ id: deviceId });
+        delete this.devices[deviceId];
+        logger.info(`[SMART HOME DB] Deleted device: ${deviceId}`);
+    }
+
+    async updateRoom(id, roomId) {
+        return await this.devicesDb.update({ id }, { room: { id: roomId } })
     }
 }
 

@@ -33,7 +33,7 @@ class WheelChair extends EventEmitter {
         logger.info('[WheelChair ROS TOPIC] creating wheelchair topic for controlling speed and angle');
         return new ROSLIB.Topic({
             ros: this.ros,
-            name: '/cmd_vel',
+            name: '/input_joy/cmd_vel',
             messageType: 'geometry_msgs/Twist',
         });
     }
@@ -47,13 +47,13 @@ class WheelChair extends EventEmitter {
         const changed = this.linearInput !== newLinearInput || this.angularInput !== newAngularInput;
         if (!changed) {
             logger.info(
-            `[WheelChair ROS TOPIC] velocity not changed, keeping it on: ${this.linearInput} and angular speed ${this.angularInput}`
-        );
+                `[WheelChair ROS TOPIC] velocity not changed, keeping it on: ${this.linearInput} and angular speed ${this.angularInput}`
+            );
             return;
         }
         this.linearInput = newLinearInput;
         this.angularInput = newAngularInput;
-        
+
         this.publishCurrent();
         this.emit('velocity:change', {
             linear: this.linearInput,

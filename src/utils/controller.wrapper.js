@@ -1,4 +1,3 @@
-
 export const errorWrapper = (controller) => {
 	return async (req, res, next) => {
 		try {
@@ -19,11 +18,12 @@ export const resultDefinedWrapper = (controller) => {
 		if (result === undefined) {
 			throw new Error('result is not defined');
 		}
+		return result;
 	}
 }
 
 export const globalControllerWrapper = (controller) => {
 	return errorWrapper(
-		resultDefinedWrapper
+		resultDefinedWrapper(controller)
 	);
 }
