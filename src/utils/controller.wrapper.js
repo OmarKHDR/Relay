@@ -1,14 +1,13 @@
-import timestamper from "./timestamp.js";
+import timestamper from './timestamp.js';
 
 export const errorWrapper = controller => {
     return async (req, res, next) => {
         try {
-            console.log("inside error wrapper")
             const result = await controller(req, res, next);
             return res.send({
                 success: true,
                 data: result,
-                meta: { timestamp: timestamper() }
+                meta: { timestamp: timestamper() },
             });
         } catch (err) {
             next(err);

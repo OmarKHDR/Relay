@@ -3,7 +3,6 @@ import logger from '#utils/logger.js';
 import roomRosTopic from './ros/room.ros.topic.js';
 import goalRosAction from '../goal/ros/goal.ros.action.js';
 
-
 class RoomService {
     async getAllRooms() {
         return await roomDB.getAllRooms();
@@ -76,7 +75,7 @@ class RoomService {
             },
         };
 
-        const goal = goalRosAction.executeGoal(poseMessage);
+        const goalId = goalRosAction.executeGoal(poseMessage);
         return { success: true, message: `Navigating to room ${id}` };
     }
 }

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const registerRoomDto = {
     body: z.object({
+        id: z.uuid(),
         name: z.string(),
         min_x: z.number(),
         max_x: z.number(),
@@ -30,21 +31,20 @@ export const updateRoomDto = {
     }),
 };
 
-
 export const getRoomDto = {
     params: z.object({
-        name: z.string(),
+        id: z.string(),
     }),
 };
 
 export const deleteRoomDto = {
     params: z.object({
-        name: z.string(),
+        id: z.string(),
     }),
 };
 
 export const navigateToRoomDto = {
     params: z.object({
-        name: z.string(),
+        id: z.string(),
     }),
 };

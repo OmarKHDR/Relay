@@ -16,7 +16,7 @@ class RoomDB {
             const roomsArr = await this.roomsDb.find({});
             this.rooms = {};
             for (const room of roomsArr) {
-                this.rooms[room.name] = room;
+                this.rooms[room.id] = room;
             }
             return this.rooms;
         } catch (err) {

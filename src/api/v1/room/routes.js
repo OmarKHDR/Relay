@@ -26,8 +26,8 @@ export const RoomRouter = {
             controller: getAllRooms,
             middlewares: [],
             response: {
-                200: ""
-            }
+                200: '',
+            },
         },
         {
             name: 'registerRoom',
@@ -68,7 +68,7 @@ export const RoomRouter = {
         {
             name: 'navigateToRoom',
             description: 'navigate robot to room',
-            method: 'POST',
+            method: 'GET',
             path: '/:id/navigate',
             dto: navigateToRoomDto,
             controller: navigateToRoom,
