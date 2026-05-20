@@ -26,11 +26,11 @@ paths:
               $ref: '#/components/schemas/RegisterRoomRequest'
       responses:
         '200':
-          description: Room registered. Returns the entire rooms map.
+          description: Room registered. Returns the saved room.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessRoomsMapResponse'
+                $ref: '#/components/schemas/Room'
 
     patch:
       summary: Update existing room info

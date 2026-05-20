@@ -54,7 +54,6 @@ export default class ExpressServer {
         const routes = routerConfig.routes || routerConfig;
         const base = routerConfig.base || '';
         if (routerConfig.customRouter) {
-            console.log(routes);
             for (const route of routes) {
                 const path = prefix + base + (route.path ?? '');
                 const handlers = [];

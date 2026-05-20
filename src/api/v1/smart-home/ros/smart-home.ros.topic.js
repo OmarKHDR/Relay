@@ -39,6 +39,7 @@ class SmartHomeTopic {
             case 'NEW_DEVICE':
             case 'DISCONNECTED':
             case 'UPDATE':
+            case 'ADD':
                 this.topic.publish(message);
                 break;
             default:

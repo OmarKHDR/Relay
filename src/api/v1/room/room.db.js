@@ -1,10 +1,14 @@
 import logger from '#utils/logger.js';
 import { dbRepositories } from '#src/db/db.repositories.js';
+import { AppDataSource } from '#src/db/datasources.js';
 
 class RoomDB {
     constructor() {
-        this.rooms = {};
-        this.roomsDb = dbRepositories.room;
+        this.rooms;
+    }
+
+    get roomsDb() {
+        return dbRepositories.room;
     }
 
     async readDbContent() {
@@ -16,37 +20,50 @@ class RoomDB {
             }
             return this.rooms;
         } catch (err) {
-            logger.warn(`[ROOM DB] Failed to read DB, initializing empty:`, err.message);
+            if (!AppDataSource.isInitialized) {
+                throw err;
+            }
+            logger.warn(`[ROOM DB] Failed to read DB, initializing empty: ${err.message}`);
             this.rooms = {};
             return this.rooms;
         }
     }
 
-    async getDb() {
+    async getAllRooms() {
+        if (this.rooms) {
+            return this.rooms;
+        }
         return await this.readDbContent();
     }
 
+    async getRoomById(id) {
+        if (this.rooms)
+    }
+
     async registerRoom(room) {
+        const rooms = await this.getAllRooms();
         const saved = await this.roomsDb.save(room);
-        this.rooms[saved.id] = saved;
+        rooms[saved.id] = saved;
         logger.info(`[ROOM DB] Saved room: ${saved.id}`);
         return saved;
     }
 
     async updateRoom(roomData) {
+        const rooms = await this.getAllRooms();
         const id = roomData.id;
         const updateData = { ...roomData };
         delete updateData.id;
 
         await this.roomsDb.update({ id }, updateData);
-        this.rooms[id] = { ...this.rooms[id], ...updateData };
+        rooms[id] = { ...rooms[id], ...updateData };
         logger.info(`[ROOM DB] Updated room info: ${id}`);
-        return this.rooms[id];
+        return rooms[id];
     }
 
     async deleteRoom(id) {
+        const rooms = await this.getAllRooms();
         await this.roomsDb.delete({ id });
-        delete this.rooms[id];
+        delete rooms[id];
         logger.info(`[ROOM DB] Deleted room: ${id}`);
     }
 }

@@ -1,5 +1,4 @@
 import { EntitySchema } from 'typeorm';
-import { nullable } from 'zod';
 
 export const DevicesSchema = new EntitySchema({
     name: 'devices',

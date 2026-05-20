@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessDevicesMapResponse'
+                $ref: '#/components/schemas/Device'
 
   /api/v1/smart-home/devices:
     get:
@@ -45,7 +45,7 @@ paths:
               $ref: '#/components/schemas/RegisterDeviceRequest'
       responses:
         '200':
-          description: Device registered. Returns entire devices map.
+          description: Device registered. Returns the registered device.
           content:
             application/json:
               schema:

@@ -9,7 +9,7 @@ export async function discover(req, res, next) {
 }
 
 export async function getAllDevices(req, res, next) {
-    const devices = smartHomeService.getAllDevices();
+    const devices = await smartHomeService.getAllDevices();
     return devices;
 }
 
@@ -21,7 +21,7 @@ export async function getInfo(req, res, next) {
 
 export async function getDevice(req, res, next) {
     const { id } = req.params;
-    const device = smartHomeService.getDevice(id);
+    const device = await smartHomeService.getDevice(id);
     return device;
 }
 
@@ -33,7 +33,7 @@ export async function control(req, res, next) {
 
 export async function registerDevice(req, res, next) {
     const device = req.body;
-    const savedDevice = await smartHomeService.addDevice(device);
+    const savedDevice = await smartHomeService.addDevice(device.device);
     return savedDevice;
 }
 
@@ -59,6 +59,6 @@ export async function deleteDevice(req, res, next) {
 export async function changeDeviceRoom(req, res, next) {
     const { id } = req.params;
     const { roomId } = req.body;
-    const device = await smartHomeService.changeDeviceRoom({id, roomId});
+    const device = await smartHomeService.changeDeviceRoom({ id, roomId });
     return device;
 }

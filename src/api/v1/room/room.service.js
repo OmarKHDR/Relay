@@ -4,34 +4,24 @@ import roomRosTopic from './ros/room.ros.topic.js';
 import goalRosAction from '../goal/ros/goal.ros.action.js';
 
 class RoomService {
-    constructor() {
-        this.rooms = {};
-        this.initializeDB();
-    }
-
-    async initializeDB() {
-        this.rooms = await roomDB.getDb();
-    }
-
     async getAllRooms() {
-        return this.rooms;
+        return await roomDB.getAllRooms();
     }
 
     async getRoom(id) {
-        if (!this.rooms[id]) throw new Error(`room doesn't exist`);
-        return this.rooms[id];
+        const room = await roomDB.getRoomById(id);
+        return room;
     }
 
     async registerRoom(room) {
         const savedRoom = await roomDB.registerRoom(room);
-        this.rooms[savedRoom.id] = savedRoom;
-
         roomRosTopic.publishRoomEvent('NEW_ROOM', savedRoom);
-        return this.rooms;
+        return savedRoom;
     }
 
     async updateRoom(data) {
-        if (!this.rooms[data.id]) {
+        const rooms = await this.getAllRooms();
+        if (!rooms[data.id]) {
             logger.warn(`[ROOM] room doesn't exist or undefined`);
             throw new Error(`trying to update a room that doesn't exist ${data.id}`);
         }
@@ -44,7 +34,8 @@ class RoomService {
     }
 
     async deleteRoom(id) {
-        if (!id || !this.rooms[id]) {
+        const rooms = await this.getAllRooms();
+        if (!id || !rooms[id]) {
             logger.warn(`[ROOM] room ${id} doesn't exist`);
             throw new Error(`trying to delete room that doesn't exist room id: ${id}`);
         }
@@ -57,30 +48,31 @@ class RoomService {
     }
 
     async navigateToRoom(id) {
-        if (!this.rooms[id]) {
+        const rooms = await this.getAllRooms();
+        if (!rooms[id]) {
             throw new Error(`room ${id} doesn't exist`);
         }
 
-        const room = this.rooms[id];
+        const room = rooms[id];
         const poseMessage = {
             pose: {
                 header: {
-                    frame_id: 'map'
+                    frame_id: 'map',
                 },
                 pose: {
                     position: {
                         x: room.pose_x,
                         y: room.pose_y,
-                        z: 0.0
+                        z: 0.0,
                     },
                     orientation: {
                         x: 0.0,
                         y: 0.0,
                         z: Math.sin(room.pose_theta / 2),
-                        w: Math.cos(room.pose_theta / 2)
-                    }
-                }
-            }
+                        w: Math.cos(room.pose_theta / 2),
+                    },
+                },
+            },
         };
 
         const goal = goalRosAction.executeGoal(poseMessage);
