@@ -37,7 +37,11 @@ class RoomDB {
     }
 
     async getRoomById(id) {
-        if (this.rooms)
+        if (this.rooms) {
+            return this.rooms[id]
+        }
+        const rooms = await this.readDbContent();
+        return rooms[id]
     }
 
     async registerRoom(room) {
