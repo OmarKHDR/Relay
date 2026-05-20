@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: SANAD Room API
-  description: API to manage rooms and navigation within the map
+  description: API to manage rooms and navigate to stored room poses.
   version: 1.0.0
 
 paths:
@@ -10,12 +10,11 @@ paths:
       summary: Get all rooms
       responses:
         '200':
-          description: All cached rooms returned.
+          description: All cached rooms keyed by room id.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessRoomsMapResponse'
-
+                $ref: '#/components/schemas/RoomsMapResponse'
     post:
       summary: Register a new room
       requestBody:
@@ -26,14 +25,20 @@ paths:
               $ref: '#/components/schemas/RegisterRoomRequest'
       responses:
         '200':
-          description: Room registered. Returns the saved room.
+          description: Registered room.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Room'
-
+                $ref: '#/components/schemas/RoomResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     patch:
       summary: Update existing room info
+      description: Runtime expects the room id in the request body.
       requestBody:
         required: true
         content:
@@ -42,103 +47,66 @@ paths:
               $ref: '#/components/schemas/UpdateRoomRequest'
       responses:
         '200':
-          description: Room updated. Returns the updated single room.
+          description: Updated room.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessSingleRoomResponse'
+                $ref: '#/components/schemas/RoomResponse'
 
   /api/v1/room/{id}:
     get:
       summary: Get a room by id
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/RoomId'
       responses:
         '200':
-          description: Single room returned.
+          description: Room or null/undefined if not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessSingleRoomResponse'
-
+                $ref: '#/components/schemas/RoomResponse'
     delete:
       summary: Delete a room by id
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/RoomId'
       responses:
         '200':
-          description: Room deleted.
+          description: Deletion result.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessDeleteResponse'
+                $ref: '#/components/schemas/DeleteRoomResponse'
 
   /api/v1/room/{id}/navigate:
-    post:
+    get:
       summary: Navigate robot to room
-      description: Sends a nav2 NavigateToPose goal using the room's stored pose.
+      description: Sends a Nav2 NavigateToPose goal using the room's stored pose.
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/RoomId'
       responses:
         '200':
           description: Navigation goal sent.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessNavigateResponse'
+                $ref: '#/components/schemas/NavigateRoomResponse'
 
 components:
+  parameters:
+    RoomId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
   schemas:
     Room:
       type: object
-      description: Room object as stored in DB and kept in memory.
       properties:
         id:
           type: string
           format: uuid
-        name:
-          type: string
-        min_x:
-          type: number
-        min_y:
-          type: number
-        max_x:
-          type: number
-        max_y:
-          type: number
-        theta:
-          type: number
-          default: 0.0
-        pose_x:
-          type: number
-        pose_y:
-          type: number
-        pose_theta:
-          type: number
-          default: 0.0
-
-    RoomsMap:
-      type: object
-      description: Object keyed by room id, each value is a Room.
-      additionalProperties:
-        $ref: '#/components/schemas/Room'
-
-    RegisterRoomRequest:
-      type: object
-      description: Request body uses snake_case field names per the DTO validation.
-      properties:
         name:
           type: string
         min_x:
@@ -161,7 +129,17 @@ components:
           type: array
           items:
             type: object
+
+    RoomsMap:
+      type: object
+      description: Object keyed by room id.
+      additionalProperties:
+        $ref: '#/components/schemas/Room'
+
+    RegisterRoomRequest:
+      type: object
       required:
+        - id
         - name
         - min_x
         - max_x
@@ -171,10 +149,37 @@ components:
         - pose_x
         - pose_y
         - pose_theta
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        min_x:
+          type: number
+        max_x:
+          type: number
+        min_y:
+          type: number
+        max_y:
+          type: number
+        theta:
+          type: number
+        pose_x:
+          type: number
+        pose_y:
+          type: number
+        pose_theta:
+          type: number
+        devices:
+          type: array
+          items:
+            type: object
 
     UpdateRoomRequest:
       type: object
-      description: All fields optional except id. Uses snake_case per the DTO.
+      required:
+        - id
       properties:
         id:
           type: string
@@ -201,51 +206,97 @@ components:
           items:
             type: object
 
-    SuccessRoomsMapResponse:
+    NavigateRoomResult:
       type: object
       properties:
         success:
           type: boolean
           example: true
-        data:
-          $ref: '#/components/schemas/RoomsMap'
+        message:
+          type: string
+          example: Navigating to room 24f6d9b4-7c44-4bd2-8d0e-62c7adfc35b7
 
-    SuccessSingleRoomResponse:
+    DeleteResult:
       type: object
       properties:
-        success:
+        id:
+          type: string
+        deleted:
           type: boolean
           example: true
-        data:
-          $ref: '#/components/schemas/Room'
 
-    SuccessDeleteResponse:
+    Meta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+
+    RoomsMapResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RoomsMap'
+
+    RoomResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Room'
+
+    DeleteRoomResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/DeleteResult'
+
+    NavigateRoomResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/NavigateRoomResult'
+
+    SuccessResponse:
       type: object
       properties:
         success:
           type: boolean
           example: true
-        data:
+        data: {}
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        reason:
+          type: string
+        meta:
           type: object
           properties:
-            id:
+            timestamper:
               type: string
-            deleted:
-              type: boolean
-              example: true
 
-    SuccessNavigateResponse:
+    ValidationErrorResponse:
       type: object
       properties:
-        success:
-          type: boolean
-          example: true
-        data:
-          type: object
-          properties:
-            success:
-              type: boolean
-              example: true
-            message:
-              type: string
-              example: Navigating to room <id>
+        error:
+          type: string
+          example: Invalid data
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string

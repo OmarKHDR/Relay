@@ -1,167 +1,85 @@
 openapi: 3.0.3
 info:
-  title: Robot Navigation API
-  description: API for managing Nav2 goals via ROS 2 Action Servers.
+  title: SANAD Goal API
+  description: API for managing Nav2 goals through ROSLIB.
   version: 1.0.0
 
 paths:
   /api/v1/goal:
     get:
-      summary: Get current navigation goal and status
-      description: Retrieves the active goal coordinates, the current ROS status, and real-time feedback.
+      summary: Get current navigation goal
+      description: Returns the plain local snapshot of the active ROSLIB goal.
       responses:
         '200':
-          description: Active goal found.
+          description: Active goal snapshot.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GoalResponse'
-        '404':
-          description: No active goal.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/GoalSnapshotResponse'
         '500':
-          description: Internal Server Error.
+          description: No active goal or ROS/runtime error.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
     post:
       summary: Set a new navigation goal
-      description: Sends a new target pose (x, y, yaw) to the robot.
+      description: Sends a target pose to the Nav2 NavigateToPose action server.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - x
-                - y
-                - yaw
-              properties:
-                x:
-                  type: number
-                  example: 1.5
-                y:
-                  type: number
-                  example: -2.0
-                yaw:
-                  type: number
-                  description: Rotation in radians.
-                  example: 0.785
+              $ref: '#/components/schemas/SetGoalRequest'
       responses:
         '200':
-          description: Goal sent successfully.
+          description: Goal accepted by ROSLIB locally.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GoalAcceptedResponse'
+                $ref: '#/components/schemas/SetGoalResponse'
         '400':
-          description: Invalid input (types are not numbers).
+          description: Validation error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      summary: Cancel active goals
+      description: Sends a zero UUID CancelGoal request to cancel all NavigateToPose goals, then clears the local active goal snapshot.
+      responses:
+        '200':
+          description: Cancel request succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelGoalResponse'
         '500':
-          description: ROS Action Server failure.
+          description: ROS cancel service error.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-    delete:
-      summary: Cancel the active goal
-      description: Issues a cancellation command to the Nav2 action server.
+  /api/v1/goal/feedback:
+    get:
+      summary: Get current goal feedback
       responses:
         '200':
-          description: Cancellation signal sent.
+          description: Latest feedback event, or null if no feedback has been received.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  data:
-                    type: object
-                    properties:
-                      canceled:
-                        type: boolean
-                      message:
-                        type: string
-                  meta:
-                    $ref: '#/components/schemas/Meta'
-        '409':
-          description: Conflict - No active goal to cancel.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/GoalFeedbackResponse'
 
 components:
   schemas:
-    # --- Response Wrappers ---
-    GoalResponse:
+    SetGoalRequest:
       type: object
-      properties:
-        status:
-          type: string
-          example: success
-        data:
-          type: object
-          properties:
-            goal:
-              $ref: '#/components/schemas/GoalPose'
-            status:
-              $ref: '#/components/schemas/RosStatus'
-            feedback:
-              $ref: '#/components/schemas/NavFeedback'
-        meta:
-          $ref: '#/components/schemas/Meta'
-
-    GoalAcceptedResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        data:
-          allOf:
-            - $ref: '#/components/schemas/GoalPose'
-            - type: object
-              properties:
-                status:
-                  type: string
-                  example: PENDING
-        meta:
-          $ref: '#/components/schemas/Meta'
-
-    ErrorResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: fail
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            detail:
-              type: string
-        meta:
-          $ref: '#/components/schemas/Meta'
-
-    # --- Data Objects ---
-    GoalPose:
-      type: object
+      required:
+        - x
+        - y
+        - yaw
       properties:
         x:
           type: number
@@ -169,56 +87,129 @@ components:
           type: number
         yaw:
           type: number
+          description: Rotation in radians.
 
-    RosStatus:
+    GoalSnapshot:
       type: object
       properties:
-        id:
-          type: integer
-          enum: [0, 1, 2, 3, 4, 5, 6]
-        status:
+        goal_id:
           type: string
-          enum: [UNKNOWN, ACCEPTED, EXECUTING, CANCELING, SUCCEEDED, CANCELED, ABORTED]
-        isActive:
+        frame_id:
+          type: string
+          example: map
+        x:
+          type: number
+        y:
+          type: number
+        yaw:
+          type: number
+        status:
+          type: object
+          nullable: true
+          description: Raw ROSLIB status event for the current goal.
+        feedback:
+          type: object
+          nullable: true
+          description: Latest raw Nav2 feedback event.
+        result:
+          type: object
+          nullable: true
+          description: Raw Nav2 result event.
+        is_finished:
           type: boolean
 
-    NavFeedback:
+    SetGoalResult:
       type: object
       properties:
-        position:
-          type: object
-          properties:
-            x: { type: number }
-            y: { type: number }
-            z: { type: number }
-        q:
-          type: object
-          properties:
-            x: { type: number }
-            y: { type: number }
-            z: { type: number }
-            w: { type: number }
-        navigation_time:
-          $ref: '#/components/schemas/RosTime'
-        estimated_time_remaining:
-          $ref: '#/components/schemas/RosTime'
-        number_of_recoveries:
-          type: integer
-        distance_remaining:
-          type: number
+        goalID:
+          type: string
 
-    RosTime:
+    CancelGoalResult:
       type: object
       properties:
-        sec:
-          type: integer
-        nanosec:
-          type: integer
+        canceled:
+          type: boolean
+          example: true
+
+    FeedbackResult:
+      type: object
+      properties:
+        feedback:
+          type: object
+          nullable: true
 
     Meta:
       type: object
       properties:
         timestamp:
           type: string
-          format: date-time
-          example: "2024-05-20T10:00:00Z"
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data: {}
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    GoalSnapshotResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/GoalSnapshot'
+
+    SetGoalResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SetGoalResult'
+
+    CancelGoalResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CancelGoalResult'
+
+    GoalFeedbackResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FeedbackResult'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        reason:
+          type: string
+        meta:
+          type: object
+          properties:
+            timestamper:
+              type: string
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Invalid data
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
