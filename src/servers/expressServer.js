@@ -102,13 +102,14 @@ export default class ExpressServer {
 
     setUpSwaggerDocs(options, prefix = '/api/v1', endpoint = '/docs') {
         this.swaggerDocs = swaggerJsdoc(options);
-        if (this.swaggerDocs)
+        if (this.swaggerDocs) {
             this.app.use(
                 prefix + endpoint,
                 swaggerUiExpress.serve,
                 swaggerUiExpress.setup(this.swaggerDocs)
             );
-        else throw new Error('cant setup swagger');
+            this.app.get(prefix + endpoint + '.json', (req, res) => res.json(this.swaggerDocs));
+        } else throw new Error('cant setup swagger');
         return this;
     }
 

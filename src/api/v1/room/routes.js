@@ -25,6 +25,9 @@ export const RoomRouter = {
             path: '/',
             controller: getAllRooms,
             middlewares: [],
+            response: {
+                200: ""
+            }
         },
         {
             name: 'registerRoom',
