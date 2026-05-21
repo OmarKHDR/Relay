@@ -14,7 +14,7 @@ const mapToRosRoom = (room = {}) => ({
     pose_x: Number(room.pose_x) || 0.0,
     pose_y: Number(room.pose_y) || 0.0,
     pose_theta: Number(room.pose_theta) || 0.0,
-    devices: room.devices || [], // devices array left empty for now to match interface
+    devices: room.devices || [],
 });
 
 class RoomRosService {
@@ -66,76 +66,76 @@ class RoomRosService {
             serviceType: 'sanad_interfaces/srv/UpdateRoom',
         });
         this.updateRoom.advertise(this.updateRoomCallback.bind(this));
-
-        this.updateRoom = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/room/addDeviceToRoom',
-            serviceType: 'sanad_interfaces/srv/AddDeviceToRoom',
-        });
-        this.updateRoom.advertise(this.updateRoomCallback.bind(this));
     }
 
-    async getAllRoomsCallback(req, res) {
-        const rooms = await roomService.getAllRooms();
-        res.rooms = Object.values(rooms).map(mapToRosRoom);
+    getAllRoomsCallback(req, res) {
+        console.log('sending rooms to ros');
+        const rooms = roomService.getAllRooms();
+        res.rooms = Object.values(rooms || {}).map(mapToRosRoom);
+        console.log(rooms)
         return true;
     }
 
-    async deleteRoomCallback(req, res) {
-        await roomService.deleteRoom(req.id);
+    deleteRoomCallback(req, res) {
+        const rooms = roomService.getAllRooms();
+        if (!rooms[req.id]) {
+            logger.warn(
+                `[Room ROS service] Failed to delete room (name=${req.id}): room doesn't exist`
+            );
+            res.success = false;
+            return true;
+        }
+        roomService.deleteRoom(req.id).catch(error => {
+            logger.warn(`[Room ROS service] Failed to delete room: ${error.message}`);
+        });
         res.success = true;
         return true;
     }
 
-    async getRoomCallback(req, res) {
-        const rooms = await roomService.getAllRooms();
+    getRoomCallback(req, res) {
+        const rooms = roomService.getAllRooms();
         // Fallback: look up by name (req.name from GetRoom.srv) or id
         const room =
-            Object.values(rooms).find(r => r.name === req.name || r.id === req.name) ||
-            rooms[req.name];
+            Object.values(rooms || {}).find(r => r.name === req.name || r.id === req.name) ||
+            rooms?.[req.name];
         res.room = room ? mapToRosRoom(room) : mapToRosRoom({});
         res.success = !!room;
         return true;
     }
 
-    async registerRoomCallback(req, res) {
-        const roomMsg = req.room;
-        const room = {
-            name: roomMsg.name,
-            min_x: roomMsg.min_x,
-            max_x: roomMsg.max_x,
-            min_y: roomMsg.min_y,
-            max_y: roomMsg.max_y,
-            theta: roomMsg.theta,
-            pose_x: roomMsg.pose_x,
-            pose_y: roomMsg.pose_y,
-            pose_theta: roomMsg.pose_theta,
-        };
-        await roomService.registerRoom(room);
+    registerRoomCallback(req, res) {
+        const room = req.room;
+        const rooms = roomService.getAllRooms();
+        if (rooms[id] || Object.values(rooms || {}).find(r => r.name === room.name)) {
+            logger.warn(
+                `[Room ROS service] Failed to create room (name=${room.name}): room already exists`
+            );
+            res.success = false;
+            return true;
+        }
+        roomService.registerRoom(room).catch(error => {
+            logger.warn(`[Room ROS service] Failed to register room: ${error.message}`);
+        });
         res.success = true;
         return true;
     }
 
-    async updateRoomCallback(req, res) {
-        const roomMsg = req.room;
-        const room = {
-            name: roomMsg.name,
-            min_x: roomMsg.min_x,
-            max_x: roomMsg.max_x,
-            min_y: roomMsg.min_y,
-            max_y: roomMsg.max_y,
-            theta: roomMsg.theta,
-            pose_x: roomMsg.pose_x,
-            pose_y: roomMsg.pose_y,
-            pose_theta: roomMsg.pose_theta,
-        };
-        // To update without an ID in the message, we can find by name
-        const rooms = await roomService.getAllRooms();
-        const existing = Object.values(rooms).find(r => r.name === room.name);
-        if (existing) {
-            room.id = existing.id;
-            await roomService.updateRoom(room);
+    updateRoomCallback(req, res) {
+        const room = req.room;
+
+        const rooms = roomService.getAllRooms();
+        const existing = Object.values(rooms || {}).find(r => r.name === room.name);
+        if (!existing || rooms[room.id]) {
+            logger.warn(
+                `[Room ROS service] Failed to update room (name=${room.name}): room not found`
+            );
+            res.success = false;
+            return true;
         }
+        room.id = existing.id;
+        roomService.updateRoom(room).catch(error => {
+            logger.warn(`[Room ROS service] Failed to update room: ${error.message}`);
+        });
         res.success = true;
         return true;
     }

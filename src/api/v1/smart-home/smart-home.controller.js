@@ -9,7 +9,7 @@ export async function discover(req, res, next) {
 }
 
 export async function getAllDevices(req, res, next) {
-    const devices = await smartHomeService.getAllDevices();
+    const devices = smartHomeService.getAllDevices();
     return devices;
 }
 
@@ -21,7 +21,7 @@ export async function getInfo(req, res, next) {
 
 export async function getDevice(req, res, next) {
     const { id } = req.params;
-    const device = await smartHomeService.getDevice(id);
+    const device = smartHomeService.getDevice(id);
     return device;
 }
 

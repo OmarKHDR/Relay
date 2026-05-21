@@ -1,9 +1,10 @@
 import { RoomRouter } from './routes.js';
-import roomRosTopic from './ros/room.ros.topic.js';
-import roomRosService from './ros/room.ros.service.js';
+import './ros/room.ros.topic.js';
+import './ros/room.ros.service.js';
+import { roomService } from './room.service.js';
 
 export const RoomModule = {
     routers: [RoomRouter],
+    services: [roomService],
 };
 
-export default RoomModule;

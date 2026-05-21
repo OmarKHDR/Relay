@@ -1,7 +1,7 @@
 import { roomService } from './room.service.js';
 
 export async function getAllRooms(req, res, next) {
-    const rooms = await roomService.getAllRooms();
+    const rooms = roomService.getAllRooms();
     return rooms;
 }
 
@@ -19,7 +19,7 @@ export async function updateRoom(req, res, next) {
 
 export async function getRoom(req, res, next) {
     const { id } = req.params;
-    const room = await roomService.getRoom(id);
+    const room = roomService.getRoom(id);
     return room;
 }
 

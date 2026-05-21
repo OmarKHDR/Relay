@@ -56,33 +56,86 @@ class SmartHomeService {
         });
         this.registerDevice.advertise(this.registerDeviceCallback.bind(this));
 
-        this.registerDevice = new ROSLIB.Service({
+        this.controlDevice = new ROSLIB.Service({
             ros: this.ros,
             name: '/smarthome/controlDevice',
             serviceType: 'sanad_interfaces/srv/ControlDevice',
         });
-        this.registerDevice.advertise(this.registerDeviceCallback.bind(this));
+        this.controlDevice.advertise(this.controlDeviceCallback.bind(this));
+
+        this.moveDevice = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/smarthome/moveDevcie',
+            serviceType: '/sanad_interface/srv/MoveDevice',
+        });
+        this.moveDevice.advertise(this.moveDeviceCallback.bind(this));
     }
 
-    async getAllDevicesCallback(req, res) {
-        const devices = await smartHomeService.getAllDevices();
-        res.devices = Object.values(devices).map(mapToRosDevice);
-        return true;
-    }
-
-    async deleteDeviceCallback(req, res) {
-        await smartHomeService.deleteDevice(req.id);
+    moveDeviceCallback(req, res) {
+        const devices = smartHomeService.getAllDevices();
+        if (!devices[req.device_id]) {
+            logger.warn(
+                `[Smart-home ROS service] Failed to move device (id=${req.device_id}): device doesn't exist`
+            );
+            res.success = false;
+            return true;
+        }
+        smartHomeService.changeDeviceRoom({ id: req.device_id, roomId: req.room_id }).catch(error =>
+            logger.warn(`[Smart-home ROS service] Failed to move device: ${error.message}`)
+        );
         res.success = true;
         return true;
     }
 
-    async getDeviceCallback(req, res) {
-        const dev = await smartHomeService.getDevice(req.id);
+    controlDeviceCallback(req, res) {
+        const devices = smartHomeService.getAllDevices();
+        if (!devices[req.id]) {
+            logger.warn(
+                `[Smart-home ROS service] Failed to update device (id=${req.id}): device doesn't exist`
+            );
+            res.success = false;
+            return true;
+        }
+        smartHomeService
+            .controlDev(req.id, req.state)
+            .catch(error => {
+                logger.warn(`[Smart-home ROS service] Failed to update device: ${error.message}`);
+            });
+        res.success = true;
+        return true;
+    }
+
+    getAllDevicesCallback(req, res) {
+        const devices = smartHomeService.getAllDevices();
+        res.devices = Object.values(devices || {}).map(mapToRosDevice);
+        return true;
+    }
+
+    async deleteDeviceCallback(req, res) {
+        const devices = smartHomeService.getAllDevices();
+        if (!devices[req.id]) {
+            logger.warn(
+                `[Smart-home ROS service] Failed to delete device (id=${req.id}): device doesn't exist`
+            );
+            res.success = false;
+            return true;
+        }
+        smartHomeService
+            .deleteDevice(req.id)
+            .catch(error => {
+                logger.warn(`[Smart-home ROS service] Failed to delete device: ${error.message}`);
+            });
+        res.success = true;
+        return true;
+    }
+
+    getDeviceCallback(req, res) {
+        const dev = smartHomeService.getDevice(req.id);
         res.device = dev ? mapToRosDevice(dev) : mapToRosDevice({});
         return true;
     }
 
-    async registerDeviceCallback(req, res) {
+    registerDeviceCallback(req, res) {
         const devMsg = req.device;
         const device = {
             id: devMsg.id,
@@ -93,11 +146,22 @@ class SmartHomeService {
             created_at: devMsg.created_at,
             updated_at: devMsg.updated_at,
         };
-        await smartHomeService.addDevice(device);
+        const devices = smartHomeService.getAllDevices();
+        if (devices[device.id]) {
+            logger.warn(
+                `[Smart-home ROS service] Failed to register device (id=${device.id}): device already exists`
+            );
+            res.success = false;
+            return true;
+        }
+        smartHomeService
+            .addDevice(device)
+            .catch(error => {
+                logger.warn(`[Smart-home ROS service] Failed to register device: ${error.message}`);
+            });
         res.success = true;
         return true;
     }
-
 }
 
 export default new SmartHomeService();

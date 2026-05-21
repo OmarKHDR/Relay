@@ -19,7 +19,7 @@ class GoalRosService {
     }
 
     createService() {
-        this.cancelService = new ROSLIB.Service({
+        this.cancelGoalClient = new ROSLIB.Service({
             ros: this.ros,
             name: '/navigate_to_pose/_action/cancel_goal',
             serviceType: 'action_msgs/srv/CancelGoal',
@@ -39,9 +39,9 @@ class GoalRosService {
         if (!this.cancelRequest) {
             this.createCancelRequest();
         }
-        if (!this.cancelService) throw new Error('goal cancel service is not connected');
+        if (!this.cancelGoalClient) throw new Error('goal cancel service is not connected');
         return new Promise( (resolve, reject) => {
-            this.cancelService.callService(
+            this.cancelGoalClient.callService(
                 this.cancelRequest,
                 result => {
                     logger.info('[GOAL ROS SERVICE] Cancel command executed successfully');

@@ -4,12 +4,16 @@ import roomRosTopic from './ros/room.ros.topic.js';
 import goalRosAction from '../goal/ros/goal.ros.action.js';
 
 class RoomService {
-    async getAllRooms() {
-        return await roomDB.getAllRooms();
+    async init() {
+        await roomDB.initializeDB();
     }
 
-    async getRoom(id) {
-        const room = await roomDB.getRoomById(id);
+    getAllRooms() {
+        return roomDB.getAllRooms();
+    }
+
+    getRoom(id) {
+        const room = roomDB.getRoomById(id);
         return room;
     }
 
@@ -20,7 +24,7 @@ class RoomService {
     }
 
     async updateRoom(data) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         if (!rooms[data.id]) {
             logger.warn(`[ROOM] room doesn't exist or undefined`);
             throw new Error(`trying to update a room that doesn't exist ${data.id}`);
@@ -34,7 +38,7 @@ class RoomService {
     }
 
     async deleteRoom(id) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         if (!id || !rooms[id]) {
             logger.warn(`[ROOM] room ${id} doesn't exist`);
             throw new Error(`trying to delete room that doesn't exist room id: ${id}`);
@@ -48,7 +52,7 @@ class RoomService {
     }
 
     async navigateToRoom(id) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         if (!rooms[id]) {
             throw new Error(`room ${id} doesn't exist`);
         }

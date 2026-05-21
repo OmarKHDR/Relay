@@ -7,11 +7,13 @@ class RoomDB {
         this.rooms;
     }
 
+
+
     get roomsDb() {
         return dbRepositories.room;
     }
 
-    async readDbContent() {
+    async initializeDB() {
         try {
             const roomsArr = await this.roomsDb.find({ relations: { devices: true } });
             this.rooms = {};
@@ -29,23 +31,22 @@ class RoomDB {
         }
     }
 
-    async getAllRooms() {
+    getAllRooms() {
         if (this.rooms) {
             return this.rooms;
         }
-        return await this.readDbContent();
+        throw new Error(`room DB wasnt initilaized yet, try restarting server`)
     }
 
-    async getRoomById(id) {
+    getRoomById(id) {
         if (this.rooms) {
             return this.rooms[id];
         }
-        const rooms = await this.readDbContent();
-        return rooms[id];
+        throw new Error(`room DB wasnt initilaized yet, try restarting server`)
     }
 
     async registerRoom(room) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         for (const [_, ro] of Object.entries(rooms)) {
             if (ro.name === room.name) {
                 logger.warn(`[room db] trying to register a room that already exist`);
@@ -60,7 +61,7 @@ class RoomDB {
     }
 
     async updateRoom(roomData) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         const id = roomData.id;
         const updateData = { ...roomData };
         delete updateData.id;
@@ -72,7 +73,7 @@ class RoomDB {
     }
 
     async deleteRoom(id) {
-        const rooms = await this.getAllRooms();
+        const rooms = this.getAllRooms();
         await this.roomsDb.delete({ id });
         delete rooms[id];
         logger.info(`[ROOM DB] Deleted room: ${id}`);

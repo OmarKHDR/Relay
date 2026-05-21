@@ -5,9 +5,13 @@ import smartHomeRosTopic from './ros/smart-home.ros.topic.js';
 
 const SMART_DEV_PORT = process.env.SMART_DEV_PORT;
 class SmartHomeService {
+    async init() {
+        await smartHomeDevicesDB.initializeDB();
+    }
+
     async discoverNewDevice(discoveredDevices) {
         for (const [id, device] of Object.entries(discoveredDevices)) {
-            if (!await smartHomeDevicesDB.getDevice(id)) {
+            if (!smartHomeDevicesDB.getDevice(id)) {
                 const deviceToStore = { ...device, connected: true };
                 await smartHomeDevicesDB.saveDevice(deviceToStore);
                 logger.info(`[SMART HOME] New device discovered: ${id}`);
@@ -24,7 +28,7 @@ class SmartHomeService {
     }
 
     async discoverDeletedDevices(discoveredDevices) {
-        const devices = await smartHomeDevicesDB.getAllDevices();
+        const devices = smartHomeDevicesDB.getAllDevices();
         for (const [id, device] of Object.entries(devices)) {
             if (!discoveredDevices[id]) {
                 // Device exists in DB but not currently discovered: mark as disconnected (do not delete).
@@ -45,15 +49,16 @@ class SmartHomeService {
         await this.discoverNewDevice(discoveredDevices);
         // Detect disconnected devices
         await this.discoverDeletedDevices(discoveredDevices);
-        return await smartHomeDevicesDB.getAllDevices();
+        return smartHomeDevicesDB.getAllDevices();
     }
 
     async getDevInfo(id) {
-        if (!await smartHomeDevicesDB.getDevice(id)) throw new Error(`device doesn't currently exist on the network`);
-        const device = await smartHomeDevicesDB.getDevice(id);
+        if (!smartHomeDevicesDB.getDevice(id))
+            throw new Error(`device doesn't currently exist on the network`);
+        const device = smartHomeDevicesDB.getDevice(id);
         const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/info?id=${id}`);
         const data = await response.json();
-        return data;
+        return { ...device, ...data };
     }
 
     validateState(state, control_type) {
@@ -62,7 +67,7 @@ class SmartHomeService {
                 if (Number(state) === 0 || Number(state) === 1) return Number(state);
                 else
                     throw new Error(
-                         `state: ${state} doesn't match device control_type: ${control_type}`
+                        `state: ${state} doesn't match device control_type: ${control_type}`
                     );
             default:
                 throw new Error(`this device control_type is not implemented yet`);
@@ -70,10 +75,10 @@ class SmartHomeService {
     }
 
     async controlDev(id, state) {
-        if (!await smartHomeDevicesDB.getDevice(id)) return false;
+        if (!smartHomeDevicesDB.getDevice(id)) return false;
 
-        const device = await smartHomeDevicesDB.getDevice(id);
-        state = this.validateState(state,  device.control_type);
+        const device = smartHomeDevicesDB.getDevice(id);
+        state = this.validateState(state, device.control_type);
         const response = await fetch(`http://${device.ip}:${SMART_DEV_PORT}/control`, {
             method: 'POST',
             headers: {
@@ -88,22 +93,20 @@ class SmartHomeService {
         return updatedDevice;
     }
 
-    async getAllDevices() {
-        return await smartHomeDevicesDB.getAllDevices();
+    getAllDevices() {
+        return smartHomeDevicesDB.getAllDevices();
     }
 
-    async getDevice(id) {
-        return await smartHomeDevicesDB.getDevice(id);
+    getDevice(id) {
+        return smartHomeDevicesDB.getDevice(id);
     }
 
     async addDevice(device, room) {
         const device_id = device.deviceId ?? device.id;
-        const devices = await smartHomeDevicesDB.getAllDevices();
+        const devices = smartHomeDevicesDB.getAllDevices();
         if (devices[device_id]) {
             logger.warn(`[SMART HOME] device ${device_id} already exist`);
-            throw new Error(
-                `trying to register a device that already exists device ID: ${id}`
-            );
+            throw new Error(`trying to register a device that already exists device ID: ${id}`);
         }
         const savedDevice = await smartHomeDevicesDB.saveDevice(device, room);
         smartHomeRosTopic.publishDeviceEvent('ADD', savedDevice);
@@ -111,7 +114,7 @@ class SmartHomeService {
     }
 
     async updateDevice(device) {
-        const existingDevice = await smartHomeDevicesDB.getDevice(device.id);
+        const existingDevice = smartHomeDevicesDB.getDevice(device.id);
         if (!existingDevice) {
             logger.warn(`[SMART HOME] device doesn't exist or undefined`);
             throw new Error(`trying to update a device that doesn't exit ${device.id}`);
@@ -134,11 +137,11 @@ class SmartHomeService {
     }
 
     async deleteDevice(id) {
-        if (!id || !await smartHomeDevicesDB.getDevice(id)) {
+        if (!id || !smartHomeDevicesDB.getDevice(id)) {
             logger.warn(`[SMART HOME] device ${id} doesn't exist`);
             throw new Error(`trying to delete device that doesn't exist device id: ${id}`);
         }
-        const device = await smartHomeDevicesDB.getDevice(id);
+        const device = smartHomeDevicesDB.getDevice(id);
 
         try {
             const response = await fetch(
@@ -158,9 +161,11 @@ class SmartHomeService {
     }
 
     async changeDeviceRoom({ id, roomId }) {
-        if (!await smartHomeDevicesDB.getDevice(id)) {
+        if (!smartHomeDevicesDB.getDevice(id)) {
             logger.warn(`[SMART HOME] device ${id} doesn't exist`);
-            throw new Error(`trying to update room for a device that doesn't exist device id: ${id}`);
+            throw new Error(
+                `trying to update room for a device that doesn't exist device id: ${id}`
+            );
         }
         return await smartHomeDevicesDB.updateRoom(id, roomId);
     }
