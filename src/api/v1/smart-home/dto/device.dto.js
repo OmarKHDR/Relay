@@ -21,6 +21,12 @@ export const registerDeviceDto = {
             control_type: z.string(),
             state: z.number(),
         }),
+        room: z
+            .object({
+                id: z.uuid().optional(),
+                name: z.string().optional(),
+            })
+            .optional(),
     }),
 };
 

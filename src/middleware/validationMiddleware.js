@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 export function dataValidation(SchemaObject) {
     return (req, res, next) => {
         try {
+            console.log(req.body)
             if (SchemaObject.body) SchemaObject.body.parse(req.body);
             if (SchemaObject.params) SchemaObject.params.parse(req.params);
             if (SchemaObject.query) SchemaObject.query.parse(req.query);

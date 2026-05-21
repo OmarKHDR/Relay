@@ -96,16 +96,16 @@ class SmartHomeService {
         return await smartHomeDevicesDB.getDevice(id);
     }
 
-    async addDevice(device) {
-        const id = device.deviceId ?? device.id;
+    async addDevice(device, room) {
+        const device_id = device.deviceId ?? device.id;
         const devices = await smartHomeDevicesDB.getAllDevices();
-        if (devices[id]) {
-            logger.warn(`[SMART HOME] device ${id} already exist`);
+        if (devices[device_id]) {
+            logger.warn(`[SMART HOME] device ${device_id} already exist`);
             throw new Error(
                 `trying to register a device that already exists device ID: ${id}`
             );
         }
-        const savedDevice = await smartHomeDevicesDB.saveDevice(device);
+        const savedDevice = await smartHomeDevicesDB.saveDevice(device, room);
         smartHomeRosTopic.publishDeviceEvent('ADD', savedDevice);
         return savedDevice;
     }

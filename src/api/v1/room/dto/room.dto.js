@@ -12,7 +12,6 @@ export const registerRoomDto = {
         pose_x: z.number(),
         pose_y: z.number(),
         pose_theta: z.number(),
-        devices: z.array(z.object()).optional(),
     }),
 };
 
@@ -27,7 +26,6 @@ export const updateRoomDto = {
         pose_x: z.number().optional(),
         pose_y: z.number().optional(),
         pose_theta: z.number().optional(),
-        devices: z.array(z.object()).optional(),
     }),
 };
 

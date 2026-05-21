@@ -13,7 +13,7 @@ class SmartHomeDevicesDB {
 
     async readDbContent() {
         try {
-            const devicesArr = await this.devicesDb.find({relations: { room: true }});
+            const devicesArr = await this.devicesDb.find({ relations: { room: true } });
             this.devices = {};
             for (const dev of devicesArr) {
                 this.devices[dev.id] = dev;
@@ -42,12 +42,14 @@ class SmartHomeDevicesDB {
         return devices[id];
     }
 
-    async saveDevice(device) {
+    async saveDevice(device, room) {
         const devices = await this.getAllDevices();
         const id = device.deviceId ?? device.id;
-        if (device.roomName) {
-            const room = await dbRepositories.room.findOne({ where: { name: device.roomName } });
-            if (!room) {
+        if (room.name || room.id) {
+            const dbroom = await dbRepositories.room.findOne({
+                where: { name: room.name, id: room.id },
+            });
+            if (!dbroom) {
                 throw new Error(`room ${device.roomName} doesn't exist`);
             }
             device.roomId = room.id;

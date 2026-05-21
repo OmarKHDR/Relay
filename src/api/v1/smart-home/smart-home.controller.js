@@ -33,7 +33,7 @@ export async function control(req, res, next) {
 
 export async function registerDevice(req, res, next) {
     const device = req.body;
-    const savedDevice = await smartHomeService.addDevice(device.device);
+    const savedDevice = await smartHomeService.addDevice(device.device, device.room);
     return savedDevice;
 }
 
