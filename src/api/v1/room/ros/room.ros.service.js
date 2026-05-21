@@ -4,6 +4,7 @@ import logger from '#utils/logger.js';
 import { roomService } from '../room.service.js';
 
 const mapToRosRoom = (room = {}) => ({
+    id: room.id,
     name: room.name || '',
     min_x: Number(room.min_x) || 0.0,
     max_x: Number(room.max_x) || 0.0,
@@ -13,7 +14,7 @@ const mapToRosRoom = (room = {}) => ({
     pose_x: Number(room.pose_x) || 0.0,
     pose_y: Number(room.pose_y) || 0.0,
     pose_theta: Number(room.pose_theta) || 0.0,
-    devices: [] // devices array left empty for now to match interface
+    devices: room.devices || [], // devices array left empty for now to match interface
 });
 
 class RoomRosService {
@@ -65,6 +66,13 @@ class RoomRosService {
             serviceType: 'sanad_interfaces/srv/UpdateRoom',
         });
         this.updateRoom.advertise(this.updateRoomCallback.bind(this));
+
+        this.updateRoom = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/room/addDeviceToRoom',
+            serviceType: 'sanad_interfaces/srv/AddDeviceToRoom',
+        });
+        this.updateRoom.advertise(this.updateRoomCallback.bind(this));
     }
 
     async getAllRoomsCallback(req, res) {
@@ -82,7 +90,9 @@ class RoomRosService {
     async getRoomCallback(req, res) {
         const rooms = await roomService.getAllRooms();
         // Fallback: look up by name (req.name from GetRoom.srv) or id
-        const room = Object.values(rooms).find(r => r.name === req.name || r.id === req.name) || rooms[req.name];
+        const room =
+            Object.values(rooms).find(r => r.name === req.name || r.id === req.name) ||
+            rooms[req.name];
         res.room = room ? mapToRosRoom(room) : mapToRosRoom({});
         res.success = !!room;
         return true;

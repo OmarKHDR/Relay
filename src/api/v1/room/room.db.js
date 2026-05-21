@@ -13,7 +13,7 @@ class RoomDB {
 
     async readDbContent() {
         try {
-            const roomsArr = await this.roomsDb.find({});
+            const roomsArr = await this.roomsDb.find({ relations: { devices: true } });
             this.rooms = {};
             for (const room of roomsArr) {
                 this.rooms[room.id] = room;
@@ -38,21 +38,21 @@ class RoomDB {
 
     async getRoomById(id) {
         if (this.rooms) {
-            return this.rooms[id]
+            return this.rooms[id];
         }
         const rooms = await this.readDbContent();
-        return rooms[id]
+        return rooms[id];
     }
 
     async registerRoom(room) {
         const rooms = await this.getAllRooms();
         for (const [_, ro] of Object.entries(rooms)) {
             if (ro.name === room.name) {
-                logger.warn(`[room db] trying to register a room that already exist`)
-                throw new Error(` trying to register a room that already exist: ${room.name}`)
+                logger.warn(`[room db] trying to register a room that already exist`);
+                throw new Error(` trying to register a room that already exist: ${room.name}`);
             }
         }
-        console.log(room)
+        console.log(room);
         const saved = await this.roomsDb.save(room);
         rooms[saved.id] = saved;
         logger.info(`[ROOM DB] Saved room: ${saved.id}`);

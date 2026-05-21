@@ -13,7 +13,7 @@ class SmartHomeDevicesDB {
 
     async readDbContent() {
         try {
-            const devicesArr = await this.devicesDb.find({});
+            const devicesArr = await this.devicesDb.find({relations: { room: true }});
             this.devices = {};
             for (const dev of devicesArr) {
                 this.devices[dev.id] = dev;

@@ -180,11 +180,34 @@ components:
           type: string
           format: date-time
         room:
-          type: object
           nullable: true
-          properties:
-            id:
-              type: string
+          allOf:
+            - $ref: '#/components/schemas/Room'
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        min_x:
+          type: number
+        max_x:
+          type: number
+        min_y:
+          type: number
+        max_y:
+          type: number
+        theta:
+          type: number
+        pose_x:
+          type: number
+        pose_y:
+          type: number
+        pose_theta:
+          type: number
 
     DevicesMap:
       type: object

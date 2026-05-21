@@ -128,7 +128,27 @@ components:
         devices:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/Device'
+
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        control_type:
+          type: string
+        state:
+          type: integer
+        connected:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
     RoomsMap:
       type: object
