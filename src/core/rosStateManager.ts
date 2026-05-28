@@ -1,7 +1,7 @@
-import rosHandler from '#lib/ros/connection.js';
-import logger from '#utils/logger.js';
-import { rosExcuter } from './rosExecuter';
-import type { ROS, RosMount } from './types/Ros.types';
+import rosHandler from '@/lib/ros/connection.js';
+import logger from '@/utils/logger.js';
+import { rosExcuter } from './rosExecuter.js';
+import type { ROS, RosMount } from './types/Ros.types.js';
 
 class RosStateManager {
     private configs = new Map<string, ROS>();

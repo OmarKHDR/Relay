@@ -3,14 +3,14 @@ import morgan from 'morgan';
 import cors from 'cors';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUiExpress from 'swagger-ui-express';
-import { dataValidation } from '#src/middleware/validation.middleware.js';
-import { globalControllerWrapper } from '#utils/controller.wrapper.js';
-import { errorHandler } from '#src/middleware/global.error.handler.middleware.js';
+import { dataValidation } from '@/middleware/validation.middleware.js';
+import { globalControllerWrapper } from '@/utils/controller.wrapper.js';
+import { errorHandler } from '@/middleware/global.error.handler.middleware.js';
 import winston from 'winston';
-import type { Route, Routes } from './types/Routes.types';
-import { rosInjector } from '#src/middleware/rosInjector.middleware.ts';
-import logger from '#utils/logger.js';
-import { rosStateManager } from './rosMapper';
+import type { Route, Routes } from './types/Routes.types.js';
+import { rosInjector } from '@/middleware/rosInjector.middleware.js';
+import logger from '@/utils/logger.js';
+import { rosStateManager } from './rosStateManager.js';
 
 export default class ExpressServer {
     static instance: ExpressServer;

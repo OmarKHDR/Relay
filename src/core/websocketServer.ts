@@ -1,5 +1,5 @@
 import { Server, Socket, type Server as SocketIo } from 'socket.io';
-import logger from '#utils/logger.js';
+import logger from '@/utils/logger.js';
 import { createServer, type Server as HttpServer } from 'http';
 import { WSCallback } from './types/wsCallback.types.js';
 

@@ -1,5 +1,5 @@
-import { Routes } from './Routes.types';
-import { WSCallback } from './wsCallback.types';
+import type { Routes } from './Routes.types.js';
+import type { WSCallback } from './wsCallback.types.js';
 
 export interface Module {
     routes?: Routes[];

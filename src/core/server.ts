@@ -1,13 +1,13 @@
-import ExpressServer from '#core/expressServer.js';
-import WebsocketServer from '#core/websocketServer.js';
-import logger from '#utils/logger.js';
+import ExpressServer from '@/core/expressServer.js';
+import WebsocketServer from '@/core/websocketServer.js';
+import logger from '@/utils/logger.js';
 import { createServer, type Server as HttpServer } from 'http';
 import express from 'express';
 import type { Express } from 'express';
 import { DataSource } from 'typeorm';
-import { Routes } from './types/Routes.types';
-import { WSCallback } from './types/wsCallback.types';
-import { ExpressOptions } from './types/server.types';
+import type { Routes } from './types/Routes.types.js';
+import type { WSCallback } from './types/wsCallback.types.js';
+import type { ExpressOptions } from './types/server.types.js';
 
 export default class Server {
     static instance: Server | null = null;

@@ -1,5 +1,5 @@
-import { ROSType } from '#core/types/Ros.types.ts';
-import { HTTPMethod, type Routes } from '#core/types/Routes.types.ts';
+import { ROSType } from '@/core/types/Ros.types.js';
+import { HTTPMethod, type Routes } from '@/core/types/Routes.types.js';
 
 export const RobotRouter: Routes = {
     base: '/robot',

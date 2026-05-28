@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import ROSLIB from 'roslib';
-import logger from '#utils/logger.js';
+import logger from '@/utils/logger.js';
 import EventEmitter from 'events';
 
 const ROSBRIDGE_HOST = process.env.ROSBRIDGE_HOST || 'localhost'

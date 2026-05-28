@@ -1,7 +1,7 @@
 import { z, ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
-import { NextFunction, Request, Response } from 'express';
-import { ZodGeneralSchema } from '#src/core/types/zod.types.ts';
+import type { NextFunction, Request, Response } from 'express';
+import type { ZodGeneralSchema } from '@/core/types/zod.types.js';
 
 export function dataValidation(SchemaObject: ZodGeneralSchema) {
     return (req: Request, res: Response, next: NextFunction) => {

@@ -1,2 +1,1 @@
-import { WSCallback } from "#src/core/types/wsCallback.types.ts";
-
+import type { WSCallback } from '@/core/types/wsCallback.types.js';

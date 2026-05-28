@@ -1,6 +1,6 @@
-import { RobotModule } from '#src/api/v1/robot/robot.module.ts';
-import { Routes } from './types/Routes.types';
-import { WSCallback } from './types/wsCallback.types';
+import { RobotModule } from '@/api/v1/robot/robot.module.js';
+import type { Routes } from './types/Routes.types.js';
+import type { WSCallback } from './types/wsCallback.types.js';
 
 
 export const CallbackRegistry: WSCallback[] = [];

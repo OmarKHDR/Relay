@@ -1,9 +1,10 @@
-import { EntitySchema, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@EntitySchema()
-class SalutationSchema {
+@Entity()
+export default class SalutationSchema {
     @PrimaryGeneratedColumn()
     id: number;
+
     @Column()
     name: string;
 }

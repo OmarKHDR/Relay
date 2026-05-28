@@ -1,4 +1,4 @@
-import rosHandler from '#lib/ros/connection.js';
+import rosHandler from '@/lib/ros/connection.js';
 import {
     type ActionROS,
     type ROS,
@@ -8,7 +8,7 @@ import {
     ServiceServerROS,
     type TopicROS,
     TopicSubROS,
-} from '#core/types/Ros.types.ts';
+} from '@/core/types/Ros.types.js';
 import ROSLIB from 'roslib';
 import { request } from 'express';
 

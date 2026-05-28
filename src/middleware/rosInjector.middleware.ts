@@ -1,4 +1,4 @@
-import { rosStateManager } from '#src/core/rosMapper.ts';
+import { rosStateManager } from '@/core/rosStateManager.js';
 import type { NextFunction, Request, Response } from 'express';
 
 export function rosInjector(key: string) {

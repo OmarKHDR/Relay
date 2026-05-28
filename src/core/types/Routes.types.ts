@@ -1,6 +1,6 @@
 import z from 'zod';
-import type { ROS } from './Ros.types';
-import { ZodGeneralSchema } from './zod.types';
+import type { ROS } from './Ros.types.js';
+import type { ZodGeneralSchema } from './zod.types.js';
 import { RequestHandler } from 'express';
 
 export interface Routes {

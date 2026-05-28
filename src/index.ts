@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import logger from '#utils/logger.js';
-import Server from '#core/server.js';
+import logger from '@/utils/logger.js';
+import Server from '@/core/server.js';
 import { swaggerOptions } from '../swagger.options.js';
-import { RouterRegistry, initialization, CallbackRegistry } from '#core/registry.js';
+import { RouterRegistry, initialization, CallbackRegistry } from '@/core/registry.js';
 import { AppDataSource } from './db/datasources.js';
 
 dotenv.config();

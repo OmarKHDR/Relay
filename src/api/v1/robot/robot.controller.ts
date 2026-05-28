@@ -1,5 +1,5 @@
-import type { Request, Result } from 'express';
+import type { Request, Response } from 'express';
 
 export class RobotController {
-    static async getStatus(req: Request, res: Result) {}
+    static async getStatus(req: Request, res: Response) {}
 }
