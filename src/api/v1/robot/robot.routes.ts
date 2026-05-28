@@ -15,6 +15,8 @@ export const RobotRouter: Routes = {
                 ROSType: ROSType.ServiceClient,
                 name: '/sanad_interfaces/RobotStatus',
                 serviceType: 'string',
+                callback: () => true,
+                errorCallback: () => {},
             },
         },
     ],

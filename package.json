@@ -13,13 +13,8 @@
     "#core/*": "./src/core/*"
   },
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "dev:smart-home:frontend": "cd ./src/api/v1/smart-home/testing/frontend && npm run dev",
-    "dev:smart-home:discovery": "node --watch src/api/v1/smart-home/discovery.udp.js",
-    "mock:smart-home": "nodemon src/mocks/smart-home/index.js",
+    "dev": "tsc --watch src/index.ts",
     "test": "NODE_ENV=testing NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest --detectOpenHandles --runInBand --testTimeout=5000",
-    "setup:irdb": "git clone --depth=1 https://github.com/UberGuidoZ/Flipper-IRDB ./irdb",
-    "update:irdb": "git -C ./irdb pull"
   },
   "repository": {
     "type": "git",

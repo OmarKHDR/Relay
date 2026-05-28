@@ -6,7 +6,7 @@ import express from 'express';
 import type { Express } from 'express';
 import { DataSource } from 'typeorm';
 import { Routes } from './types/Routes.types';
-import { WSCallback } from './registry';
+import { WSCallback } from './types/wsCallback.types';
 import { ExpressOptions } from './types/server.types';
 
 export default class Server {

@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { type Express, type RequestHandler } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import swaggerJsdoc from 'swagger-jsdoc';
@@ -7,10 +7,10 @@ import { dataValidation } from '#src/middleware/validation.middleware.js';
 import { globalControllerWrapper } from '#utils/controller.wrapper.js';
 import { errorHandler } from '#src/middleware/global.error.handler.middleware.js';
 import winston from 'winston';
-import { Routes } from './types/Routes.types';
-import { rosExcuter } from './rosExecuter';
+import type { Route, Routes } from './types/Routes.types';
 import { rosInjector } from '#src/middleware/rosInjector.middleware.ts';
 import logger from '#utils/logger.js';
+import { rosStateManager } from './rosMapper';
 
 export default class ExpressServer {
     static instance: ExpressServer;
@@ -47,24 +47,21 @@ export default class ExpressServer {
 
     mountRoutesAndMiddlewares(routerRegistry: Routes[], prefix = '/api/v1') {
         for (const routerConfig of routerRegistry) {
-            this.attachRoutes(routerConfig, prefix);
-            this.attachMiddlewares(routerConfig);
+            this.attachRoutesAndMiddlewares(routerConfig, prefix);
         }
         this.app?.use(errorHandler);
         return this;
     }
 
-    attachRoutes(routerConfig: Routes, prefix = '/api/v1') {
+    attachRoutesAndMiddlewares(routerConfig: Routes, prefix = '/api/v1') {
         const routes = routerConfig.routes;
         const base = routerConfig.base || '';
+
         for (const route of routes) {
             const path = prefix + base + (route.path ?? '');
-            const handlers = [];
-            if (route.dto) {
-                handlers.push(dataValidation(route.dto));
-            }
-            handlers.push(globalControllerWrapper(route.controller));
-            console.log('initializing: ', route.method, routerConfig.base + route.path);
+            const handlers = [...this.getMiddlewares(route, path), this.getController(route)];
+
+            logger.info(`[EXPRESS SERVER] initializing: ${route.method} ${base + route.path}`);
 
             switch (route.method?.toUpperCase()) {
                 case 'GET':
@@ -83,28 +80,41 @@ export default class ExpressServer {
                     this.app?.delete(path, ...handlers);
                     break;
                 default:
-                    console.warn(
+                    logger.warn(
                         `Unsupported HTTP method: ${route.method} for path ${path}, skepping`
                     );
                     break;
             }
-            if (route.ROS) {
-                logger.info(`[EXPRESS SERVER] mouting ros object to the route: ${path}`)
-                const ros = rosExcuter.build(route.ROS);
-                this.app?.use(path, rosInjector);
-            }
         }
     }
 
-    attachMiddlewares(routerConfig: Routes, prefix = '/api/v1') {
-        const routes = routerConfig.routes || routerConfig;
-        const base = routerConfig.base || '';
+    getMiddlewares(route: Route, path: string) {
+        const middlewares: RequestHandler[] = [];
 
-        for (const route of routes) {
-            const path = prefix + base + (route.path ?? '');
-            if (route.middlewares)
-                for (const middleware of route.middlewares) this.app?.use(path, middleware);
+        if (route.middlewares) {
+            middlewares.push(...route.middlewares);
         }
+
+        if (route.dto) {
+            middlewares.push(dataValidation(route.dto));
+        }
+
+        if (route.ROS) {
+            const key = this.getRosKey(route, path);
+            logger.info(`[EXPRESS SERVER] mounting ros object to the route: ${path}`);
+            rosStateManager.register(key, route.ROS);
+            middlewares.push(rosInjector(key));
+        }
+
+        return middlewares;
+    }
+
+    getController(route: Route) {
+        return globalControllerWrapper(route.controller);
+    }
+
+    getRosKey(route: Route, path: string) {
+        return `${route.method}:${path}`;
     }
 
     setUpSwaggerDocs(options: swaggerJsdoc.Options, prefix = '/api/v1', endpoint = '/docs') {

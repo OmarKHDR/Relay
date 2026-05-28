@@ -1,9 +1,13 @@
-import { ROS, RosMount } from '#src/core/types/Ros.types.ts';
-import { NextFunction, Request, Response } from 'express';
+import { rosStateManager } from '#src/core/rosMapper.ts';
+import type { NextFunction, Request, Response } from 'express';
 
-export function rosInjector(ros: RosMount) {
+export function rosInjector(key: string) {
     return (req: Request, res: Response, next: NextFunction) => {
-        req.ros = ros;
-        next();
+        try {
+            req.ros = rosStateManager.get(key);
+            next();
+        } catch (error) {
+            next(error);
+        }
     };
 }

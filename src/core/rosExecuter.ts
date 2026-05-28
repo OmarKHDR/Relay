@@ -24,7 +24,7 @@ class RosExecuter {
         }
     }
 
-    build(config: ROS) {
+    buildRosObject(config: ROS) {
         //returns {message: function, ros: ros communication}
         switch (config.ROSType) {
             case ROSType.ServiceClient:
