@@ -2,15 +2,20 @@ import rosHandler from '@/lib/ros/connection.js';
 import {
     type ActionROS,
     type ROS,
+    type RosActionClientMount,
+    type RosActionServerMount,
+    type RosMount,
+    type RosServiceClientMount,
+    type RosServiceServerMount,
+    type RosTopicPubMount,
+    type RosTopicSubMount,
     ROSType,
-    ServiceClientROS,
     type ServiceROS,
     ServiceServerROS,
     type TopicROS,
     TopicSubROS,
 } from '@/core/types/Ros.types.js';
 import ROSLIB from 'roslib';
-import { request } from 'express';
 
 class RosExecuter {
     ros?: ROSLIB.Ros;
@@ -24,7 +29,7 @@ class RosExecuter {
         }
     }
 
-    buildRosObject(config: ROS) {
+    buildRosObject(config: ROS): RosMount {
         //returns {message: function, ros: ros communication}
         switch (config.ROSType) {
             case ROSType.ServiceClient:
@@ -52,63 +57,68 @@ class RosExecuter {
         });
     }
 
-    createServiceClient(config: ServiceROS) {
+    createServiceClient(config: ServiceROS): RosServiceClientMount {
         const service = this.createService(config);
         return {
+            kind: ROSType.ServiceClient,
             request: (message: Record<string, unknown>) => new ROSLIB.ServiceRequest(message),
-            service: service.callService(
-                request,
-                config.callback,
-                (config as ServiceClientROS).errorCallback
-            ),
+            service: (request: ROSLIB.ServiceRequest) =>
+                new Promise((resolve, reject) => {
+                    service.callService(request, resolve, reject);
+                }),
         };
     }
 
-    createServiceServer(config: ServiceROS) {
+    createServiceServer(config: ServiceROS): RosServiceServerMount {
         const service = this.createService(config);
-        service.advertise((request, response) => config.callback(request, response) ?? true);
+        service.advertise((request, response) => (config as ServiceServerROS).callback(request, response) ?? true);
         return {
+            kind: ROSType.ServiceServer,
             service,
         };
     }
 
-    createActionClient(config: ActionROS) {
+    createActionClient(config: ActionROS): RosActionClientMount {
         const actionClinet = new ROSLIB.ActionClient({
             ros: this.getRos(),
             serverName: config.serverName,
             actionName: config.actionName,
         });
         return {
+            kind: ROSType.ActionClient,
             action: actionClinet,
         };
     }
 
-    createActionServer(config: ActionROS) {
+    createActionServer(config: ActionROS): RosActionServerMount {
         const actionServer = new ROSLIB.SimpleActionServer({
             ros: this.getRos(),
             serverName: config.serverName,
             actionName: config.actionName,
         });
         return {
+            kind: ROSType.ActionServer,
             action: actionServer,
         };
     }
 
-    createPub(config: TopicROS) {
+    createPub(config: TopicROS): RosTopicPubMount {
         const topic = this.createTopic(config);
         topic.advertise();
 
         return {
+            kind: ROSType.TopicPub,
             message: (message: Record<string, unknown>) => new ROSLIB.Message(message),
             topic: topic,
         };
     }
 
-    createSub(config: TopicROS) {
+    createSub(config: TopicROS): RosTopicSubMount {
         const topic = this.createTopic(config);
         topic.subscribe(message => (config as TopicSubROS).callback(message));
 
         return {
+            kind: ROSType.TopicSub,
             topic,
         };
     }

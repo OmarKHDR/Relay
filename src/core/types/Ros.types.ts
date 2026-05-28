@@ -36,8 +36,6 @@ export interface BaseServiceROS {
 export interface ServiceClientROS extends BaseServiceROS {
     ROSType: ROSType.ServiceClient;
     serviceMessage?: Record<string, unknown>;
-    callback: (...args: unknown[]) => unknown;
-    errorCallback: (...args: unknown[]) => unknown;
 }
 
 export interface ServiceServerROS extends BaseServiceROS {
@@ -69,20 +67,42 @@ export type ActionROS = ActionClientROS | ActionServerROS;
 
 export type ROS = TopicROS | ServiceROS | ActionROS;
 
+export interface RosServiceClientMount {
+    kind: ROSType.ServiceClient;
+    request: (message: Record<string, unknown>) => ROSLIB.ServiceRequest;
+    service: (request: ROSLIB.ServiceRequest) => Promise<unknown>;
+}
+
+export interface RosServiceServerMount {
+    kind: ROSType.ServiceServer;
+    service: ROSLIB.Service<any, any>;
+}
+
+export interface RosActionClientMount {
+    kind: ROSType.ActionClient;
+    action: ROSLIB.ActionClient;
+}
+
+export interface RosActionServerMount {
+    kind: ROSType.ActionServer;
+    action: ROSLIB.SimpleActionServer;
+}
+
+export interface RosTopicPubMount {
+    kind: ROSType.TopicPub;
+    message: (message: Record<string, unknown>) => ROSLIB.Message;
+    topic: ROSLIB.Topic<ROSLIB.Message>;
+}
+
+export interface RosTopicSubMount {
+    kind: ROSType.TopicSub;
+    topic: ROSLIB.Topic<ROSLIB.Message>;
+}
+
 export type RosMount =
-    | {
-          request: (message: Record<string, unknown>) => ROSLIB.ServiceRequest;
-          service: void;
-      }
-    | {
-          service: ROSLIB.Service<any, any>;
-      }
-    | {
-          action: ROSLIB.ActionClient;
-      }
-    | {
-          action: ROSLIB.SimpleActionServer;
-      }
-    | {
-          topic: ROSLIB.Topic<ROSLIB.Message>;
-      };
+    | RosServiceClientMount
+    | RosServiceServerMount
+    | RosActionClientMount
+    | RosActionServerMount
+    | RosTopicPubMount
+    | RosTopicSubMount;
